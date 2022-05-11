@@ -245,6 +245,36 @@
                 </ul>
             </li>
         @endcan
+        @can('business_process_access')
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route("admin.business-processes.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/business-processes") || request()->is("admin/business-processes/*") ? "c-active" : "" }}">
+                    <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                    </i>
+                    {{ trans('cruds.businessProcess.title') }}
+                </a>
+            </li>
+        @endcan
+        @can('stage_access')
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route("admin.stages.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/stages") || request()->is("admin/stages/*") ? "c-active" : "" }}">
+                    <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                    </i>
+                    {{ trans('cruds.stage.title') }}
+                </a>
+            </li>
+        @endcan
+        @can('responsible_access')
+            <li class="c-sidebar-nav-item">
+                <a href="{{ route("admin.responsibles.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/responsibles") || request()->is("admin/responsibles/*") ? "c-active" : "" }}">
+                    <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                    </i>
+                    {{ trans('cruds.responsible.title') }}
+                </a>
+            </li>
+        @endcan
         @if(file_exists(app_path('Http/Controllers/Auth/ChangePasswordController.php')))
             @can('profile_password_edit')
                 <li class="c-sidebar-nav-item">

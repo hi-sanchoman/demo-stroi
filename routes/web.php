@@ -88,6 +88,22 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     // Contact Contacts
     Route::delete('contact-contacts/destroy', 'ContactContactsController@massDestroy')->name('contact-contacts.massDestroy');
     Route::resource('contact-contacts', 'ContactContactsController');
+
+    // Responsible
+    Route::delete('responsibles/destroy', 'ResponsibleController@massDestroy')->name('responsibles.massDestroy');
+    Route::post('responsibles/media', 'ResponsibleController@storeMedia')->name('responsibles.storeMedia');
+    Route::post('responsibles/ckmedia', 'ResponsibleController@storeCKEditorImages')->name('responsibles.storeCKEditorImages');
+    Route::resource('responsibles', 'ResponsibleController');
+
+    // Stage
+    Route::delete('stages/destroy', 'StageController@massDestroy')->name('stages.massDestroy');
+    Route::post('stages/media', 'StageController@storeMedia')->name('stages.storeMedia');
+    Route::post('stages/ckmedia', 'StageController@storeCKEditorImages')->name('stages.storeCKEditorImages');
+    Route::resource('stages', 'StageController');
+
+    // Business Process
+    Route::delete('business-processes/destroy', 'BusinessProcessController@massDestroy')->name('business-processes.massDestroy');
+    Route::resource('business-processes', 'BusinessProcessController');
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
     // Change password

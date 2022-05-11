@@ -352,6 +352,66 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'id'    => 86,
+                'title' => 'responsible_create',
+            ],
+            [
+                'id'    => 87,
+                'title' => 'responsible_edit',
+            ],
+            [
+                'id'    => 88,
+                'title' => 'responsible_show',
+            ],
+            [
+                'id'    => 89,
+                'title' => 'responsible_delete',
+            ],
+            [
+                'id'    => 90,
+                'title' => 'responsible_access',
+            ],
+            [
+                'id'    => 91,
+                'title' => 'stage_create',
+            ],
+            [
+                'id'    => 92,
+                'title' => 'stage_edit',
+            ],
+            [
+                'id'    => 93,
+                'title' => 'stage_show',
+            ],
+            [
+                'id'    => 94,
+                'title' => 'stage_delete',
+            ],
+            [
+                'id'    => 95,
+                'title' => 'stage_access',
+            ],
+            [
+                'id'    => 96,
+                'title' => 'business_process_create',
+            ],
+            [
+                'id'    => 97,
+                'title' => 'business_process_edit',
+            ],
+            [
+                'id'    => 98,
+                'title' => 'business_process_show',
+            ],
+            [
+                'id'    => 99,
+                'title' => 'business_process_delete',
+            ],
+            [
+                'id'    => 100,
+                'title' => 'business_process_access',
+            ],
+            [
+                'id'    => 101,
                 'title' => 'profile_password_edit',
             ],
         ];
