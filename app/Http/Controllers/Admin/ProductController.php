@@ -25,7 +25,11 @@ class ProductController extends Controller
 
         $products = Product::with(['categories', 'tags', 'media'])->get();
 
-        return view('admin.products.index', compact('products'));
+        $product_categories = ProductCategory::get();
+
+        $product_tags = ProductTag::get();
+
+        return view('admin.products.index', compact('product_categories', 'product_tags', 'products'));
     }
 
     public function create()

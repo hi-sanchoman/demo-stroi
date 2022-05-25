@@ -352,66 +352,134 @@ class PermissionsTableSeeder extends Seeder
             ],
             [
                 'id'    => 86,
-                'title' => 'responsible_create',
+                'title' => 'construction_create',
             ],
             [
                 'id'    => 87,
-                'title' => 'responsible_edit',
+                'title' => 'construction_edit',
             ],
             [
                 'id'    => 88,
-                'title' => 'responsible_show',
+                'title' => 'construction_show',
             ],
             [
                 'id'    => 89,
-                'title' => 'responsible_delete',
+                'title' => 'construction_delete',
             ],
             [
                 'id'    => 90,
-                'title' => 'responsible_access',
+                'title' => 'construction_access',
             ],
             [
                 'id'    => 91,
-                'title' => 'stage_create',
+                'title' => 'application_create',
             ],
             [
                 'id'    => 92,
-                'title' => 'stage_edit',
+                'title' => 'application_edit',
             ],
             [
                 'id'    => 93,
-                'title' => 'stage_show',
+                'title' => 'application_show',
             ],
             [
                 'id'    => 94,
-                'title' => 'stage_delete',
+                'title' => 'application_delete',
             ],
             [
                 'id'    => 95,
-                'title' => 'stage_access',
+                'title' => 'application_access',
             ],
             [
                 'id'    => 96,
-                'title' => 'business_process_create',
+                'title' => 'application_product_create',
             ],
             [
                 'id'    => 97,
-                'title' => 'business_process_edit',
+                'title' => 'application_product_edit',
             ],
             [
                 'id'    => 98,
-                'title' => 'business_process_show',
+                'title' => 'application_product_show',
             ],
             [
                 'id'    => 99,
-                'title' => 'business_process_delete',
+                'title' => 'application_product_delete',
             ],
             [
                 'id'    => 100,
-                'title' => 'business_process_access',
+                'title' => 'application_product_access',
             ],
             [
                 'id'    => 101,
+                'title' => 'application_path_create',
+            ],
+            [
+                'id'    => 102,
+                'title' => 'application_path_edit',
+            ],
+            [
+                'id'    => 103,
+                'title' => 'application_path_show',
+            ],
+            [
+                'id'    => 104,
+                'title' => 'application_path_delete',
+            ],
+            [
+                'id'    => 105,
+                'title' => 'application_path_access',
+            ],
+            [
+                'id'    => 106,
+                'title' => 'application_status_create',
+            ],
+            [
+                'id'    => 107,
+                'title' => 'application_status_edit',
+            ],
+            [
+                'id'    => 108,
+                'title' => 'application_status_show',
+            ],
+            [
+                'id'    => 109,
+                'title' => 'application_status_delete',
+            ],
+            [
+                'id'    => 110,
+                'title' => 'application_status_access',
+            ],
+            [
+                'id'    => 111,
+                'title' => 'application_log_create',
+            ],
+            [
+                'id'    => 112,
+                'title' => 'application_log_edit',
+            ],
+            [
+                'id'    => 113,
+                'title' => 'application_log_show',
+            ],
+            [
+                'id'    => 114,
+                'title' => 'application_log_delete',
+            ],
+            [
+                'id'    => 115,
+                'title' => 'application_log_access',
+            ],
+            [
+                'id'    => 116,
+                'title' => 'configuration_access',
+            ],
+            [
+                'id'    => 117,
+                'title' => 'application_management_access',
+            ],
+            [
+                'id'    => 118,
                 'title' => 'profile_password_edit',
             ],
         ];

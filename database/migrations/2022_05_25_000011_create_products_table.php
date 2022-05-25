@@ -13,6 +13,7 @@ class CreateProductsTable extends Migration
             $table->string('name')->nullable();
             $table->longText('description')->nullable();
             $table->decimal('price', 15, 2)->nullable();
+            $table->string('unit')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

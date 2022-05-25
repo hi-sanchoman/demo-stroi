@@ -1,14 +1,21 @@
 <?php
 
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', 'middleware' => ['auth:sanctum']], function () {
-    // Responsible
-    Route::post('responsibles/media', 'ResponsibleApiController@storeMedia')->name('responsibles.storeMedia');
-    Route::apiResource('responsibles', 'ResponsibleApiController');
+    // Construction
+    Route::apiResource('constructions', 'ConstructionApiController');
 
-    // Stage
-    Route::post('stages/media', 'StageApiController@storeMedia')->name('stages.storeMedia');
-    Route::apiResource('stages', 'StageApiController');
+    // Application
+    Route::apiResource('applications', 'ApplicationApiController');
 
-    // Business Process
-    Route::apiResource('business-processes', 'BusinessProcessApiController');
+    // Application Products
+    Route::apiResource('application-products', 'ApplicationProductsApiController');
+
+    // Application Path
+    Route::apiResource('application-paths', 'ApplicationPathApiController');
+
+    // Application Status
+    Route::apiResource('application-statuses', 'ApplicationStatusApiController');
+
+    // Application Log
+    Route::apiResource('application-logs', 'ApplicationLogApiController');
 });
