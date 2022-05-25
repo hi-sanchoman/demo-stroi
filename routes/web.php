@@ -89,21 +89,29 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::delete('contact-contacts/destroy', 'ContactContactsController@massDestroy')->name('contact-contacts.massDestroy');
     Route::resource('contact-contacts', 'ContactContactsController');
 
-    // Responsible
-    Route::delete('responsibles/destroy', 'ResponsibleController@massDestroy')->name('responsibles.massDestroy');
-    Route::post('responsibles/media', 'ResponsibleController@storeMedia')->name('responsibles.storeMedia');
-    Route::post('responsibles/ckmedia', 'ResponsibleController@storeCKEditorImages')->name('responsibles.storeCKEditorImages');
-    Route::resource('responsibles', 'ResponsibleController');
+    // Construction
+    Route::delete('constructions/destroy', 'ConstructionController@massDestroy')->name('constructions.massDestroy');
+    Route::resource('constructions', 'ConstructionController');
 
-    // Stage
-    Route::delete('stages/destroy', 'StageController@massDestroy')->name('stages.massDestroy');
-    Route::post('stages/media', 'StageController@storeMedia')->name('stages.storeMedia');
-    Route::post('stages/ckmedia', 'StageController@storeCKEditorImages')->name('stages.storeCKEditorImages');
-    Route::resource('stages', 'StageController');
+    // Application
+    Route::delete('applications/destroy', 'ApplicationController@massDestroy')->name('applications.massDestroy');
+    Route::resource('applications', 'ApplicationController');
 
-    // Business Process
-    Route::delete('business-processes/destroy', 'BusinessProcessController@massDestroy')->name('business-processes.massDestroy');
-    Route::resource('business-processes', 'BusinessProcessController');
+    // Application Products
+    Route::delete('application-products/destroy', 'ApplicationProductsController@massDestroy')->name('application-products.massDestroy');
+    Route::resource('application-products', 'ApplicationProductsController');
+
+    // Application Path
+    Route::delete('application-paths/destroy', 'ApplicationPathController@massDestroy')->name('application-paths.massDestroy');
+    Route::resource('application-paths', 'ApplicationPathController');
+
+    // Application Status
+    Route::delete('application-statuses/destroy', 'ApplicationStatusController@massDestroy')->name('application-statuses.massDestroy');
+    Route::resource('application-statuses', 'ApplicationStatusController');
+
+    // Application Log
+    Route::delete('application-logs/destroy', 'ApplicationLogController@massDestroy')->name('application-logs.massDestroy');
+    Route::resource('application-logs', 'ApplicationLogController');
 });
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
     // Change password

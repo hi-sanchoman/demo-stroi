@@ -36,6 +36,10 @@ class StoreProductRequest extends FormRequest
             'tags' => [
                 'array',
             ],
+            'unit' => [
+                'string',
+                'required',
+            ],
         ];
     }
 }

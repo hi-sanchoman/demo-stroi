@@ -4,17 +4,16 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
-class CreateResponsiblesTable extends Migration
+class CreateApplicationsTable extends Migration
 {
     public function up()
     {
-        Schema::create('responsibles', function (Blueprint $table) {
+        Schema::create('applications', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->integer('order');
+            $table->datetime('issued_at');
+            $table->string('kind');
             $table->string('status');
-            $table->longText('reason')->nullable();
-            $table->longText('notes')->nullable();
-            $table->datetime('reviewed_at')->nullable();
+            $table->boolean('is_urgent')->default(0)->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

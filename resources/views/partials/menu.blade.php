@@ -245,34 +245,88 @@
                 </ul>
             </li>
         @endcan
-        @can('business_process_access')
+        @can('construction_access')
             <li class="c-sidebar-nav-item">
-                <a href="{{ route("admin.business-processes.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/business-processes") || request()->is("admin/business-processes/*") ? "c-active" : "" }}">
+                <a href="{{ route("admin.constructions.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/constructions") || request()->is("admin/constructions/*") ? "c-active" : "" }}">
                     <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
 
                     </i>
-                    {{ trans('cruds.businessProcess.title') }}
+                    {{ trans('cruds.construction.title') }}
                 </a>
             </li>
         @endcan
-        @can('stage_access')
-            <li class="c-sidebar-nav-item">
-                <a href="{{ route("admin.stages.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/stages") || request()->is("admin/stages/*") ? "c-active" : "" }}">
-                    <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+        @can('application_management_access')
+            <li class="c-sidebar-nav-dropdown {{ request()->is("admin/applications*") ? "c-show" : "" }} {{ request()->is("admin/application-products*") ? "c-show" : "" }} {{ request()->is("admin/application-statuses*") ? "c-show" : "" }} {{ request()->is("admin/application-logs*") ? "c-show" : "" }}">
+                <a class="c-sidebar-nav-dropdown-toggle" href="#">
+                    <i class="fa-fw far fa-file-alt c-sidebar-nav-icon">
 
                     </i>
-                    {{ trans('cruds.stage.title') }}
+                    {{ trans('cruds.applicationManagement.title') }}
                 </a>
+                <ul class="c-sidebar-nav-dropdown-items">
+                    @can('application_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.applications.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/applications") || request()->is("admin/applications/*") ? "c-active" : "" }}">
+                                <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                                </i>
+                                {{ trans('cruds.application.title') }}
+                            </a>
+                        </li>
+                    @endcan
+                    @can('application_product_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.application-products.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/application-products") || request()->is("admin/application-products/*") ? "c-active" : "" }}">
+                                <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                                </i>
+                                {{ trans('cruds.applicationProduct.title') }}
+                            </a>
+                        </li>
+                    @endcan
+                    @can('application_status_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.application-statuses.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/application-statuses") || request()->is("admin/application-statuses/*") ? "c-active" : "" }}">
+                                <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                                </i>
+                                {{ trans('cruds.applicationStatus.title') }}
+                            </a>
+                        </li>
+                    @endcan
+                    @can('application_log_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.application-logs.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/application-logs") || request()->is("admin/application-logs/*") ? "c-active" : "" }}">
+                                <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                                </i>
+                                {{ trans('cruds.applicationLog.title') }}
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
             </li>
         @endcan
-        @can('responsible_access')
-            <li class="c-sidebar-nav-item">
-                <a href="{{ route("admin.responsibles.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/responsibles") || request()->is("admin/responsibles/*") ? "c-active" : "" }}">
+        @can('configuration_access')
+            <li class="c-sidebar-nav-dropdown {{ request()->is("admin/application-paths*") ? "c-show" : "" }}">
+                <a class="c-sidebar-nav-dropdown-toggle" href="#">
                     <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
 
                     </i>
-                    {{ trans('cruds.responsible.title') }}
+                    {{ trans('cruds.configuration.title') }}
                 </a>
+                <ul class="c-sidebar-nav-dropdown-items">
+                    @can('application_path_access')
+                        <li class="c-sidebar-nav-item">
+                            <a href="{{ route("admin.application-paths.index") }}" class="c-sidebar-nav-link {{ request()->is("admin/application-paths") || request()->is("admin/application-paths/*") ? "c-active" : "" }}">
+                                <i class="fa-fw fas fa-cogs c-sidebar-nav-icon">
+
+                                </i>
+                                {{ trans('cruds.applicationPath.title') }}
+                            </a>
+                        </li>
+                    @endcan
+                </ul>
             </li>
         @endcan
         @if(file_exists(app_path('Http/Controllers/Auth/ChangePasswordController.php')))

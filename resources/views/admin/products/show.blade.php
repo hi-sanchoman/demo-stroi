@@ -79,6 +79,14 @@
                             @endif
                         </td>
                     </tr>
+                    <tr>
+                        <th>
+                            {{ trans('cruds.product.fields.unit') }}
+                        </th>
+                        <td>
+                            {{ $product->unit }}
+                        </td>
+                    </tr>
                 </tbody>
             </table>
             <div class="form-group">
