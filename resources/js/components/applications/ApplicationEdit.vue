@@ -147,7 +147,6 @@
                                             class="w-10"
                                             variant="underlined"
                                             style="width: 50px"
-                                            v-if="application.status == 'in_progress'"
                                         >
                                         </v-text-field>
 
@@ -166,7 +165,6 @@
                                             class="w-10"
                                             variant="underlined"
                                             style="width: 50px"
-                                            v-if="application.status == 'in_progress'"
                                         >
                                         </v-text-field>
                                     </td>
@@ -179,7 +177,6 @@
                                             class="w-10"
                                             variant="underlined"
                                             style="width: 50px"
-                                            v-if="application.status == 'in_progress'"
                                         >
                                         </v-text-field>
 
