@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApplicationStatusRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
 use App\Http\Resources\Admin\ApplicationStatusResource;
+use App\Models\Application;
+use App\Models\ApplicationLog;
+use App\Models\ApplicationPath;
 use App\Models\ApplicationStatus;
 use Gate;
 use Illuminate\Http\Request;
@@ -36,13 +39,79 @@ class ApplicationStatusApiController extends Controller
         return new ApplicationStatusResource($applicationStatus->load(['application', 'application_path']));
     }
 
-    public function update(UpdateApplicationStatusRequest $request, ApplicationStatus $applicationStatus)
+    public function update(Request $request, ApplicationStatus $applicationStatus)
     {
-        $applicationStatus->update($request->all());
+        $input = $request->all();
 
-        return (new ApplicationStatusResource($applicationStatus))
-            ->response()
-            ->setStatusCode(Response::HTTP_ACCEPTED);
+        $totalSteps = ApplicationPath::count();
+
+        if ($input['method'] == 'sign') {
+            // set accepted
+            $applicationStatus->status = 'accepted';
+            $applicationStatus->save();
+
+            // set next responsible's status to 'incoming'
+            $nextStep = $applicationStatus->application_path_id + 1;
+            
+            // first responsible just signed up
+            if ($nextStep == 2) {
+                ApplicationStatus::query()
+                    ->where('application_id', $applicationStatus->application_id)
+                    ->whereNot('application_path_id', 1)
+                    ->update(['status' => 'waiting', 'declined_reason' => '']);
+            }
+
+            if ($nextStep <= $totalSteps) {
+                ApplicationStatus::query()
+                    ->where('application_id', $applicationStatus->application_id)
+                    ->where('application_path_id', $nextStep)
+                    ->update(['status' => 'incoming']);
+            }
+
+            // last responsible
+            if ($nextStep == $totalSteps + 1) {
+                $applicationStatus->application->status = 'in_progress';
+                $applicationStatus->application->save();
+            } else {
+                // set application's status to 'in_review'
+                $applicationStatus->application->status = 'in_review';
+                $applicationStatus->application->save();
+            }
+
+            // log to history
+            ApplicationLog::create([
+                'application_id' => $applicationStatus->application_id,
+                'user_id' => $request->user()->id,
+                'log' => $request->user()->name . ' одобрил заявку под №' . $applicationStatus->application_id,
+            ]);
+        } else if ($input['method'] == 'decline') {
+            $applicationStatus->status = 'declined';
+            $applicationStatus->declined_reason = $input['declined_reason'];
+            $applicationStatus->save();
+
+            // prev step
+            $prevStep = $applicationStatus->application_path_id - 1;
+
+            if ($prevStep > 0) {
+                ApplicationStatus::query()
+                    ->where('application_id', $applicationStatus->application_id)
+                    ->where('application_path_id', $prevStep)
+                    ->update(['status' => 'incoming']);
+            }
+
+            // set application's status to 'declined'
+            $applicationStatus->application->status = 'declined';
+            $applicationStatus->application->save();
+
+            // log to history
+            ApplicationLog::create([
+                'application_id' => $applicationStatus->application_id,
+                'user_id' => $request->user()->id,
+                'log' => $request->user()->name . ' отклонил заявку под №' . $applicationStatus->application_id . ' по причине: ' . $input['declined_reason'],
+            ]);
+        }
+
+        return new ApplicationStatusResource(ApplicationStatus::with(['application', 'application_path'])->where('application_id', $applicationStatus->application_id)->get());
     }
 
     public function destroy(ApplicationStatus $applicationStatus)

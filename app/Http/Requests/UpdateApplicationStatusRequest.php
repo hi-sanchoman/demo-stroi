@@ -17,20 +17,20 @@ class UpdateApplicationStatusRequest extends FormRequest
     public function rules()
     {
         return [
-            'application_id' => [
-                'required',
-                'integer',
-            ],
-            'application_path_id' => [
-                'required',
-                'integer',
-            ],
-            'status' => [
-                'required',
-            ],
-            'declined_reason' => [
-                'required',
-            ],
+            // 'application_id' => [
+            //     'required',
+            //     'integer',
+            // ],
+            // 'application_path_id' => [
+            //     'required',
+            //     'integer',
+            // ],
+            // 'status' => [
+            //     'required',
+            // ],
+            // 'declined_reason' => [
+            //     'required',
+            // ],
         ];
     }
 }

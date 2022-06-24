@@ -22,14 +22,14 @@ class UpdateApplicationRequest extends FormRequest
                 'integer',
             ],
             'issued_at' => [
-                'required',
-                'date_format:' . config('panel.date_format') . ' ' . config('panel.time_format'),
+                // 'required',
+                // 'date_format:' . config('panel.date_format') . ' ' . config('panel.time_format'),
             ],
             'kind' => [
                 'required',
             ],
             'status' => [
-                'required',
+                // 'required',
             ],
         ];
     }

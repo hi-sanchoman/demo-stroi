@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApplicationProductRequest;
 use App\Http\Requests\UpdateApplicationProductRequest;
 use App\Http\Resources\Admin\ApplicationProductResource;
+use App\Models\ApplicationLog;
 use App\Models\ApplicationProduct;
+use App\Models\Inventory;
 use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -36,9 +38,37 @@ class ApplicationProductsApiController extends Controller
         return new ApplicationProductResource($applicationProduct->load(['application', 'product']));
     }
 
-    public function update(UpdateApplicationProductRequest $request, ApplicationProduct $applicationProduct)
+    public function update(Request $request, ApplicationProduct $applicationProduct)
     {
-        $applicationProduct->update($request->all());
+
+        // add to log
+        if ($request->mode == 'prepare') {
+            $applicationProduct->update($request->all());
+
+            ApplicationLog::create([
+                'application_id' => $applicationProduct->application_id,
+                'user_id' => $request->user()->id,
+                'log' => $request->user()->name . ' подготовил ' . $applicationProduct->prepared . ' ' . $applicationProduct->product->name,
+            ]);
+        } else if ($request->mode == 'receive') {
+            $applicationProduct->update([
+                'delivered' => $applicationProduct->delivered + $request->delivered,
+            ]);
+
+            Inventory::create([
+                'construction_id' => $applicationProduct->application->construction_id,
+                'application_product_id' => $applicationProduct->id,
+                'quantity' => $request->delivered,
+            ]);
+
+            ApplicationLog::create([
+                'application_id' => $applicationProduct->application_id,
+                'user_id' => $request->user()->id,
+                'log' => $request->user()->name . ' принял ' . $applicationProduct->delivered . ' ' . $applicationProduct->product->name,
+            ]);
+        }
+
+        
 
         return (new ApplicationProductResource($applicationProduct))
             ->response()

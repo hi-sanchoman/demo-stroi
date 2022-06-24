@@ -13,15 +13,22 @@
     "@mdi/font": "5.9.55",
     "roboto-fontface": "*",
     "vue": "^3.2.33",
-    "vuetify": "^3.0.0-beta.0",
+    "vue-multiselect": "^3.0.0-alpha.2",
+    "vue-router": "^4.0.13",
+    "vuetify": "^3.0.0-beta.2",
+    "vuetify-loader": "^1.7.3",
     "webfontloader": "^1.0.0"
   },
   "devDependencies": {
     "@vue/compiler-sfc": "^3.2.36",
     "axios": "^0.25",
+    "css-loader": "^6.7.1",
+    "deepmerge": "^4.2.2",
     "laravel-mix": "^6.0.6",
     "lodash": "^4.17.19",
     "postcss": "^8.1.14",
+    "sass": "~1.32",
+    "sass-loader": "^13.0.0",
     "vue-cli-plugin-vuetify": "~2.5.0",
     "vue-loader": "^16.2.0",
     "webpack-plugin-vuetify": "^2.0.0-alpha.0"

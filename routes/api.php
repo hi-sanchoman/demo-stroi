@@ -1,6 +1,9 @@
 <?php
 
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', 'middleware' => ['auth:sanctum']], function () {
+    // User
+    Route::get('/me', [App\Http\Controllers\Api\V1\UserController::class, 'me']);
+    
     // Construction
     Route::apiResource('constructions', 'ConstructionApiController');
 
@@ -18,4 +21,40 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
     // Application Log
     Route::apiResource('application-logs', 'ApplicationLogApiController');
+
+
+
+    // Inventories
+    Route::get('history-inventories/{productId}', 'InventoryApiController@historyInventories');
+    Route::apiResource('inventories', 'InventoryApiController');
+    
+});
+
+
+// login
+Route::post('/v1/auth/login', [App\Http\Controllers\Api\V1\AuthController::class, 'login']);
+
+// logout
+Route::post('/v1/auth/logout', [App\Http\Controllers\Api\V1\AuthController::class, 'logout'])->middleware('auth:sanctum');
+
+
+
+// register
+// Route::post('/api/v1/auth/register', function(Request $request) {
+//     // $request->validate([
+//     //     'name' => ''
+//     // ])
+// });
+
+
+
+
+
+// non admin
+Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middleware' => ['auth:sanctum']], function () {
+
+    Route::apiResource('products', 'ProductApiController');
+    Route::apiResource('categories', 'CategoryApiController');
+    
+    Route::get('/payments', [App\Http\Controllers\Api\V1\ProductApiController::class, 'payments']);
 });

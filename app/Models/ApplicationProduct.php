@@ -23,9 +23,16 @@ class ApplicationProduct extends Model
     protected $fillable = [
         'application_id',
         'product_id',
+        'product_category_id',
         'quantity',
+        'prepared',
+        'delivered',
         'notes',
         'is_delivered_by_us',
+        'price',
+        'company',
+        'files',
+        'accepted_by',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -39,6 +46,11 @@ class ApplicationProduct extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id');
+    }
+
+    public function category()
+    {
+        return $this->belongsTo(ProductCategory::class, 'product_category_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

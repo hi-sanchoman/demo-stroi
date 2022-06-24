@@ -1,15 +1,32 @@
 <?php
 
-Route::redirect('/', '/login');
-Route::get('/home', function () {
-    if (session('status')) {
-        return redirect()->route('admin.home')->with('status', session('status'));
-    }
-
-    return redirect()->route('admin.home');
+Route::get('/', function() {
+    return view('welcome');
 });
 
+Route::get('/home', function () {
+    if (session('status')) {
+        return redirect('/')->with('status', session('status'));
+    }
+
+    return redirect('/');
+});
+
+
+Route::get('/applications', 'ApplicationController@index');
+Route::get('/applications/create', 'ApplicationController@create');
+Route::get('/applications/{id}/edit', 'ApplicationController@edit');
+
+Route::get('/inventories', 'ApplicationController@index');
+Route::get('/payments', 'ApplicationController@index');
+
+
+Route::get('/logout', 'ApplicationController@index');
+
+
 Auth::routes(['register' => false]);
+
+
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
     Route::get('/', 'HomeController@index')->name('home');
@@ -113,6 +130,8 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'mi
     Route::delete('application-logs/destroy', 'ApplicationLogController@massDestroy')->name('application-logs.massDestroy');
     Route::resource('application-logs', 'ApplicationLogController');
 });
+
+
 Route::group(['prefix' => 'profile', 'as' => 'profile.', 'namespace' => 'Auth', 'middleware' => ['auth']], function () {
     // Change password
     if (file_exists(app_path('Http/Controllers/Auth/ChangePasswordController.php'))) {
