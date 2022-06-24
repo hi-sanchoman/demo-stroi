@@ -251,7 +251,7 @@
                         </v-table>
 
                         <v-btn
-                            v-if="form.construction != null && products.length > 0 && (application.status == 'draft' || application.status == 'in_progress')"
+                            v-if="form.construction != null && products.length > 0"
                             class="mt-5"
                             @click="updateApplication"
                             color="primary"
