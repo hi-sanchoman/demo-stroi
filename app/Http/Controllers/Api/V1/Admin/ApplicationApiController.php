@@ -56,7 +56,7 @@ class ApplicationApiController extends Controller
         } else if ($status == 'in_progress_supplier') {
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
-                ->where('status', 'in_progress')
+                // ->where('status', 'in_progress')
                 ->get();
             
             return new ApplicationResource($collection);
