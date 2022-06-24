@@ -70,7 +70,7 @@
                         @click="updatePayments"
                         color="primary"
                     >
-                        Сохранить
+                        Сохранить.
                     </v-btn>
                 </v-col>
             </v-row>    
