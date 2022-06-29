@@ -679,7 +679,7 @@ export default {
                 this.application = response.data.data
 
                 this.products = this.application.application_application_products
-                console.log(this.products);
+                // console.log(this.products);
 
                 this.form.construction = this.application.construction
                 this.form.kind = this.application.kind
@@ -800,7 +800,7 @@ export default {
         },
 
         isEditable() {
-            return this.isEditable() && this.application.status != 'in_progress';
+            return this.application.status != 'in_review' && this.application.status != 'in_progress';
         },
 
         prepareQuantity(product) {
