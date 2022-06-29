@@ -280,7 +280,8 @@
                                                                 variant="underlined"
                                                                 required
                                                             ></v-text-field>
-                                                            <span v-if="application.status == 'in_review'">{{ offer.name }}</span>
+                                                            
+                                                            <span v-if="!isEditable()">{{ offer.name }}</span>
                                                         </td>
                                                         <td>
                                                             <v-text-field
@@ -291,7 +292,7 @@
                                                                 variant="underlined"
                                                                 required
                                                             ></v-text-field>
-                                                            <span v-if="application.status == 'in_review'">{{ offer.quantity }}</span>
+                                                            <span v-if="!isEditable()">{{ offer.quantity }}</span>
                                                         </td>
                                                         <td>
                                                             <v-text-field
@@ -302,7 +303,7 @@
                                                                 variant="underlined"
                                                                 required
                                                             ></v-text-field>
-                                                            <span v-if="application.status == 'in_review'">{{ offer.price }} тг</span>    
+                                                            <span v-if="!isEditable()">{{ offer.price }} тг</span>    
                                                         </td>
                                                         <td>
                                                             {{ offer.price * offer.quantity }} тг
@@ -800,7 +801,7 @@ export default {
         },
 
         isEditable() {
-            return this.currentUser != null && this.currentUser.roles[0].title == 'Supplier';
+            return this.currentUser != null && this.currentUser.roles[0].title == 'Supplier' && this.application.status != 'in_review';
         },
 
         prepareQuantity(product) {
