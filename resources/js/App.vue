@@ -14,10 +14,17 @@
 
       <v-row class="flex-grow-1 flex flex-row">
         <router-link 
-          v-if="currentUser != null && currentUser.roles[0].title != 'Accountant'"
+          v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Warehouse Manager' && currentUser.roles[0].title != 'Foreman')"
           to="/applications?status=redirect" class="text-decoration-none"
         >
           <v-btn flat class="text-white">Заявки</v-btn>
+        </router-link>
+
+        <router-link 
+          v-if="currentUser != null && currentUser.roles[0].title == 'Warehouse Manager'"
+          to="/inventories" class="text-decoration-none"
+        >
+          <v-btn flat class="text-white">Склады</v-btn>
         </router-link>
         
         <router-link 
@@ -36,7 +43,7 @@
 
         <router-link 
           v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'"
-          to="/inventories" class="text-decoration-none"
+          to="/supplies" class="text-decoration-none"
         >
           <v-btn flat class="text-white">Накопители</v-btn>
         </router-link>

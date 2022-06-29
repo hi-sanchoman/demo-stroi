@@ -9,7 +9,9 @@ use App\Http\Resources\Admin\ApplicationProductResource;
 use App\Models\ApplicationLog;
 use App\Models\ApplicationProduct;
 use App\Models\Inventory;
+use App\Models\InventoryApplication;
 use Gate;
+use DB;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -82,5 +84,32 @@ class ApplicationProductsApiController extends Controller
         $applicationProduct->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
+    }
+
+
+    public function prepare(Request $request, $id)
+    {
+        DB::beginTransaction();
+
+        $applicationProduct = ApplicationProduct::with(['application', 'application.construction'])
+            ->where('id', $id)->firstOrFail();
+        $applicationProduct->prepared += $request->toBePrepared;
+        $applicationProduct->save();
+
+        // get main inventory
+        $inventory = Inventory::where('construction_id', $applicationProduct->application->construction->id)
+            ->where('is_main', 1)
+            ->firstOrFail();
+
+        // create application request for a WareHouse manager
+        InventoryApplication::create([
+            'inventory_id' => $inventory->id,
+            'application_product_id' => $applicationProduct->id,
+            'prepared' => $request->toBePrepared,
+        ]);
+
+        DB::commit();
+
+        return $applicationProduct->prepared;
     }
 }

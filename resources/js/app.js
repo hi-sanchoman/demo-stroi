@@ -10,9 +10,12 @@ import ApplicationList from './components/applications/ApplicationList.vue'
 import ApplicationCreate from './components/applications/ApplicationCreate.vue'
 import ApplicationSidebar from './components/applications/ApplicationSidebar.vue'
 import ApplicationEdit from './components/applications/ApplicationEdit.vue'
+import InventorySidebar from './components/inventories/InventorySidebar.vue'
 import InventoryList from './components/inventories/InventoryList.vue'
+import InventoryShow from './components/inventories/InventoryShow.vue'
 import PaymentList from './components/payments/PaymentList.vue'
 import ToPayList from './components/payments/ToPayList.vue'
+import SupplyList from './components/supplies/SupplyList.vue'
 
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -34,9 +37,12 @@ const routes = [
   { path: '/applications/:id/edit', name: 'applications.edit', component: ApplicationEdit },
   { path: '/applications/', name: 'applications.index', component: ApplicationList },
 
+  { path: '/inventories', name: 'inventories.index', component: InventoryList },
+  { path: '/inventories/:id', name: 'inventories.show', component: InventoryShow },
+  
+  { path: '/supplies', name: 'supplies.index', component: SupplyList },
 
   { path: '/storages', component: HelloWorld },
-  { path: '/inventories', component: InventoryList },
   { path: '/payments', component: PaymentList },
   { path: '/to-pay', component: ToPayList },
 ]

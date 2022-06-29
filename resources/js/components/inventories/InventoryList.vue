@@ -9,119 +9,35 @@
 
             <v-row no-gutters class="mt-10">
                 <v-col cols="12" class="mb-5">
-                    <h2>Накопители</h2>
+                    <h2>Склады</h2>
                 </v-col>
 
-                <v-col cols="12" class="pl-5">
-                    <v-table transition="slide-x-transition">
-                        <thead>
-                            <tr>
-                                <th class="text-left">
-                                    №
-                                </th>
-                                <th class="text-left">
-                                    Наименование ресурса
-                                </th>
-                                <th class="text-left">
-                                    Статья расходов
-                                </th>
-                                <th class="text-left">
-                                    Ед. изм.
-                                </th>
-                                <th>
-                                    Кол-во
-                                </th>
-                                <th>
-                                    По плану
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="inventories.length <= 0">
-                                <td colspan="5">Нет данных.</td>
-                            </tr>
+                <div v-for="inventory in inventories" :key="inventory.id" class="border rounded px-4 py-4 w-fit">
+                    <h2 class="block mb-4">{{ inventory.construction.name }}</h2>
 
-                            <tr
-                                v-for="(inventory, index) in inventories"
-                                :key="inventory.item.id"
-                                style="cursor:pointer"
-                                @click="showPosition(inventory)"
-                            >
-                                <td>{{ index + 1 }}</td>
-                                <td>{{ inventory.item.application_product.product.name }}</td>
-                                <td>{{ inventory.item.application_product.product.categories[0].name }}</td>
-                                <td>{{ inventory.item.application_product.product.unit }}</td>
-                                <td>{{ inventory.total }}</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </v-table>
-                </v-col>
+                    <a :href="'/inventories/' + inventory.id" class="mt-4 py-2 px-2 block text-decoration-none text-black border hover:bg-slate-200">Перейти</a>
+                </div>
             </v-row>    
         </v-container>
 
 
-        <!-- inventory history dialog -->
-        <v-dialog
-            v-model="historyDialog"
+        <!-- Snackbar -->
+        <v-snackbar
+            v-model="snackbar.status"
+            :timeout="snackbar.timeout"
         >
-            <v-card>
-                <v-card-title>
-                    <span class="text-h5">История "{{ history.item.application_product.product.name }}"</span>
-                </v-card-title>
+            {{ snackbar.text }}
 
-                <v-card-text>
-                    <v-container>
-                        <v-row no-gutters class="">
-
-                            <v-col cols="12" class="">
-                                <v-table transition="slide-x-transition">
-                                    <thead>
-                                        <tr>
-                                            <th class="text-left">
-                                                №
-                                            </th>
-                                            <th class="text-left">
-                                                Наименование ресурса
-                                            </th>
-                                            <th class="text-left">
-                                                Статья расходов
-                                            </th>
-                                            <th class="text-left">
-                                                Ед. изм.
-                                            </th>
-                                            <th>
-                                                Кол-во
-                                            </th>
-                                            <th>
-                                                Дата поступления на склад
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <tr v-if="historyInventories.length <= 0">
-                                            <td colspan="5">Нет данных.</td>
-                                        </tr>
-
-                                        <tr
-                                            v-for="(inventory, index) in historyInventories"
-                                            :key="inventory.id"
-                                        >
-                                            <td>{{ index + 1 }}</td>
-                                            <td>{{ inventory.application_product.product.name }}</td>
-                                            <td>{{ inventory.application_product.product.categories[0].name }}</td>
-                                            <td>{{ inventory.application_product.product.unit }}</td>
-                                            <td>{{ inventory.quantity }}</td>
-                                            <td>{{ inventory.application_product.updated_at }}</td>
-                                        </tr>
-                                    </tbody>
-                                </v-table>
-                            </v-col>
-                        </v-row>    
-                    </v-container>
-                </v-card-text>
-            </v-card>
-        </v-dialog>
+            <template v-slot:actions>
+                <v-btn
+                    color="blue"
+                    variant="text"
+                    @click="snackbar.status = false"
+                >
+                    Закрыть
+                </v-btn>
+            </template>
+        </v-snackbar>
 
 
     </div>
@@ -136,11 +52,13 @@ export default {
 
     data() {
         return {
+            snackbar: {
+                status: false,
+                text: '',
+                timeout: 2000,
+            },
             inventories: [],
             currentUser: null,
-            historyDialog: false,
-            history: null,
-            historyInventories: [],
         } 
     },
     
@@ -152,29 +70,11 @@ export default {
             })
         },
 
-        showPosition(item) {
-            this.historyDialog = true
-            this.history = item
-            this.historyInventories = []
-
-            this.getHistoryInventories()
-        },
-
         getInventories() {
-            // get applications 
             axios.get('/api/v1/inventories').then((response) => {
-                this.inventories = response.data
-            })
-        },
-
-        getHistoryInventories() {
-            console.log(this.history)
-
-            axios.get('/api/v1/history-inventories/' + this.history.item.application_product.product.id).then((response) => {
-                this.historyInventories = response.data
+                this.inventories = response.data.data;
             })
         }
-
     },
 
     mounted() {

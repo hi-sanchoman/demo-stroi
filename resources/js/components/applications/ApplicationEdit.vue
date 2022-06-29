@@ -113,9 +113,9 @@
                                     <!-- <th>Цена</th>
                                     <th>Сумма</th>
                                     <th>Компания</th> -->
-                                    <th v-if="isCanPrepareQuantity()">Подготовлено</th>
-                                    <th v-if="isCanReceiveQuantity()">Получено</th>
                                     <th>Примечание</th>
+                                    <th v-if="isCanPrepareQuantity()">Подготовлено</th>
+                                    <!-- <th v-if="isCanReceiveQuantity()">Получено</th> -->
                                     <!-- <th>Файлы</th> -->
                                     <th></th>
                                 </tr>
@@ -173,6 +173,22 @@
                                             </v-text-field>
                                         </td> -->
 
+                                        
+                                        <!-- <td v-if="isCanReceiveQuantity()" class="">
+                                            <span>{{ item.delivered }}</span>    
+
+                                            <v-btn
+                                                v-if="item.delivered != item.quantity"
+                                                size="x-small"
+                                                color="primary"
+                                                class="ml-3"
+                                                @click="showReceiveDialog(item)"
+                                            >
+                                                <v-icon>mdi-plus</v-icon>
+                                            </v-btn>
+                                        </td>  -->
+                                        
+                                        <td>{{ item.notes }}</td>
                                         <td v-if="isCanPrepareQuantity()" class="d-flex mt-3 justify-center" s>
                                             <v-text-field
                                                 v-model="products[index].toBePrepared"
@@ -187,7 +203,7 @@
                                             <v-btn
                                                 size="x-small"
                                                 color="green"
-                                                class="ml-1"
+                                                class="ml-1 mt-2"
                                                 @click="prepareQuantity(item)"
                                             >
                                                 <v-icon>mdi-check</v-icon>
@@ -195,20 +211,6 @@
 
                                             <!-- <span v-if="item.quantity == item.prepared">{{ item.prepared }}</span> -->
                                         </td>  
-                                        <td v-if="isCanReceiveQuantity()" class="">
-                                            <span>{{ item.delivered }}</span>    
-
-                                            <v-btn
-                                                v-if="item.delivered != item.quantity"
-                                                size="x-small"
-                                                color="primary"
-                                                class="ml-3"
-                                                @click="showReceiveDialog(item)"
-                                            >
-                                                <v-icon>mdi-plus</v-icon>
-                                            </v-btn>
-                                        </td> 
-                                        <td>{{ item.notes }}</td>
                                         <!-- <td class="d-flex">
                                             <input
                                                 v-if="application.status == 'in_progress'"
@@ -805,13 +807,16 @@ export default {
         },
 
         prepareQuantity(product) {
-            product.mode = 'prepare'
+            if (!window.confirm('Вы действительно уверены?')) {
+                return
+            }
 
-            axios.put('/api/v1/application-products/' + product.id, product).then((response) => {
-                this.getApplication()
+            axios.put('/api/v1/application-products/' + product.id + '/prepare', product).then((response) => {
+                product.prepared = response.data;
+                product.toBePrepared = null;
 
-                this.snackbar.text = 'Ценностно-материальная позиция обновлена.'
-                this.snackbar.status = true
+                this.snackbar.text = 'Ценностно-материальная позиция обновлена.';
+                this.snackbar.status = true;
             })
         },
 

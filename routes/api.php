@@ -11,6 +11,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::apiResource('applications', 'ApplicationApiController');
 
     // Application Products
+    Route::put('/application-products/{id}/prepare', 'ApplicationProductsApiController@prepare');
     Route::apiResource('application-products', 'ApplicationProductsApiController');
 
     // Application Path
@@ -27,8 +28,12 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
 
     // Inventories
-    Route::get('history-inventories/{productId}', 'InventoryApiController@historyInventories');
+    Route::get('/history-inventories/{productId}', 'InventoryApiController@historyInventories');
+    Route::get('/inventories/{id}/stocks', 'InventoryStockApiController@index');
     Route::apiResource('inventories', 'InventoryApiController');
+
+    // Inventory stocks
+    Route::apiResource('inventory-stocks', 'InventoryStockApiController');
     
 });
 

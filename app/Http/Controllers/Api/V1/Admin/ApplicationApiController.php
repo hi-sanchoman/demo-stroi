@@ -137,7 +137,7 @@ class ApplicationApiController extends Controller
                 ->response()
                 ->setStatusCode(Response::HTTP_CREATED);
         } catch (\Exception $e) {
-            // DB::rollback();
+            DB::rollback();
             dd($e->getMessage());
         }
     }
