@@ -9,7 +9,7 @@
 
             <v-row no-gutters class="mt-10">
                 <v-col cols="12" class="mb-5">
-                    <h2>Общий Реестр платежей</h2>
+                    <h2>Входящие на оплату</h2>
                 </v-col>
 
                 <v-col cols="12" class="">
@@ -28,17 +28,14 @@
                                 <th class="text-left">
                                     Компания
                                 </th>
-                                <th class="text-left">
-                                    Количество
-                                </th>
                                 <th>
-                                    Сумма
+                                    Сумма к оплате
                                 </th>
+                                <!-- <th>
+                                    Платеж. поручение
+                                </th> -->
                                 <th>
-                                    Оплатить
-                                </th>
-                                <th>
-                                    На оплате
+                                    Управление
                                 </th>
                             </tr>
                         </thead>
@@ -55,34 +52,21 @@
                                 <td>{{ payment.id }}</td>
                                 <td width="30%">{{ payment.application_product.product.name }}</td>
                                 <td>{{ payment.name }}</td>
-                                <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td>
-                                <td>{{ payment.paidTotal }} / {{ payment.price * payment.quantity }} тг</td>
-                                <td class="pt-6">
-                                    <v-text-field
-                                        v-model="payment.order_paid"
-                                        type="number"
-                                        density="compact"
-                                        class="w-24"
-                                        variant="underlined"
-                                        style="width: 150px"
-                                        v-if="payment.application_product.application.status == 'in_progress'"
-                                    >
-                                    </v-text-field>
-                                </td>
+                                <td>{{ payment.to_be_paid }} тг</td>
+                                <!-- <td>
+
+                                </td> -->
                                 <td>
-                                    {{ payment.to_be_paid ? `${payment.to_be_paid} тг` : '' }} 
+                                    <v-btn
+                                        color="success"
+                                        @click="setPaid(payment)"
+                                    >
+                                        Оплачено
+                                    </v-btn>
                                 </td>
                             </tr>
                         </tbody>
                     </v-table>
-
-                    <v-btn
-                        class="mt-5"
-                        @click="updatePayments"
-                        color="primary"
-                    >
-                        Отправить на оплату
-                    </v-btn>
                 </v-col>
             </v-row>    
         </v-container>
@@ -141,33 +125,17 @@ export default {
             console.log('get payments')
 
             // get applications 
-            axios.get('/api/v1/payments').then((response) => {
+            axios.get('/api/v1/payments-to-pay').then((response) => {
                 this.payments = response.data.data
                 console.log(this.payments)
             });
         },
 
-        updatePayments() {
-            var data = [];
+        setPaid(offer) {
+            axios.put(`/api/v1/to-pay/${offer.id}`).then((response) => {
+                this.getPayments();
 
-            for (var i = 0; i < this.payments.length; i++) {
-                var offer = this.payments[i];
-
-                data.push({
-                    'id': offer.id,
-                    'to_be_paid': offer.order_paid,
-                });
-            }
-
-            // update once in a batch
-            axios.put('/api/v1/payments', { data: data }).then((response) => {
-                this.payments = response.data.data;
-
-                for (var i = 0; i < this.payments.length; i++) {
-                    this.payments[i].order_paid = 0;
-                }
-
-                this.snackbar.text = 'Отправлено на оплату';
+                this.snackbar.text = 'Оплачено';
                 this.snackbar.status = true;
             });
         },

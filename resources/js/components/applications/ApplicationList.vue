@@ -134,6 +134,11 @@ export default {
                     } else if (this.currentUser.roles[0].title == 'Supplier') {
                         this.$router.push('/applications?status=in_progress_supplier')
                         return
+                    } else if (this.currentUser.roles[0].title == 'Economist' || 
+                        this.currentUser.roles[0].title == 'Chief Financial Officer'
+                    ) {
+                        this.$router.push('/applications?status=in_progress_economist')
+                        return
                     } else if (this.currentUser.roles[0].title == 'Warehouse Manager') {
                         this.$router.push('/applications?status=in_progress_warehouse')
                         return
@@ -152,6 +157,7 @@ export default {
             // get applications 
             axios.get('/api/v1/applications?status=' + status).then((response) => {
                 this.applications = response.data.data
+                console.log(this.applications);
             })
         },
 

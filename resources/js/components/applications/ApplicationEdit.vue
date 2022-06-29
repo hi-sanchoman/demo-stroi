@@ -110,148 +110,242 @@
                                     <th>Наименование ресурсов</th>
                                     <th>Ед. изм.</th>
                                     <th>Кол-во</th>
-                                    <th>Цена</th>
+                                    <!-- <th>Цена</th>
                                     <th>Сумма</th>
-                                    <th>Компания</th>
+                                    <th>Компания</th> -->
                                     <th v-if="isCanPrepareQuantity()">Подготовлено</th>
                                     <th v-if="isCanReceiveQuantity()">Получено</th>
                                     <th>Примечание</th>
-                                    <th>Файлы</th>
+                                    <!-- <th>Файлы</th> -->
                                     <th></th>
                                 </tr>
                             </thead>
 
                             <tbody>
-                                <tr v-for="(item, index) in products" :key="item.id">
-                                    <td>{{ item.id }}</td>
-                                    <td>{{ item.category.name }}</td>
-                                    <td>{{ item.product.name }}</td>
-                                    <td>{{ item.product.unit }}</td>
-                                    <td :class="application.status == 'draft' ? 'd-flex mt-3' : ''">
-                                        <v-text-field
-                                            v-model="products[index].quantity"
-                                            type="number"
-                                            variant="plain"
-                                            density="compact"
-                                            v-if="application.status == 'draft'"
-                                        >
-                                        </v-text-field>
+                                <template v-for="(item, index) in products" :key="item.id">
+                                    <tr>
+                                        <td>{{ item.id }}</td>
+                                        <td>{{ item.category.name }}</td>
+                                        <td>{{ item.product.name }}</td>
+                                        <td>{{ item.product.unit }}</td>
+                                        <td :class="application.status == 'draft' ? 'd-flex mt-3' : ''">
+                                            <v-text-field
+                                                v-model="products[index].quantity"
+                                                type="number"
+                                                variant="plain"
+                                                density="compact"
+                                                v-if="application.status == 'draft'"
+                                            >
+                                            </v-text-field>
 
-                                        <span v-if="application.status != 'draft'">{{ products[index].quantity }}</span>
-                                    </td>
-                                    <td>
-                                        <v-text-field
-                                            v-model="products[index].price"
-                                            type="number"
-                                            density="compact"
-                                            class="w-10"
-                                            variant="underlined"
-                                            style="width: 50px"
-                                        >
-                                        </v-text-field>
+                                            <span v-if="application.status == 'in_progress' && isSupplier()">
+                                                {{ products[index].prepared }} / 
+                                            </span>
+                                            <span v-if="application.status != 'draft'">
+                                                {{ products[index].quantity }}
+                                            </span>
+                                        </td>
+                                        <!-- <td>
+                                            <v-text-field
+                                                v-model="products[index].price"
+                                                type="number"
+                                                density="compact"
+                                                class="w-10"
+                                                variant="underlined"
+                                                style="width: 50px"
+                                            >
+                                            </v-text-field>
+                                        </td> -->
 
-                                        <!-- <span v-if="application.status != 'draft'">{{ products[index].price }}</span> -->
-                                    </td>
+                                        <!-- <td>
+                                            {{ countSum(products[index]) }}
+                                        </td> -->
 
-                                    <td>
-                                        {{ countSum(products[index]) }}
-                                    </td>
+                                        <!-- <td class="w-36">
+                                            <v-text-field
+                                                v-model="products[index].company"
+                                                type="text"
+                                                density="compact"
+                                                class="w-10"
+                                                variant="underlined"
+                                                style="width: 50px"
+                                            >
+                                            </v-text-field>
+                                        </td> -->
 
-                                    <td class="w-36">
-                                        <v-text-field
-                                            v-model="products[index].company"
-                                            type="text"
-                                            density="compact"
-                                            class="w-10"
-                                            variant="underlined"
-                                            style="width: 50px"
-                                        >
-                                        </v-text-field>
-                                    </td>
+                                        <td v-if="isCanPrepareQuantity()" class="d-flex mt-3 justify-center" s>
+                                            <v-text-field
+                                                v-model="products[index].toBePrepared"
+                                                type="number"
+                                                density="compact"
+                                                variant="underlined"
+                                                class="w-10"
+                                                style="width: 50px"
+                                            >
+                                            </v-text-field>
 
-                                    <td v-if="isCanPrepareQuantity()" class="d-flex mt-3 justify-center" s>
-                                        <v-text-field
-                                            v-model="products[index].prepared"
-                                            type="number"
-                                            density="compact"
-                                            class="w-10"
-                                            variant="underlined"
-                                            style="width: 50px"
-                                        >
-                                        </v-text-field>
+                                            <v-btn
+                                                size="x-small"
+                                                color="green"
+                                                class="ml-1"
+                                                @click="prepareQuantity(item)"
+                                            >
+                                                <v-icon>mdi-check</v-icon>
+                                            </v-btn>
 
-                                        <v-btn
-                                            size="x-small"
-                                            color="green"
-                                            class="ml-1"
-                                            @click="prepareQuantity(item)"
-                                        >
-                                            <v-icon>mdi-check</v-icon>
-                                        </v-btn>
+                                            <!-- <span v-if="item.quantity == item.prepared">{{ item.prepared }}</span> -->
+                                        </td>  
+                                        <td v-if="isCanReceiveQuantity()" class="">
+                                            <span>{{ item.delivered }}</span>    
 
-                                        <!-- <span v-if="item.quantity == item.prepared">{{ item.prepared }}</span> -->
-                                    </td>  
-                                    <td v-if="isCanReceiveQuantity()" class="">
-                                        <span>{{ item.delivered }}</span>    
+                                            <v-btn
+                                                v-if="item.delivered != item.quantity"
+                                                size="x-small"
+                                                color="primary"
+                                                class="ml-3"
+                                                @click="showReceiveDialog(item)"
+                                            >
+                                                <v-icon>mdi-plus</v-icon>
+                                            </v-btn>
+                                        </td> 
+                                        <td>{{ item.notes }}</td>
+                                        <!-- <td class="d-flex">
+                                            <input
+                                                v-if="application.status == 'in_progress'"
+                                                type="file"
+                                                :ref="'doc_' + item.id"
+                                                class="
+                                                    w-full
+                                                    px-4
+                                                    py-2
+                                                    mt-2
+                                                    border
+                                                    rounded-md
+                                                    focus:outline-none
+                                                    focus:ring-1
+                                                    focus:ring-blue-600
+                                                "
+                                            />
 
-                                        <v-btn
-                                            v-if="item.delivered != item.quantity"
-                                            size="x-small"
-                                            color="primary"
-                                            class="ml-3"
-                                            @click="showReceiveDialog(item)"
-                                        >
-                                            <v-icon>mdi-plus</v-icon>
-                                        </v-btn>
-                                    </td> 
-                                    <td>{{ item.notes }}</td>
-                                    <td class="d-flex">
-                                        <!-- FILES -->
+                                            <v-btn
+                                                v-if="application.status == 'in_progress'"
+                                                size="x-small"
+                                                color="primary"
+                                                class="ml-3"
+                                                @click="uploadFile(item)"
+                                            >
+                                                Загрузить
+                                            </v-btn>
+                                        </td> -->
+                                        <td>
+                                            <v-btn 
+                                                v-if="application.status == 'draft'"
+                                                size="small"
+                                                color="error"
+                                                @click="deleteProduct(item)"
+                                            >
+                                                <v-icon>mdi-close</v-icon>
+                                            </v-btn>
 
-                                        <!-- UPLOAD -->
-                                        <input
-                                            v-if="application.status == 'in_progress'"
-                                            type="file"
-                                            :ref="'doc_' + item.id"
-                                            class="
-                                                w-full
-                                                px-4
-                                                py-2
-                                                mt-2
-                                                border
-                                                rounded-md
-                                                focus:outline-none
-                                                focus:ring-1
-                                                focus:ring-blue-600
-                                            "
-                                        />
+                                            <v-btn @click="addOffer(item.id)"
+                                                color="info"
+                                                size="small"
+                                                v-if="application.status == 'in_progress' && isSupplier()"
+                                            >
+                                                + компания
+                                            </v-btn>
+                                        </td>
+                                    </tr>
 
-                                        <v-btn
-                                            v-if="application.status == 'in_progress'"
-                                            size="x-small"
-                                            color="primary"
-                                            class="ml-3"
-                                            @click="uploadFile(item)"
-                                        >
-                                            Загрузить
-                                        </v-btn>
-                                    </td>
-                                    <td>
-                                        <v-btn 
-                                            v-if="application.status == 'draft'"
-                                            size="small"
-                                            color="error"
-                                            @click="deleteProduct(item)"
-                                        >
-                                            <v-icon>mdi-close</v-icon>
-                                        </v-btn>
-                                    </td>
-                                </tr>
+                                    <tr v-if="item.offers != null && item.offers.length > 0 && (application.status == 'in_progress' || application.status == 'in_review')" class="bg-slate-100">
+                                        <td colspan="9" class="border-none">
+                                            <v-table class="mt-4 mb-8 mx-8 border">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Название компании</th>
+                                                        <th>Кол-во</th>
+                                                        <th>Цена за ед.</th>
+                                                        <th>Общая сумма</th>
+                                                        <th>Счет на оплату</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="offer in item.offers" :key="offer.id">
+                                                        <td>
+                                                            <v-text-field
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                v-model="offer.name"
+                                                                type="text"
+                                                                variant="underlined"
+                                                                required
+                                                            ></v-text-field>
+                                                            <span v-if="application.status == 'in_review'">{{ offer.name }}</span>
+                                                        </td>
+                                                        <td>
+                                                            <v-text-field
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                v-model="offer.quantity"
+                                                                label=""
+                                                                type="number"
+                                                                variant="underlined"
+                                                                required
+                                                            ></v-text-field>
+                                                            <span v-if="application.status == 'in_review'">{{ offer.quantity }}</span>
+                                                        </td>
+                                                        <td>
+                                                            <v-text-field
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                v-model="offer.price"
+                                                                label=""
+                                                                type="number"
+                                                                variant="underlined"
+                                                                required
+                                                            ></v-text-field>
+                                                            <span v-if="application.status == 'in_review'">{{ offer.price }} тг</span>    
+                                                        </td>
+                                                        <td>
+                                                            {{ offer.price * offer.quantity }} тг
+                                                        </td>
+                                                        
+                                                        <td>
+                                                            <span v-if="offer.file != null">
+                                                                <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer" target="_blank" :href="'/uploads/' + offer.file">Просмотр</a>   
+                                                            </span>   
+
+                                                            <input v-if="isEditable()" type="file" id="file" v-on:change="handleFileUpload(offer, $event)"/>                                                             
+                                                        </td>
+
+                                                        <td>
+                                                            <v-btn @click="updateOffer(offer)"
+                                                                color="success"
+                                                                size="small"
+                                                                class="mr-2"
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                            >
+                                                                Сохранить
+                                                            </v-btn>
+
+                                                            <v-btn @click="deleteOffer(offer.id, item.id)"
+                                                                color="error"
+                                                                size="small"
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                            >
+                                                                Удалить
+                                                            </v-btn>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </v-table>
+                                        </td>
+                                    </tr>  
+                                       
+                                </template>
                             </tbody>
                         </v-table>
 
                         <v-btn
-                            v-if="form.construction != null && products.length > 0"
+                            v-if="form.construction != null && products.length > 0 && isPTDEngineer() && application.status == 'draft'"
                             class="mt-5"
                             @click="updateApplication"
                             color="primary"
@@ -585,6 +679,7 @@ export default {
                 this.application = response.data.data
 
                 this.products = this.application.application_application_products
+                console.log(this.products);
 
                 this.form.construction = this.application.construction
                 this.form.kind = this.application.kind
@@ -696,6 +791,18 @@ export default {
             return this.currentUser != null && this.currentUser.roles[0].title == 'Warehouse Manager';
         },
 
+        isPTDEngineer() {
+            return this.currentUser != null && this.currentUser.roles[0].title == 'PTD Engineer';
+        },        
+
+        isSupplier() {
+            return this.currentUser != null && this.currentUser.roles[0].title == 'Supplier';
+        },
+
+        isEditable() {
+            return this.isEditable() && this.application.status != 'in_progress';
+        },
+
         prepareQuantity(product) {
             product.mode = 'prepare'
 
@@ -728,13 +835,86 @@ export default {
             })
         },
 
+        addOffer(applicationProductId) {
+            var data = {
+                application_product_id: applicationProductId,
+                name: '',
+                status: 'draft',
+                price: 0,
+                quantity: 0,
+                file: null,
+                paidSum: 0,
+            };
+
+            axios.post('/api/v1/application-offers/', data).then((response) => {
+                console.log(response);
+
+                for (var i = 0; i < this.products.length; i++) {
+                    if (this.products[i].id == applicationProductId) {
+                        console.log(this.products[i]);
+
+                        this.products[i].offers = response.data.data.offers;
+
+                        this.snackbar.text = 'Предложение от новой компании успешно добавлено.'
+                        this.snackbar.status = true                      
+                    }
+                }
+            });
+        },
+
+        updateOffer(offer) {
+            try {
+                axios.put(`/api/v1/application-offers/${offer.id}`, offer).then((response) => {
+                    this.snackbar.text = 'Предложение от компании сохранено.'
+                    this.snackbar.status = true
+                })
+            } catch (e) {
+                console.log(e)
+
+                if (e.response.status === 422) {
+                    // errors.value = e.response.data.errors
+                }
+
+                this.snackbar.text = 'Ошибка.'
+                this.snackbar.status = true
+            }
+        },
+
+        deleteOffer(offerId, applicationProductId) {
+            if (!window.confirm('Вы действительно хотите?')) {
+                return
+            }
+            
+            axios.delete('/api/v1/application-offers/' + offerId).then((response) => {
+                for (var i = 0; i < this.products.length; i++) {
+                    if (this.products[i].id == applicationProductId) {
+                        this.products[i].offers = this.products[i].offers.filter(function(el) { return el.id != offerId })
+                    }
+                }
+            })
+        },
+
         countSum(product) {
             return product.quantity * product.price
         },
 
-        uploadFile(item) {
-            var key = 'doc_' + item.id
-            console.log(key, this.$refs, this.$refs[0], this.$refs[key])
+        handleFileUpload(offer, event) {
+            this.file = event.target.files[0];
+            
+            let formData = new FormData();
+            formData.append('file', this.file);
+            formData.append('offer_id', offer.id);
+
+            axios.post('/upload-file', formData, {
+                'headers': { 'Content-Type': 'multipart/form-data' }
+            }).then((response) => {
+                offer.file = response.data.data.file;
+
+                this.snackbar.text = 'Счет на оплату закреплен';
+                this.snackbar.status = true;
+            }).catch((error) => {
+                console.error(error);
+            })
         },
     },  
 }

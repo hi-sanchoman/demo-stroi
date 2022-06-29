@@ -1,6 +1,6 @@
 <template>
-  <v-container>
-    <v-row class="text-center">
+  <v-container class="items-center justify-center ">
+    <v-row class="text-center justify-center items-center h-screen mt-6">
       Добро пожаловать
     </v-row>
   </v-container>

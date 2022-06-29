@@ -22,6 +22,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     // Application Log
     Route::apiResource('application-logs', 'ApplicationLogApiController');
 
+    // Application Offer
+    Route::apiResource('application-offers', 'ApplicationOfferApiController');
 
 
     // Inventories
@@ -56,5 +58,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::apiResource('products', 'ProductApiController');
     Route::apiResource('categories', 'CategoryApiController');
     
-    Route::get('/payments', [App\Http\Controllers\Api\V1\ProductApiController::class, 'payments']);
+    Route::get('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'payments']);
+    Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);
+    Route::get('/payments-to-pay', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'paymentsToPay']);
+    Route::put('/to-pay/{id}', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'setPaid']);
 });

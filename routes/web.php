@@ -16,9 +16,9 @@ Route::get('/home', function () {
 Route::get('/applications', 'ApplicationController@index');
 Route::get('/applications/create', 'ApplicationController@create');
 Route::get('/applications/{id}/edit', 'ApplicationController@edit');
-
 Route::get('/inventories', 'ApplicationController@index');
 Route::get('/payments', 'ApplicationController@index');
+Route::get('/to-pay', 'ApplicationController@index');
 
 
 Route::get('/logout', 'ApplicationController@index');
@@ -26,6 +26,8 @@ Route::get('/logout', 'ApplicationController@index');
 
 Auth::routes(['register' => false]);
 
+
+Route::post('/upload-file', 'ApplicationController@uploadFile');
 
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {

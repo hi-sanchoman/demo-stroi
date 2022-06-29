@@ -12,11 +12,20 @@
         </router-link>
       </v-toolbar-title>
 
-      <v-row class="flex-grow-1">
-        <router-link to="/applications?status=redirect" class="text-decoration-none">
+      <v-row class="flex-grow-1 flex flex-row">
+        <router-link 
+          v-if="currentUser != null && currentUser.roles[0].title != 'Accountant'"
+          to="/applications?status=redirect" class="text-decoration-none"
+        >
           <v-btn flat class="text-white">Заявки</v-btn>
         </router-link>
         
+        <router-link 
+          v-if="currentUser != null && currentUser.roles[0].title == 'Accountant'"
+          to="/to-pay" class="text-decoration-none"
+        >
+          <v-btn flat class="text-white">На оплату</v-btn>
+        </router-link>
 
         <router-link 
           v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'"
@@ -40,6 +49,15 @@
         <router-link to="/inventories" class="text-decoration-none">
           <v-btn flat class="text-white">Накопитель</v-btn>
         </router-link> -->
+
+        <div class="flex-grow-1"></div>
+
+        <router-link 
+          v-if="currentUser != null"
+          to="/#" class="text-decoration-none"
+        >
+          <v-btn flat class="text-white">{{ currentUser.email }}</v-btn>
+        </router-link>
       </v-row>
 
       <v-btn icon>
@@ -153,8 +171,9 @@ export default {
   methods: {
     logout() {
       axios.post('/api/v1/auth/logout').then((response) => {
-        localStorage.removeItem('token')
-        this.$router.push('/login')
+        localStorage.removeItem('token');
+        // this.$router.push('/login');
+        location.reload()
       }).catch((exception) => {
         // exception
       })

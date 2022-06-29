@@ -48,6 +48,11 @@ class ApplicationProduct extends Model
         return $this->belongsTo(Product::class, 'product_id');
     }
 
+    public function offers()
+    {
+        return $this->hasMany(ApplicationOffer::class);
+    }
+
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'product_category_id');

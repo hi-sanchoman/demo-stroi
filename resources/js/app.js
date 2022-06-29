@@ -12,6 +12,7 @@ import ApplicationSidebar from './components/applications/ApplicationSidebar.vue
 import ApplicationEdit from './components/applications/ApplicationEdit.vue'
 import InventoryList from './components/inventories/InventoryList.vue'
 import PaymentList from './components/payments/PaymentList.vue'
+import ToPayList from './components/payments/ToPayList.vue'
 
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -37,6 +38,7 @@ const routes = [
   { path: '/storages', component: HelloWorld },
   { path: '/inventories', component: InventoryList },
   { path: '/payments', component: PaymentList },
+  { path: '/to-pay', component: ToPayList },
 ]
 
 // create routes

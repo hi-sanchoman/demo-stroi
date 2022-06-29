@@ -56,14 +56,21 @@ class ApplicationApiController extends Controller
         } else if ($status == 'in_progress_supplier') {
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
-                // ->where('status', 'in_progress')
+                ->where('status', 'in_progress')
+                ->get();
+            
+            return new ApplicationResource($collection);
+        } else if ($status == 'in_progress_economist') {
+            $collection = Application::query()
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->where('status', 'in_review')
                 ->get();
             
             return new ApplicationResource($collection);
         } else if ($status == 'in_progress_warehouse') {
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
-                ->where('status', 'in_progress')
+                ->where('status', 'in_review')
                 ->get();
             
             return new ApplicationResource($collection);
@@ -139,12 +146,12 @@ class ApplicationApiController extends Controller
     {
         abort_if(Gate::denies('application_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible' ]));
+        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible' ]));
     }
 
     public function update(Request $request, Application $application)
     {
-        dd($request->all());
+        // dd($request->all());
 
         try {
             DB::beginTransaction();
@@ -166,8 +173,8 @@ class ApplicationApiController extends Controller
                     'quantity' => $product['quantity'],
                     'notes' => $product['notes'],
                     'is_delivered_by_us' => 0,
-                    'price' => $product['price'],
-                    'company' => $product['company'],
+                    // 'price' => $product['price'],
+                    // 'company' => $product['company'],
                 ]);
             }
 

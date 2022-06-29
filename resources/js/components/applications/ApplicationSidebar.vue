@@ -94,6 +94,26 @@
         </v-list>
 
         <v-list 
+            v-else-if="currentUser != null && (currentUser.roles[0].title == 'Economist' || currentUser.roles[0].title == 'Chief Financial Officer')"
+            density="compact" 
+            transition="slide-x-transition"
+        >
+            <v-list-subheader class="d-block">
+                Заявки 
+            </v-list-subheader>
+            
+            <router-link to="/applications?status=in_progress_economist" class="text-decoration-none text-black">
+                <v-list-item
+                    key="in_progress_economist"
+                    value="in_progress_economist"
+                    active-color="primary"
+                >
+                    <v-list-item-title v-text="`Открытые`"></v-list-item-title>
+                </v-list-item>
+            </router-link>            
+        </v-list>
+
+        <v-list 
             v-else-if="currentUser != null && currentUser.roles[0].title == 'Warehouse Manager'"
             density="compact" 
             transition="slide-x-transition"

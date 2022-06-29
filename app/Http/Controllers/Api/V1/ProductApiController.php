@@ -19,23 +19,4 @@ class ProductApiController extends Controller
         
         return new ProductResource($collection);
     }
-
-    public function payments() {
-        $applications = ApplicationProduct::with(['application', 'product', 'category'])->get();
-        // dd($applications->toArray());
-
-        $data = [];
-
-        foreach ($applications as $product) {
-            if ($product->application != null && $product->application->status == 'in_progress') {
-                if ($product->price > 0 && $product->company != null) {
-                    $data[] = $product;
-                }
-            }
-        }
-        
-        return [
-            'data' => $data,
-        ];
-    }
 }
