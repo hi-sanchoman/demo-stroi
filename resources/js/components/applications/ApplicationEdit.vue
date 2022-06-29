@@ -800,7 +800,7 @@ export default {
         },
 
         isEditable() {
-            return this.application.status != 'in_review' && this.application.status != 'in_progress';
+            return (this.application.status != 'in_review' && this.currentUser != null && this.currentUser.roles[0].title == 'Supplier') && this.application.status != 'in_progress';
         },
 
         prepareQuantity(product) {
