@@ -846,7 +846,7 @@ export default {
                 paidSum: 0,
             };
 
-            axios.post('/api/v1/application-offers/', data).then((response) => {
+            axios.post('/api/v1/application-offers', data).then((response) => {
                 console.log(response);
 
                 for (var i = 0; i < this.products.length; i++) {
