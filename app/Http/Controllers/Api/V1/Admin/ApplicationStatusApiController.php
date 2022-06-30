@@ -73,7 +73,8 @@ class ApplicationStatusApiController extends Controller
                 $applicationStatus->application->status = 'in_progress';
             // final responsible
             } else if ($nextStep == $totalSteps + 1) {
-                $applicationStatus->application->status = 'signed';
+                $applicationStatus->application->status = 'in_progress';
+                // $applicationStatus->application->status = 'signed';
             } else {
                 // set application's status to 'in_review'
                 $applicationStatus->application->status = 'in_review';
