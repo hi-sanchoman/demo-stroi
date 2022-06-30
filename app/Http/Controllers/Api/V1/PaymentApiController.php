@@ -40,7 +40,7 @@ class PaymentApiController extends Controller
         $data = [];
 
         foreach ($applications as $product) {
-            if ($product->application != null && $product->application->status == 'in_progress') {
+            if ($product->application != null && ($product->application->status == 'in_progress' || $product->application->status == 'signed')) {
                 foreach ($product->offers as $offer) {
                     if ($offer->to_be_paid != null && $offer->to_be_paid > 0) {
                         $data[] = $offer;
