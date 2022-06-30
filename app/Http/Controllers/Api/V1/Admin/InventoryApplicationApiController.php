@@ -37,14 +37,14 @@ class InventoryApplicationApiController extends Controller
             ]);
             $stock->quantity += $inventoryApplication->accepted;
             $stock->save();
-        } else if ($mode == 'decline') {
+        } else {
             $inventoryApplication->declined = $inventoryApplication->prepared;
             $inventoryApplication->accepted = 0;
             $inventoryApplication->status = 'declined';
             $inventoryApplication->reason = $request->reason;
             $inventoryApplication->save();
 
-            $productApplication = ApplicationProduct::where('id', $inventoryApplication->product_application_id)->first();
+            $productApplication = ApplicationProduct::where('id', $inventoryApplication->application_product_id)->first();
             $productApplication->prepared -= $inventoryApplication->declined;
             $productApplication->save();
         }

@@ -13,6 +13,7 @@ use Symfony\Component\HttpFoundation\Response;
 use DB;
 use Carbon;
 use App\Models\Product;
+use App\Models\Application;
 
 class InventoryStockApiController extends Controller
 {
@@ -29,15 +30,34 @@ class InventoryStockApiController extends Controller
     }
 
 
-    public function incoming(Request $request, $inventoryId) {
+    public function incoming(Request $request, $applicationId) {
         $collection = [];
 
+        // get application
+        $application = Application::with(['construction'])->findOrFail($applicationId);
+
+        // get main inventory
+        $inventory = Inventory::where('construction_id', $application->construction->id)
+            ->where('is_main', 1)
+            ->firstOrFail();
+
+        // get prihod
         $inventoryApplications = InventoryApplication::query()
-            ->where('inventory_id', $inventoryId)
+            ->where('inventory_id', $inventory->id)
             ->where('status', 'waiting')
-            ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.application'])
+            ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.category', 'applicationProduct.product', 'applicationProduct.application'])
             ->get();
 
         return ['data' => $inventoryApplications];
+    }
+
+    public function show(Request $request, $inventoryId) {
+        // dd($inventoryId);
+
+        $inventory = Inventory::with(['stocks', 'stocks.applicationProduct', 'stocks.applicationProduct.product'])
+            ->where('id', $inventoryId)
+            ->firstOrFail();
+
+        return $inventory->stocks;
     }
 }

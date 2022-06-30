@@ -68,15 +68,18 @@ class ApplicationStatusApiController extends Controller
                     ->update(['status' => 'incoming']);
             }
 
-            // last responsible
-            if ($nextStep == $totalSteps + 1 || $request->user()->email == 'kurtayev@mail.com') {
+            // TODO: hardcoded: kurtayev
+            if ($request->user()->email == 'kurtayev@mail.com') {
                 $applicationStatus->application->status = 'in_progress';
-                $applicationStatus->application->save();
+            // final responsible
+            } else if ($nextStep == $totalSteps + 1) {
+                $applicationStatus->application->status = 'signed';
             } else {
                 // set application's status to 'in_review'
                 $applicationStatus->application->status = 'in_review';
-                $applicationStatus->application->save();
             }
+
+            $applicationStatus->application->save();
 
             // log to history
             ApplicationLog::create([

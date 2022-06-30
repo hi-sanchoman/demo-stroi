@@ -138,7 +138,7 @@
                                             >
                                             </v-text-field>
 
-                                            <span v-if="application.status == 'in_progress' && isSupplier()">
+                                            <span v-if="!isPTDEngineer()">
                                                 {{ products[index].prepared }} / 
                                             </span>
                                             <span v-if="application.status != 'draft'">
@@ -259,7 +259,35 @@
                                         </td>
                                     </tr>
 
-                                    <tr v-if="item.offers != null && item.offers.length > 0 && (application.status == 'in_progress' || application.status == 'in_review')" class="bg-slate-100">
+                                    <tr v-if="isWarehouseManager() && incoming.length > 0" class="bg-slate-100">
+                                        <td colspan="9" class="border-none">
+                                            <v-table class="mt-4 mb-8 mx-8 border">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Статья расходов</th>
+                                                        <th>Наименование ресурса</th>
+                                                        <th>Ед. изм.</th>
+                                                        <th>Кол-во</th>
+                                                        <th>Управление</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="item in incoming" :key="item.id">
+                                                        <td>{{ item.application_product.category.name }}</td>
+                                                        <td>{{ item.application_product.product.name }}</td>
+                                                        <td>{{ item.application_product.product.unit }}</td>
+                                                        <td>{{ item.prepared }}</td>
+                                                        <td>
+                                                            <v-btn class="mr-3" color="success" size="small" @click="acceptProduct(item)">Принять</v-btn>
+                                                            <v-btn color="error" size="small" @click="showDeclineProduct(item)">Отклонить</v-btn>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>  
+                                            </v-table>
+                                        </td>
+                                    </tr>
+
+                                    <tr v-if="!isWarehouseManager() && item.offers != null && item.offers.length > 0 && (application.status == 'in_progress' || application.status == 'in_review')" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
                                             <v-table class="mt-4 mb-8 mx-8 border">
                                                 <thead>
@@ -289,6 +317,7 @@
                                                                 </multiselect>
 
                                                                 <v-btn
+                                                                    v-if="offer.status == 'draft' && isEditable()"
                                                                     color="primary"
                                                                     size="x-small"
                                                                     plain
@@ -298,7 +327,7 @@
                                                                 </v-btn>
                                                             </div>
                                                             
-                                                            <span v-if="!isEditable()">{{ offer.name }}</span>
+                                                            <span v-if="!isEditable() && offer != null && offer.company != null">{{ offer.company.name }}</span>
                                                         </td>
                                                         <td>
                                                             <v-text-field
@@ -390,7 +419,7 @@
                             </v-col>
                         </v-row>
                         
-                        <v-row no-gutters>
+                        <v-row no-gutters v-if="!isWarehouseManager()">
                             <v-col cols="12">
                                 <v-expansion-panels v-model="showPanels">
                                     <v-expansion-panel value="sign">
@@ -529,6 +558,54 @@
                         color="red-darken-1"
                         text
                         @click="declineApplication()"
+                    >
+                        Отклонить
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- Decline Product dialog -->
+        <v-dialog
+            v-model="declineProductDialog"
+            persistent
+        >
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Отклонить приход?</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col
+                                cols="12"
+                            >
+                                <v-textarea
+                                    v-model="declinedProductReason"
+                                    label="Причина отклонения*"
+                                    required
+                                ></v-textarea>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>* обязательные поля</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    
+                    <v-btn
+                        color="blue-darken-1"
+                        text
+                        @click="declineProductDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn
+                        color="red-darken-1"
+                        text
+                        @click="declineProduct()"
                     >
                         Отклонить
                     </v-btn>
@@ -692,6 +769,11 @@ export default {
 
             receiveDialog: false,
             receiveProduct: null,
+
+            incoming: [],
+            declineProductDialog: false,
+            declinedProductReason: null,
+            declineInventoryApplicationId: null,
         }
     },
 
@@ -726,9 +808,6 @@ export default {
         axios.get('/api/v1/constructions').then((response) => {
             this.constructions = response.data.data
         })
-
-        // get application
-        this.getApplication()
     },
 
     methods: {
@@ -743,6 +822,10 @@ export default {
                 if (this.currentUser.roles[0].title == 'Supplier' || this.currentUser.roles[0].title == 'Warehouse Manager') {
                     this.showPanels = []
                 }
+
+                // get application
+                this.getApplication()
+                
             })
         },
 
@@ -755,6 +838,11 @@ export default {
 
                 this.form.construction = this.application.construction
                 this.form.kind = this.application.kind
+
+                // if warehouse manager
+                if (this.currentUser.roles[0].title == 'Warehouse Manager') {
+                    this.getIncoming();
+                }
             })
         },  
 
@@ -869,6 +957,10 @@ export default {
 
         isSupplier() {
             return this.currentUser != null && this.currentUser.roles[0].title == 'Supplier';
+        },
+
+        isWarehouseManager() {
+            return this.currentUser != null && this.currentUser.roles[0].title == 'Warehouse Manager';
         },
 
         isEditable() {
@@ -1014,7 +1106,61 @@ export default {
                 this.newCompany = null;
                 this.addCompanyDialog = false;
             });
+        },
+
+
+        // WAREHOUSE MANAGER
+        getIncoming() {
+            axios.get('/api/v1/inventories/' + this.application.id + '/incoming').then((response) => {
+                this.incoming = response.data.data;
+            })
+        },
+
+        acceptProduct(item) {
+            var data = {
+                'mode': 'accept'
+            };
+
+            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
+                this.getIncoming();
+            })
+        },
+
+        showDeclineProduct(item) {
+            // show decline product dialog
+            this.declineProductDialog = true;
+            this.declineInventoryApplicationId = item.id;
+
+            console.log(this.declineInventoryApplicationId);
+        },
+
+        declineProduct() {            
+            var data = {
+                'mode': 'decline',
+                'reason': this.declinedProductReason,
+            };
+
+            axios.put('/api/v1/inventory-applications/' + this.declineInventoryApplicationId, data).then((response) => {
+                // this.getIncoming();
+
+                this.declineProductDialog = false;
+                this.declineInventoryApplicationId = null;
+                this.declinedProductReason = null;
+
+                this.getApplication();
+            })
         }
     },  
+
+    watch: {
+        '$route.query': {
+            handler(newValue) {
+                const { status } = newValue
+
+                console.log(status);
+            },
+            immediate: true,
+        }
+    }
 }
 </script>

@@ -147,11 +147,7 @@ export default {
             })
         },
 
-        getIncoming() {
-            axios.get('/api/v1/inventories/' + this.$route.params.id + '/incoming').then((response) => {
-                this.incoming = response.data.data;
-            })
-        },
+        
 
         acceptProduct(item) {
             var data = {
@@ -195,7 +191,7 @@ export default {
                 const { status } = newValue
 
                 if (status == 'waiting') {
-                    this.getIncoming();
+                    // this.getIncoming();
                 } else if (status == 'accepted') {
                     this.getStocks();
                 } else if (status == 'declined') {

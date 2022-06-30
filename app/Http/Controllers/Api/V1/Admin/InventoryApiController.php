@@ -13,7 +13,7 @@ use App\Models\Product;
 
 class InventoryApiController extends Controller
 {
-    public function historyInventories(Request $request, $productId)
+    public function history(Request $request, $productId)
     {
         $product = Product::findOrFail($productId);
 
