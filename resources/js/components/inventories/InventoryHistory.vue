@@ -16,19 +16,6 @@
                 
 
                 <v-col cols="10" class="pl-5">
-                    <template v-for="item in incoming" :key="item.id">
-                        <div class="flex justify-between border rounded mb-4 px-2 py-2">
-                            <div><span class="font-bold">{{ item.application_product.product.name }}</span> 
-                            в количестве {{ item.prepared }} по заявке №{{ item.application_product.application.id }}  
-                            </div>
-
-                            <div class="mt-2">
-                                <v-btn class="mr-3" color="success" size="small" @click="acceptProduct(item)">Принять</v-btn>
-                                <v-btn color="error" size="small" @click="declineProduct(item)">Отклонить</v-btn>
-                            </div>
-                        </div>
-                    </template>
-
                     <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
@@ -36,13 +23,13 @@
                                     №
                                 </th>
                                 <th class="text-left">
-                                    Наименование позиции
+                                    Операция
                                 </th>
                                 <th class="text-left">
-                                    Ед. изм.
+                                    Пользователь
                                 </th>
                                 <th class="text-left">
-                                    Количество
+                                    Дата
                                 </th>
                                 <th>
                                     
@@ -50,19 +37,19 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-if="stocks.length <= 0">
+                            <tr v-if="logs.length <= 0">
                                 <td colspan="5">Нет данных.</td>
                             </tr>
 
                             <tr
-                                v-for="(stock, index) in stocks"
-                                :key="stock.id"
+                                v-for="(item, index) in logs"
+                                :key="item.id"
                                 class="hover:bg-slate-100"
                             >
                                 <td>{{ index + 1 }}</td>
-                                <td>{{ stock.application_product.product.name }}</td>
-                                <td>{{ stock.application_product.product.unit }}</td>
-                                <td>{{ stock.quantity }}</td>
+                                <td>{{ item.log }}</td>
+                                <td>{{ item.user.email }}</td>
+                                <td>{{ item.created_at }}</td>
                                 <td>
                                     <!-- Management -->
                                 </td>
@@ -72,26 +59,6 @@
                 </v-col>
             </v-row>    
         </v-container>
-
-
-
-        <!-- Snackbar -->
-        <v-snackbar
-            v-model="snackbar.status"
-            :timeout="snackbar.timeout"
-        >
-            {{ snackbar.text }}
-
-            <template v-slot:actions>
-                <v-btn
-                    color="blue"
-                    variant="text"
-                    @click="snackbar.status = false"
-                >
-                    Закрыть
-                </v-btn>
-            </template>
-        </v-snackbar>
     </div>
 </template>
 
@@ -112,9 +79,8 @@ export default {
                 timeout: 2000,
             },
             inventory: null,
-            stocks: [],
+            logs: [],
             currentUser: null,
-            incoming: [],
         } 
     },
     
@@ -126,50 +92,13 @@ export default {
             })
         },
 
-        showPosition(item) {
-            this.historyDialog = true
-            this.history = item
-            this.historyInventories = []
 
-            this.getHistoryInventories()
-        },
-
-        getInventory() {
-            // get applications 
-            axios.get('/api/v1/inventories/' + this.$route.params.id).then((response) => {
-                this.inventory = response.data.data;
+        getLogs() {
+            axios.get('/api/v1/inventories/' + this.$route.params.id + '/history').then((response) => {
+                this.logs = response.data;
             })
         },
 
-        getStocks() {
-            axios.get('/api/v1/inventories/' + this.$route.params.id + '/stocks').then((response) => {
-                this.stocks = response.data.data;
-            })
-        },
-
-        
-
-        acceptProduct(item) {
-            var data = {
-                'mode': 'accept'
-            };
-
-            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
-                // this.getIncoming();
-                this.getStocks();
-            })
-        },
-
-        declineProduct(item) {
-            var data = {
-                'mode': 'decline'
-            };
-
-            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
-                // this.getIncoming();
-                this.getStocks();
-            })
-        }
 
     },
 
@@ -180,9 +109,7 @@ export default {
         // get current user
         this.getCurrentUser();
 
-        this.getInventory();
-
-        this.getStocks();
+        this.getLogs();
     },
 
     watch: {

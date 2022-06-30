@@ -8,6 +8,7 @@ use App\Models\Inventory;
 use App\Models\InventoryApplication;
 use App\Models\InventoryStock;
 use App\Models\ApplicationProduct;
+use App\Models\InventoryLog;
 use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -31,12 +32,19 @@ class InventoryApplicationApiController extends Controller
             $inventoryApplication->status = 'accepted';
             $inventoryApplication->save();
         
-            $stock = InventoryStock::firstOrCreate([
+            $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.application'])->firstOrCreate([
                 'inventory_id' => $inventoryApplication->inventory_id,
                 'application_product_id' => $inventoryApplication->application_product_id,
             ]);
             $stock->quantity += $inventoryApplication->accepted;
             $stock->save();
+
+            InventoryLog::create([
+                'inventory_id' => $stock->inventory_id,
+                'user_id' => $request->user()->id,
+                'log' => $request->user()->email . ' принял товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $stock->applicationProduct->product->unit . 'по заявке №' . $stock->applicationProduct->application_id,
+            ]);
+
         } else {
             $inventoryApplication->declined = $inventoryApplication->prepared;
             $inventoryApplication->accepted = 0;
@@ -44,9 +52,15 @@ class InventoryApplicationApiController extends Controller
             $inventoryApplication->reason = $request->reason;
             $inventoryApplication->save();
 
-            $productApplication = ApplicationProduct::where('id', $inventoryApplication->application_product_id)->first();
+            $productApplication = ApplicationProduct::with(['application', 'product'])->where('id', $inventoryApplication->application_product_id)->first();
             $productApplication->prepared -= $inventoryApplication->declined;
             $productApplication->save();
+
+            InventoryLog::create([
+                'inventory_id' => $inventoryApplication->inventory_id,
+                'user_id' => $request->user()->id,
+                'log' => $request->user()->email . ' отказался принимать товар (' . $productApplication->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $productApplication->product->unit . 'по заявке №' . $productApplication->application_id,
+            ]);
         }
 
         return $inventoryApplication;

@@ -259,7 +259,7 @@
                                         </td>
                                     </tr>
 
-                                    <tr v-if="isWarehouseManager() && incoming.length > 0" class="bg-slate-100">
+                                    <tr v-if="isWarehouseManager() && item.inventory_applications.length > 0" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
                                             <v-table class="mt-4 mb-8 mx-8 border">
                                                 <thead>
@@ -272,14 +272,14 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr v-for="item in incoming" :key="item.id">
-                                                        <td>{{ item.application_product.category.name }}</td>
-                                                        <td>{{ item.application_product.product.name }}</td>
-                                                        <td>{{ item.application_product.product.unit }}</td>
-                                                        <td>{{ item.prepared }}</td>
+                                                    <tr v-for="it in item.inventory_applications" :key="it.id">
+                                                        <td>{{ it.application_product.category.name }}</td>
+                                                        <td>{{ it.application_product.product.name }}</td>
+                                                        <td>{{ it.application_product.product.unit }}</td>
+                                                        <td>{{ it.prepared }}</td>
                                                         <td>
-                                                            <v-btn class="mr-3" color="success" size="small" @click="acceptProduct(item)">Принять</v-btn>
-                                                            <v-btn color="error" size="small" @click="showDeclineProduct(item)">Отклонить</v-btn>
+                                                            <v-btn class="mr-3" color="success" size="small" @click="acceptProduct(it)">Принять</v-btn>
+                                                            <v-btn color="error" size="small" @click="showDeclineProduct(it)">Отклонить</v-btn>
                                                         </td>
                                                     </tr>
                                                 </tbody>  
@@ -840,9 +840,9 @@ export default {
                 this.form.kind = this.application.kind
 
                 // if warehouse manager
-                if (this.currentUser.roles[0].title == 'Warehouse Manager') {
-                    this.getIncoming();
-                }
+                // if (this.currentUser.roles[0].title == 'Warehouse Manager') {
+                //     this.getIncoming();
+                // }
             })
         },  
 
@@ -1110,11 +1110,11 @@ export default {
 
 
         // WAREHOUSE MANAGER
-        getIncoming() {
-            axios.get('/api/v1/inventories/' + this.application.id + '/incoming').then((response) => {
-                this.incoming = response.data.data;
-            })
-        },
+        // getIncoming() {
+        //     axios.get('/api/v1/inventories/' + this.application.id + '/incoming').then((response) => {
+        //         this.incoming = response.data.data;
+        //     })
+        // },
 
         acceptProduct(item) {
             var data = {
@@ -1122,7 +1122,7 @@ export default {
             };
 
             axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
-                this.getIncoming();
+                this.getApplication();
             })
         },
 

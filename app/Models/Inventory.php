@@ -30,4 +30,8 @@ class Inventory extends Model
     public function stocks() {
         return $this->hasMany(InventoryStock::class);
     }
+
+    public function logs() {
+        return $this->hasMany(InventoryLog::class);
+    }
 }

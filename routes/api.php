@@ -33,6 +33,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
     Route::get('/inventories/{id}/stocks', 'InventoryStockApiController@index');
     Route::get('/inventories/{id}/incoming', 'InventoryStockApiController@incoming');
+    Route::get('/inventories/{id}/history', 'InventoryStockApiController@history');
     Route::apiResource('inventories', 'InventoryApiController');
 
     // Inventory stocks

@@ -60,4 +60,11 @@ class InventoryStockApiController extends Controller
 
         return $inventory->stocks;
     }
+
+
+    public function history(Request $request, $id) {
+        $inventory = Inventory::with(['logs', 'logs.user'])->findOrFail($id);
+
+        return $inventory->logs;
+    }
 }

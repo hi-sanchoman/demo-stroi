@@ -21,6 +21,7 @@ Route::get('/supplies', 'ApplicationController@index');
 
 Route::get('/inventories', 'ApplicationController@index');
 Route::get('/inventories/{id}', 'ApplicationController@index');
+Route::get('/inventories/{id}/history', 'ApplicationController@index');
 Route::get('/payments', 'ApplicationController@index');
 Route::get('/to-pay', 'ApplicationController@index');
 

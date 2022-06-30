@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
+use App\Models\InventoryLog;
 use App\Models\InventoryStock;
 use Gate;
 use Illuminate\Http\Request;
@@ -15,24 +16,24 @@ use App\Models\User;
 
 class InventoryApiController extends Controller
 {
-    public function history(Request $request, $productId)
-    {
-        $product = Product::findOrFail($productId);
+    // public function history(Request $request, $productId)
+    // {
+    //     $product = Product::findOrFail($productId);
 
-        $result = [];
+    //     $result = [];
 
-        $collection = Inventory::query()
-            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.product.categories'])
-            ->get();
+    //     $collection = Inventory::query()
+    //         ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.product.categories'])
+    //         ->get();
 
-        foreach ($collection as $item) {
-            if ($item->applicationProduct->product->id == $product->id) {
-                $result[] = $item;
-            }
-        }
+    //     foreach ($collection as $item) {
+    //         if ($item->applicationProduct->product->id == $product->id) {
+    //             $result[] = $item;
+    //         }
+    //     }
 
-        return $result;
-    }
+    //     return $result;
+    // }
 
     public function index(Request $request)
     {
@@ -99,10 +100,19 @@ class InventoryApiController extends Controller
     }
 
     public function moveStocks(Request $request) {
-        $stock = InventoryStock::findOrFail($request->stock['stock_id']);
+        $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product'])->findOrFail($request->stock['stock_id']);
         $stock->quantity -= $request->quantity;
         $stock->save();
 
+        InventoryLog::create([
+            'inventory_id' => $stock->inventory_id,
+            'user_id' => $request->user()->id,
+            'log' => $request->user()->email . ' переместил из склада к (' . $request->where . ') товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $request->quantity . ' ' . $stock->applicationProduct->product->unit,
+        ]);
+
         return 1;
     }
+
+
+    
 }

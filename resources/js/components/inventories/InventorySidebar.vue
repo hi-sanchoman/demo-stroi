@@ -7,7 +7,7 @@
             <v-list-subheader class="d-block">
                 Склад
 
-                <div class="float-right">
+                <!-- <div class="float-right">
                     <v-btn
                         color="primary"
                         plain
@@ -15,7 +15,7 @@
                     >
                         <v-icon>mdi-arrow-expand-horizontal</v-icon>
                     </v-btn>
-                </div>
+                </div> -->
             </v-list-subheader>
             
             <!-- <router-link :to="'/inventories/' + inventory.id + '?status=waiting'" class="text-decoration-none text-black">
@@ -38,15 +38,16 @@
                 </v-list-item>
             </router-link>
 
-            <!-- <router-link :to="'/inventories/' + inventory.id + '?status=declined'" class="text-decoration-none text-black">
+            <!-- <router-link :to="'/inventories/' + inventory.id + '?status=declined'" class="text-decoration-none text-black"> -->
                 <v-list-item
                     key="declined"
                     value="declined"
                     active-color="primary"
+                    @click="showMoveDialog()"
                 >
-                    <v-list-item-title v-text="'Отклоненные'"></v-list-item-title>
+                    <v-list-item-title v-text="'Перемещение'"></v-list-item-title>
                 </v-list-item>
-            </router-link>           -->
+            <!-- </router-link>           -->
             
             <router-link :to="'/inventories/' + inventory.id + '/history'" class="text-decoration-none text-black">
                 <v-list-item
@@ -79,16 +80,31 @@
                             cols="12"
                         >
                             <multiselect  
-                                v-model="move.product" :options="stocks" placeholder="Укажите товар" label="name" track-by="id">
+                                v-model="move.product" 
+                                :options="stocks" 
+                                placeholder="Укажите товар" 
+                                label="name" 
+                                track-by="id"
+                                @select="onProductSelect"
+                            >
                             </multiselect>
 
-                            <multiselect  
+                            <!-- <multiselect  
                                 class="mt-2"
                                 v-model="move.where" :options="foremans" placeholder="Укажите бригадира" label="name" track-by="id">
-                            </multiselect>
+                            </multiselect> -->
 
                             <v-text-field
                                 class="mt-4"
+                                v-model="move.where"
+                                label="Укажите получателя"
+                                variant="underlined"
+                                required
+                                density="comfortable"
+                            ></v-text-field>
+
+                            <v-text-field
+                                class="mt-2"
                                 v-model="move.quantity"
                                 label="Количество"
                                 variant="underlined"
@@ -97,6 +113,8 @@
                                 type="number"
                                 @keyup.enter="move()"
                             ></v-text-field>
+
+                            <span class="mt-2">Ед. изм.: {{ move.unit }}</span>
 
                         </v-col>
                     </v-row>
@@ -151,6 +169,7 @@ export default {
 
                     this.stocks.push({
                         'stock_id': goods[i].id,
+                        'unit': goods[i].application_product.product.unit,
                         'name': goods[i].application_product.product.name,
                     })
                 }
@@ -158,9 +177,9 @@ export default {
                 console.log(this.stocks);
             })
 
-            axios.get('/api/v1/foremans').then((response) => {
-                this.foremans = response.data;
-            })
+            // axios.get('/api/v1/foremans').then((response) => {
+            //     this.foremans = response.data;
+            // })
         }
     },
 
@@ -171,6 +190,7 @@ export default {
                 product: null,
                 where: null,
                 quantity: 0,
+                unit: null,
             },
             stocks: [],
             foremans: [],
@@ -200,11 +220,16 @@ export default {
                     product: null,
                     where: null,
                     quantity: 0,
+                    unit: null,
                 };
                 
                 location.reload();
             })
         },
+
+        onProductSelect(val) {
+            this.move.unit = val.unit;
+        }
     }
 }
 </script>
