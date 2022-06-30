@@ -37,4 +37,12 @@ class InventoryApplication extends Model
     {
         return $date->format('Y-m-d H:i:s');
     }
+
+    public function inventory() {
+        return $this->belongsTo(Inventory::class);
+    }
+
+    public function applicationProduct() {
+        return $this->belongsTo(ApplicationProduct::class);
+    }
 }

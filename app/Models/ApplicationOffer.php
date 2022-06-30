@@ -22,7 +22,7 @@ class ApplicationOffer extends Model
 
     protected $fillable = [
         'application_product_id',        
-        'name',
+        'company_id',
         'quantity',
         'price',
         'paidTotal',
@@ -36,5 +36,9 @@ class ApplicationOffer extends Model
 
     public function applicationProduct() {
         return $this->belongsTo(ApplicationProduct::class);
+    } 
+
+    public function company() {
+        return $this->belongsTo(Company::class);
     } 
 }

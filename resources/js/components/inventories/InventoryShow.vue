@@ -7,6 +7,8 @@
                 </v-col>
             </v-row>
 
+            
+
             <v-row no-gutters class="mt-10">
                 <v-col cols="2" class="border px-5 py-5">
                     <InventorySidebar v-if="currentUser != null && inventory != null" :currentUser="currentUser" :inventory="inventory" />
@@ -14,6 +16,19 @@
                 
 
                 <v-col cols="10" class="pl-5">
+                    <template v-for="item in incoming" :key="item.id">
+                        <div class="flex justify-between border rounded mb-4 px-2 py-2">
+                            <div><span class="font-bold">{{ item.application_product.product.name }}</span> 
+                            в количестве {{ item.prepared }} по заявке №{{ item.application_product.application.id }}  
+                            </div>
+
+                            <div class="mt-2">
+                                <v-btn class="mr-3" color="success" size="small" @click="acceptProduct(item)">Принять</v-btn>
+                                <v-btn color="error" size="small" @click="declineProduct(item)">Отклонить</v-btn>
+                            </div>
+                        </div>
+                    </template>
+
                     <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
@@ -99,6 +114,7 @@ export default {
             inventory: null,
             stocks: [],
             currentUser: null,
+            incoming: [],
         } 
     },
     
@@ -127,7 +143,35 @@ export default {
 
         getStocks() {
             axios.get('/api/v1/inventories/' + this.$route.params.id + '/stocks').then((response) => {
-                this.stocks = response.data;
+                this.stocks = response.data.data;
+            })
+        },
+
+        getIncoming() {
+            axios.get('/api/v1/inventories/' + this.$route.params.id + '/incoming').then((response) => {
+                this.incoming = response.data.data;
+            })
+        },
+
+        acceptProduct(item) {
+            var data = {
+                'mode': 'accept'
+            };
+
+            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
+                this.getIncoming();
+                this.getStocks();
+            })
+        },
+
+        declineProduct(item) {
+            var data = {
+                'mode': 'decline'
+            };
+
+            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
+                this.getIncoming();
+                this.getStocks();
             })
         }
 
@@ -146,14 +190,20 @@ export default {
     },
 
     watch: {
-        // '$route.query': {
-        //     handler(newValue) {
-        //         const { status } = newValue
+        '$route.query': {
+            handler(newValue) {
+                const { status } = newValue
 
-        //         this.getInventories()
-        //     },
-        //     immediate: true,
-        // }
+                if (status == 'waiting') {
+                    this.getIncoming();
+                } else if (status == 'accepted') {
+                    this.getStocks();
+                } else if (status == 'declined') {
+                    console.log('get declined');
+                }
+            },
+            immediate: true,
+        }
     }
 }
 </script>

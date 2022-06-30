@@ -18,7 +18,7 @@
                 </v-list-item>
             </router-link>
             
-            <router-link :to="'/inventories/' + inventory.id" class="text-decoration-none text-black">
+            <router-link :to="'/inventories/' + inventory.id + '?status=accepted'" class="text-decoration-none text-black">
                 <v-list-item
                     key="accepted"
                     value="accepted"
@@ -28,7 +28,7 @@
                 </v-list-item>
             </router-link>
 
-            <router-link :to="'/inventories/' + inventory.id + '?status=declined'" class="text-decoration-none text-black">
+            <!-- <router-link :to="'/inventories/' + inventory.id + '?status=declined'" class="text-decoration-none text-black">
                 <v-list-item
                     key="declined"
                     value="declined"
@@ -36,9 +36,9 @@
                 >
                     <v-list-item-title v-text="'Отклоненные'"></v-list-item-title>
                 </v-list-item>
-            </router-link>          
+            </router-link>           -->
             
-            <router-link :to="'/inventories/' + inventory.id + '/history'" class="text-decoration-none text-black">
+            <!-- <router-link :to="'/inventories/' + inventory.id + '/history'" class="text-decoration-none text-black">
                 <v-list-item
                     key="history"
                     value="history"
@@ -46,7 +46,7 @@
                 >
                     <v-list-item-title v-text="'История'"></v-list-item-title>
                 </v-list-item>
-            </router-link>  
+            </router-link>   -->
         </v-list>
     </div>
 </template>

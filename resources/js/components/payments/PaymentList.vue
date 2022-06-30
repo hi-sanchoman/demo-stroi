@@ -52,9 +52,9 @@
                                 :key="payment.id"
                             >
                                 <td>{{ payment.application_product.application.construction.name }}</td>
-                                <td>{{ payment.id }}</td>
+                                <td>{{ payment.application_product.application.id }}</td>
                                 <td width="30%">{{ payment.application_product.product.name }}</td>
-                                <td>{{ payment.name }}</td>
+                                <td>{{ payment.company.name }}</td>
                                 <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td>
                                 <td>{{ payment.paidTotal }} / {{ payment.price * payment.quantity }} тг</td>
                                 <td class="pt-6">

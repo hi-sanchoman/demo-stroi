@@ -16,6 +16,9 @@ Route::get('/home', function () {
 Route::get('/applications', 'ApplicationController@index');
 Route::get('/applications/create', 'ApplicationController@create');
 Route::get('/applications/{id}/edit', 'ApplicationController@edit');
+
+Route::get('/supplies', 'ApplicationController@index');
+
 Route::get('/inventories', 'ApplicationController@index');
 Route::get('/inventories/{id}', 'ApplicationController@index');
 Route::get('/payments', 'ApplicationController@index');

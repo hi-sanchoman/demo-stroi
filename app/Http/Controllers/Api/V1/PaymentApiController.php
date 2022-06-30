@@ -10,7 +10,7 @@ use App\Models\ApplicationProduct;
 class PaymentApiController extends Controller
 {
     public function payments() {
-        $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
+        $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
         // dd($applications->toArray());
 
         $data = [];
@@ -18,7 +18,9 @@ class PaymentApiController extends Controller
         foreach ($applications as $product) {
             if ($product->application != null && $product->application->status == 'in_progress') {
                 foreach ($product->offers as $offer) {
-                    if ($offer->price > 0 && $offer->name != null) {
+                    // dd($product->offers);
+
+                    if ($offer->price > 0 && $offer->company_id != null) {
                         $data[] = $offer;
                     }
                 }
@@ -32,7 +34,7 @@ class PaymentApiController extends Controller
 
 
     public function paymentsToPay() {
-        $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
+        $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
         // dd($applications->toArray());
 
         $data = [];
@@ -66,7 +68,7 @@ class PaymentApiController extends Controller
             ]);
         }
 
-        $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
+        $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
         // dd($applications->toArray());
 
         $data = [];
@@ -74,7 +76,7 @@ class PaymentApiController extends Controller
         foreach ($applications as $product) {
             if ($product->application != null && $product->application->status == 'in_progress') {
                 foreach ($product->offers as $offer) {
-                    if ($offer->price > 0 && $offer->name != null) {
+                    if ($offer->price > 0 && $offer->company_id != null) {
                         $data[] = $offer;
                     }
                 }

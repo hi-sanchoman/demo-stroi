@@ -160,9 +160,9 @@ export default {
             this.getHistoryInventories()
         },
 
-        getInventories() {
+        getSupplies() {
             // get applications 
-            axios.get('/api/v1/inventories').then((response) => {
+            axios.get('/api/v1/supplies').then((response) => {
                 this.inventories = response.data
             })
         },
@@ -170,7 +170,7 @@ export default {
         getHistoryInventories() {
             console.log(this.history)
 
-            axios.get('/api/v1/history-inventories/' + this.history.item.application_product.product.id).then((response) => {
+            axios.get('/api/v1/history-supplies/' + this.history.item.application_product.product.id).then((response) => {
                 this.historyInventories = response.data
             })
         }
@@ -179,7 +179,7 @@ export default {
 
     mounted() {
         // this.getApplications('draft')
-        this.getInventories()
+        this.getSupplies()
     },
 
     watch: {

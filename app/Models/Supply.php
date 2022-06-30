@@ -6,21 +6,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class InventoryStock extends Model
+class Supply extends Model
 {
-    use SoftDeletes;
     use HasFactory;
-
-    public $table = 'inventory_stocks';
-
-    protected $dates = [
-        'created_at',
-        'updated_at',
-        'deleted_at',
-    ];
+    use SoftDeletes;
 
     protected $fillable = [
-        'inventory_id',
+        'constuction_id',
         'application_product_id',
         'quantity',
         'created_at',
@@ -28,8 +20,8 @@ class InventoryStock extends Model
         'deleted_at',
     ];
 
-    public function inventory() {
-        return $this->belongsTo(Inventory::class);
+    public function construction() {
+        return $this->belongsTo(Construction::class);
     }
 
     public function applicationProduct() {

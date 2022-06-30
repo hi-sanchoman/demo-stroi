@@ -124,7 +124,7 @@
                             <tbody>
                                 <template v-for="(item, index) in products" :key="item.id">
                                     <tr>
-                                        <td>{{ item.id }}</td>
+                                        <td>{{ (index + 1) }}</td>
                                         <td>{{ item.category.name }}</td>
                                         <td>{{ item.product.name }}</td>
                                         <td>{{ item.product.unit }}</td>
@@ -264,9 +264,9 @@
                                             <v-table class="mt-4 mb-8 mx-8 border">
                                                 <thead>
                                                     <tr>
-                                                        <th>Название компании</th>
-                                                        <th>Кол-во</th>
-                                                        <th>Цена за ед.</th>
+                                                        <th style="width: 25%">Название компании</th>
+                                                        <th style="width: 10%">Кол-во</th>
+                                                        <th style="width: 10%">Цена за ед.</th>
                                                         <th>Общая сумма</th>
                                                         <th>Счет на оплату</th>
                                                         <th></th>
@@ -274,14 +274,29 @@
                                                 </thead>
                                                 <tbody>
                                                     <tr v-for="offer in item.offers" :key="offer.id">
-                                                        <td>
-                                                            <v-text-field
+                                                        <td class="">
+                                                            <!-- <v-text-field
                                                                 v-if="offer.status == 'draft' && isEditable()"
                                                                 v-model="offer.name"
                                                                 type="text"
                                                                 variant="underlined"
                                                                 required
-                                                            ></v-text-field>
+                                                            ></v-text-field> -->
+                                                            <div class="flex">
+                                                                <multiselect  
+                                                                    v-if="offer.status == 'draft' && isEditable()"
+                                                                    v-model="offer.company" :options="companies" placeholder="Укажите компанию" label="name" track-by="id">
+                                                                </multiselect>
+
+                                                                <v-btn
+                                                                    color="primary"
+                                                                    size="x-small"
+                                                                    plain
+                                                                    @click="showAddCompanyDialog()"
+                                                                >
+                                                                    Добавить компанию
+                                                                </v-btn>
+                                                            </div>
                                                             
                                                             <span v-if="!isEditable()">{{ offer.name }}</span>
                                                         </td>
@@ -570,6 +585,53 @@
             </v-card>
         </v-dialog>
 
+        <!-- Add Company Dialog -->
+        <v-dialog
+            v-model="addCompanyDialog"
+            persistent
+        >
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Добавить компанию</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col
+                                cols="12"
+                            >
+                                <v-text-field
+                                    v-model="newCompany"
+                                    label="Название компании *"
+                                    required
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>* обязательные поля</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    
+                    <v-btn
+                        color="default"
+                        text
+                        @click="addCompanyDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn
+                        color="success"
+                        text
+                        @click="addCompany()"
+                    >
+                        Добавить
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
     </div>
 </template>
 
@@ -608,6 +670,7 @@ export default {
             options: [],
             categories: [],
             products: [],
+            companies: [],
             form: {
                 // 'issued_at': new Date(),
                 'construction': null,
@@ -621,6 +684,9 @@ export default {
             declinedApplicationStatus: null,
             declineDialog: false,
             declinedReason: '',
+
+            addCompanyDialog: false,
+            newCompany: null,
 
             showPanels: ['sign'],
 
@@ -652,6 +718,9 @@ export default {
             
             // this.isLoading = false
         })
+
+        // get companies
+        this.getCompanies();
 
         // get constructions
         axios.get('/api/v1/constructions').then((response) => {
@@ -922,6 +991,30 @@ export default {
                 console.error(error);
             })
         },
+
+        getCompanies() {
+            axios.get('/api/v1/companies').then((response) => {
+                response.data.data.forEach((item) => {
+                    this.companies.push(item)
+                })
+                
+                // this.isLoading = false
+            });
+        },
+
+        showAddCompanyDialog() {
+            this.addCompanyDialog = true;
+        },
+
+        addCompany() {
+            var data = { "name": this.newCompany };
+            axios.post('/api/v1/companies', data).then((response) => {
+                this.companies.push(response.data);
+
+                this.newCompany = null;
+                this.addCompanyDialog = false;
+            });
+        }
     },  
 }
 </script>

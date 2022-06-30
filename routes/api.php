@@ -28,12 +28,18 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
 
     // Inventories
-    Route::get('/history-inventories/{productId}', 'InventoryApiController@historyInventories');
+    Route::get('/history-supplies/{productId}', 'SupplyApiController@history');
+    Route::get('/supplies', 'SupplyApiController@index');
+
     Route::get('/inventories/{id}/stocks', 'InventoryStockApiController@index');
+    Route::get('/inventories/{id}/incoming', 'InventoryStockApiController@incoming');
     Route::apiResource('inventories', 'InventoryApiController');
 
     // Inventory stocks
     Route::apiResource('inventory-stocks', 'InventoryStockApiController');
+
+    // Inventory applications
+    Route::apiResource('inventory-applications', 'InventoryApplicationApiController');
     
 });
 
@@ -62,6 +68,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
 
     Route::apiResource('products', 'ProductApiController');
     Route::apiResource('categories', 'CategoryApiController');
+    Route::apiResource('companies', 'CompanyApiController');
     
     Route::get('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'payments']);
     Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);

@@ -10,6 +10,7 @@ use App\Models\ApplicationLog;
 use App\Models\ApplicationProduct;
 use App\Models\Inventory;
 use App\Models\InventoryApplication;
+use App\Models\Supply;
 use Gate;
 use DB;
 use Illuminate\Http\Request;
@@ -57,7 +58,7 @@ class ApplicationProductsApiController extends Controller
                 'delivered' => $applicationProduct->delivered + $request->delivered,
             ]);
 
-            Inventory::create([
+            Supply::create([
                 'construction_id' => $applicationProduct->application->construction_id,
                 'application_product_id' => $applicationProduct->id,
                 'quantity' => $request->delivered,

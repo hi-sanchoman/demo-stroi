@@ -31,7 +31,7 @@ class ApplicationOfferApiController extends Controller
     {
         $applicationOffer = ApplicationOffer::create($request->all());
 
-        $applicationProduct = ApplicationProduct::with(['application', 'offers'])
+        $applicationProduct = ApplicationProduct::with(['application', 'offers', 'offers.company'])
             ->where('id', $applicationOffer->application_product_id)
             ->firstOrFail();
 
@@ -65,8 +65,13 @@ class ApplicationOfferApiController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // dd($request->all());
+        
+        $input = $request->all();
+        $input['company_id'] = $request->company['id'];
+
         $offer = ApplicationOffer::whereId($id)->firstOrFail();
-        $offer->update($request->all());
+        $offer->update($input);
 
         return (new ApplicationOfferResource($offer))
                 ->response()
