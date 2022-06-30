@@ -42,7 +42,7 @@ class InventoryApplicationApiController extends Controller
             InventoryLog::create([
                 'inventory_id' => $stock->inventory_id,
                 'user_id' => $request->user()->id,
-                'log' => $request->user()->email . ' принял товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $stock->applicationProduct->product->unit . 'по заявке №' . $stock->applicationProduct->application_id,
+                'log' => $request->user()->email . ' принял товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $stock->applicationProduct->product->unit . ' по заявке №' . $stock->applicationProduct->application_id,
             ]);
 
         } else {
@@ -59,7 +59,7 @@ class InventoryApplicationApiController extends Controller
             InventoryLog::create([
                 'inventory_id' => $inventoryApplication->inventory_id,
                 'user_id' => $request->user()->id,
-                'log' => $request->user()->email . ' отказался принимать товар (' . $productApplication->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $productApplication->product->unit . 'по заявке №' . $productApplication->application_id,
+                'log' => $request->user()->email . ' отказался принимать товар (' . $productApplication->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $productApplication->product->unit . ' по заявке №' . $productApplication->application_id,
             ]);
         }
 

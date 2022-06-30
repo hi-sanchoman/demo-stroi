@@ -259,7 +259,7 @@
                                         </td>
                                     </tr>
 
-                                    <tr v-if="isWarehouseManager() && item.inventory_applications.length > 0" class="bg-slate-100">
+                                    <tr v-if="isWarehouseManager() && incoming(item.inventory_applications).length > 0" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
                                             <v-table class="mt-4 mb-8 mx-8 border">
                                                 <thead>
@@ -272,7 +272,7 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    <tr v-for="it in item.inventory_applications" :key="it.id">
+                                                    <tr v-for="it in incoming(item.inventory_applications)" :key="it.id">
                                                         <td>{{ it.application_product.category.name }}</td>
                                                         <td>{{ it.application_product.product.name }}</td>
                                                         <td>{{ it.application_product.product.unit }}</td>
@@ -1123,6 +1123,9 @@ export default {
 
             axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
                 this.getApplication();
+
+                this.snackbar.text = 'Приход товара принят';
+                this.snackbar.status = true
             })
         },
 
@@ -1147,8 +1150,15 @@ export default {
                 this.declineInventoryApplicationId = null;
                 this.declinedProductReason = null;
 
+                this.snackbar.text = 'Приход товара отклонен';
+                this.snackbar.status = true
+
                 this.getApplication();
             })
+        },
+
+        incoming(items) {
+            return items.filter(el => el.status == 'waiting');
         }
     },  
 
