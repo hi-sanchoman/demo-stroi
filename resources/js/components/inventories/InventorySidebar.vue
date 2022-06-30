@@ -83,8 +83,20 @@
                             </multiselect>
 
                             <multiselect  
+                                class="mt-2"
                                 v-model="move.where" :options="foremans" placeholder="Укажите бригадира" label="name" track-by="id">
                             </multiselect>
+
+                            <v-text-field
+                                class="mt-4"
+                                v-model="move.quantity"
+                                label="Количество"
+                                variant="underlined"
+                                required
+                                density="comfortable"
+                                type="number"
+                                @keyup.enter="move()"
+                            ></v-text-field>
 
                         </v-col>
                     </v-row>
@@ -105,9 +117,9 @@
                 <v-btn
                     color="success"
                     text
-                    @click="move()"
+                    @click="moveIt()"
                 >
-                    Добавить
+                    Переместить
                 </v-btn>
             </v-card-actions>
         </v-card>
@@ -147,7 +159,7 @@ export default {
             })
 
             axios.get('/api/v1/foremans').then((response) => {
-                this.foremans = response.data.data;
+                this.foremans = response.data;
             })
         }
     },
@@ -172,8 +184,26 @@ export default {
             console.log('[show move]')
         },
 
-        move() {
+        moveIt() {
+            if (!window.confirm('Вы уверены, что хотите переместить?')) {
+                return;
+            }
+            var data = {
+                stock: this.move.product,
+                where: this.move.where,
+                quantity: this.move.quantity,
+            }
 
+            axios.post('/api/v1/move-stocks', data).then((response) => {
+                this.moveDialog = false;
+                this.move = {
+                    product: null,
+                    where: null,
+                    quantity: 0,
+                };
+                
+                location.reload();
+            })
         },
     }
 }

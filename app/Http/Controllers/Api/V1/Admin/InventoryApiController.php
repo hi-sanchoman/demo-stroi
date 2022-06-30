@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api\V1\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Inventory;
+use App\Models\InventoryStock;
 use Gate;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use DB;
 use Carbon;
 use App\Models\Product;
+use App\Models\User;
 
 class InventoryApiController extends Controller
 {
@@ -77,5 +79,30 @@ class InventoryApiController extends Controller
             ->firstOrFail();
 
         return ['data' => $inventory];
+    }
+
+
+    public function getForemans() {
+        $users = User::with(['roles'])->get();
+
+        $result = [];
+
+        foreach ($users as $user) {
+            foreach ($user->roles as $role) {
+                if ($role->title == 'Foreman') {
+                    $result[] = $user;
+                }
+            }
+        }
+
+        return $result;
+    }
+
+    public function moveStocks(Request $request) {
+        $stock = InventoryStock::findOrFail($request->stock['stock_id']);
+        $stock->quantity -= $request->quantity;
+        $stock->save();
+
+        return 1;
     }
 }

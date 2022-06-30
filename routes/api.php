@@ -74,4 +74,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);
     Route::get('/payments-to-pay', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'paymentsToPay']);
     Route::put('/to-pay/{id}', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'setPaid']);
+    
+    Route::get('/foremans', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'getForemans']);
+    Route::post('/move-stocks', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'moveStocks']);
 });
