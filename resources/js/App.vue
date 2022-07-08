@@ -12,7 +12,7 @@
         </router-link>
       </v-toolbar-title>
 
-      <v-row class="flex-grow-1 flex flex-row">
+      <v-row class="d-none d-md-flex md-flex-grow-1 md-flex-row">
         <router-link 
           v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Foreman')"
           to="/applications?status=redirect" class="text-decoration-none"
@@ -101,27 +101,46 @@
       <v-list
         nav
         dense
-      >
-        <v-list-item-group
-          v-model="group"
-          active-class="deep-purple--text text--accent-4"
-        >
-          <!-- <router-link to="/dashboard" class="text-decoration-none text-black">
-            <v-list-item value="dashboard">
-              <v-list-item-title>
-                Дэшбоард
-              </v-list-item-title>
-            </v-list-item>
+      >       
+        <v-list-item v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Foreman')">
+          <router-link             
+            to="/applications?status=redirect" class="text-decoration-none"
+          >
+            <v-btn flat class="">Заявки</v-btn>
           </router-link>
+        </v-list-item>
 
-          <router-link to="/settings" class="text-decoration-none text-black">
-            <v-list-item value="settings">
-              <v-list-item-title>
-                Настройки
-              </v-list-item-title>
-            </v-list-item>
-          </router-link> -->
-        </v-list-item-group>
+        <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Warehouse Manager'">
+          <router-link             
+            to="/inventories" class="text-decoration-none"
+          >
+            <v-btn flat class="">Склады</v-btn>
+          </router-link>
+        </v-list-item>
+
+        <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Accountant'">
+          <router-link             
+            to="/to-pay" class="text-decoration-none"
+          >
+            <v-btn flat class="">На оплату</v-btn>
+          </router-link>
+        </v-list-item>
+
+        <v-list-item v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant')">
+          <router-link             
+            to="/payments" class="text-decoration-none"
+          >
+            <v-btn flat class="">Реестр платежей</v-btn>
+          </router-link>
+        </v-list-item>
+
+        <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'">
+          <router-link             
+            to="/supplies" class="text-decoration-none"
+          >
+            <v-btn flat class="">Накопители</v-btn>
+          </router-link>
+        </v-list-item>
       </v-list>
     </v-navigation-drawer>
 

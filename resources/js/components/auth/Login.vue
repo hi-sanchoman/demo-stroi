@@ -3,8 +3,8 @@
         <v-container class="fill-height">
             <v-row no-gutters class="d-flex justify-center align-center fill-height">
                 <v-col  
-                    cols="6"
-                    class="mx-auto my-auto border px-15 py-15 elevation-3"
+                    cols="12" md="4"
+                    class="mx-auto my-auto border px-5 py-5 elevation-3"
                 >
                     <h3 class="w-full text-center mb-3">Вход в систему</h3>
 

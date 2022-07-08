@@ -8,11 +8,11 @@
             </v-row> -->
 
             <v-row no-gutters class="mt-10">
-                <v-col cols="2" class="border px-5 py-5">
-                    <ApplicationSidebar />
+                <v-col cols="12" md="2" class="border px-5 py-5">
+                    <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
                 </v-col>
 
-                <v-col cols="10" class="pl-5">
+                <v-col cols="12" md="10" class="pl-0 pl-md-5 mt-4 mt-md-0">
                     <div v-if="errors">
                         <div v-for="(v, k) in errors" :key="k" class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
                             <p v-for="error in v" :key="error" class="text-sm">
@@ -35,15 +35,15 @@
                         </v-row>
 
                         <v-row>
-                            <v-col cols="3">
+                            <v-col cols="12" md="3">
                                 <multiselect v-model="current.category" :options="categories" placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
                             </v-col>
 
-                            <v-col cols="3">
+                            <v-col cols="12" md="3">
                                 <multiselect v-model="current.product" :options="options" placeholder="Укажите товар" label="name" track-by="name"></multiselect>
                             </v-col>
 
-                            <v-col cols="2">
+                            <v-col cols="12" md="2">
                                 <v-text-field
                                     v-model="current.quantity"
                                     label="Количество"
@@ -55,7 +55,7 @@
                                 ></v-text-field>
                             </v-col>
 
-                            <v-col cols="2">
+                            <v-col cols="12" md="2">
                                 <v-textarea
                                     v-if="current.isAddNotes"
                                     outlined
@@ -75,7 +75,7 @@
                                 </v-btn>
                             </v-col>
                             
-                            <v-col cols="2">
+                            <v-col cols="12" md="2">
                                 <v-btn 
                                     size="small"
                                     color="primary"
@@ -88,7 +88,7 @@
                             
                         </v-row>
 
-                        <v-table>
+                        <v-table >
                             <thead>
                                 <tr>
                                     <th>№</th>
@@ -183,39 +183,49 @@ export default {
                 'kind': 'acquisition_of_inventory',
             },
             constructions: [],
+            currentUser: null,
         }
     },
 
     mounted() {
         this.isLoading = true
 
+        // get current user
+        this.getCurrentUser();
+
         // get products -> async autocomplete TODO!
         axios.get('/api/v1/products').then((response) => {
             response.data.data.forEach((item) => {
                 // console.log(item)
                 this.options.push(item)
-            })
+            });
             
             // this.isLoading = false
-        })
+        });
 
         // get categories
         axios.get('/api/v1/categories').then((response) => {
             response.data.data.forEach((item) => {
                 // console.log(item)
                 this.categories.push(item)
-            })
+            });
             
             // this.isLoading = false
-        })
+        });
 
         // get constructions
         axios.get('/api/v1/constructions').then((response) => {
             this.constructions = response.data.data
-        })
+        });
     },
 
     methods: {
+        getCurrentUser() {
+            axios.get('/api/v1/me').then((response) => {
+                this.currentUser = response.data;                
+            });
+        },
+
         showNotes() {
             this.current.isAddNotes = true
         },

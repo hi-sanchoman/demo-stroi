@@ -13,7 +13,7 @@
                 </v-col>
 
                 <v-col cols="12" class="pl-5">
-                    <v-table transition="slide-x-transition">
+                    <v-table transition="slide-x-transition" style="overflow-x:auto;">
                         <thead>
                             <tr>
                                 <th class="text-left">

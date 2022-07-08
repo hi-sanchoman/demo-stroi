@@ -8,11 +8,11 @@
             </v-row> -->
 
             <v-row no-gutters class="mt-10">
-                <v-col cols="2" class="border px-5 py-5">
+                <v-col cols="12" md="2" class="border px-5 py-5">
                     <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
                 </v-col>
 
-                <v-col cols="10" class="pl-5">
+                <v-col cols="12" md="10" class="pl-0 pl-md-5 mt-4 mt-md-0">
                     <div v-if="errors">
                         <div v-for="(v, k) in errors" :key="k" class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
                             <p v-for="error in v" :key="error" class="text-sm">
@@ -49,15 +49,15 @@
                         </v-row>
 
                         <v-row v-if="application != null && application.status == 'draft'">
-                            <v-col cols="3">
+                            <v-col cols="12" md="3">
                                 <multiselect v-model="current.category" :options="categories" placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
                             </v-col>
 
-                            <v-col cols="3">
+                            <v-col cols="12" md="3">
                                 <multiselect v-model="current.product" :options="options" placeholder="Укажите товар" label="name" track-by="name"></multiselect>
                             </v-col>
 
-                            <v-col cols="2">
+                            <v-col cols="12" md="2">
                                 <v-text-field
                                     v-model="current.quantity"
                                     label="Количество"
@@ -69,7 +69,7 @@
                                 ></v-text-field>
                             </v-col>
 
-                            <v-col cols="2">
+                            <v-col cols="12" md="2">
                                 <v-textarea
                                     v-if="current.isAddNotes"
                                     outlined
@@ -89,7 +89,7 @@
                                 </v-btn>
                             </v-col>
                             
-                            <v-col cols="2">
+                            <v-col cols="12" md="2">
                                 <v-btn 
                                     size="small"
                                     color="primary"
@@ -102,7 +102,7 @@
                             
                         </v-row>
 
-                        <v-table>
+                        <v-table style="overflow-x:auto;">
                             <thead>
                                 <tr>
                                     <th>№</th>
@@ -299,7 +299,7 @@
 
                                     <tr v-if="!isWarehouseManager() && item.offers != null && item.offers.length > 0 && (application.status == 'in_progress' || application.status == 'in_review')" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
-                                            <v-table class="mt-4 mb-8 mx-8 border">
+                                            <v-table class="mt-4 mb-8 mx-8 border" style="overflow-x:auto;">
                                                 <thead>
                                                     <tr>
                                                         <th style="width: 25%">Название компании</th>
@@ -441,13 +441,16 @@
                                             Подписание заявки
                                         </v-expansion-panel-title>
 
-                                        <v-expansion-panel-text>
+                                        <v-expansion-panel-text style="overflow-x:auto;">
                                             <v-list-item
                                                 v-for="item in application.application_application_statuses" :key="item.id"
                                             >
                                                 <v-list-item-header>
                                                     <v-list-item-title>
-                                                        <strong>{{ item.application_path.id }}. {{ item.application_path.position }}</strong> - {{ item.application_path.responsible.name }}  
+                                                        <v-col cols="12">
+                                                            <strong>{{ item.application_path.id }}. {{ item.application_path.position }}</strong>
+                                                            - {{ item.application_path.responsible.name }}  
+                                                        </v-col> 
 
                                                         <!-- declined -->
                                                         <span v-if="item.status == 'declined'">
@@ -474,6 +477,7 @@
 
                                                             <span>{{ item.updated_at }}</span>
                                                         </span>
+
                                                         <!-- incoming -->
                                                         <span v-else-if="currentUser != null && item.status == 'incoming' && item.application_path.responsible.id == currentUser.id">
                                                             <v-btn
