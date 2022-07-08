@@ -40,12 +40,21 @@
 
             <!-- <router-link :to="'/inventories/' + inventory.id + '?status=declined'" class="text-decoration-none text-black"> -->
                 <v-list-item
-                    key="declined"
-                    value="declined"
+                    key="movement_inside"
+                    value="movement_inside"
                     active-color="primary"
                     @click="showMoveDialog()"
                 >
-                    <v-list-item-title v-text="'Перемещение'"></v-list-item-title>
+                    <v-list-item-title v-text="'Перемещение (бригадирам)'"></v-list-item-title>
+                </v-list-item>
+
+                <v-list-item
+                    key="movement_outside"
+                    value="movement_outside"
+                    active-color="primary"
+                    @click="showMoveOutsideDialog()"
+                >
+                    <v-list-item-title v-text="'Перемещение (объекты)'"></v-list-item-title>
                 </v-list-item>
             <!-- </router-link>           -->
             
@@ -61,7 +70,7 @@
         </v-list>
     </div>
 
-    <!-- Add Company Dialog -->
+    <!-- Move Inside Dialog -->
     <v-dialog
         v-model="moveDialog"
         persistent
@@ -142,6 +151,89 @@
             </v-card-actions>
         </v-card>
     </v-dialog>
+
+    <!-- Move Outside Dialog -->
+    <v-dialog
+        v-model="moveOutsideDialog"
+        persistent
+    >
+        <v-card
+            class="min-w-5xl w-7xl" style="width: 500px"
+        >
+            <v-card-title>
+                <span class="text-h5">Перемещение товара</span>
+            </v-card-title>
+
+            <v-card-text>
+                <v-container>
+                    <v-row>
+                        <v-col
+                            cols="12"
+                        >
+                            <multiselect  
+                                v-model="moveOutside.product" 
+                                :options="stocks" 
+                                placeholder="Укажите товар" 
+                                label="name" 
+                                track-by="id"
+                                @select="onProductSelect"
+                            >
+                            </multiselect>
+
+                            <!-- <multiselect  
+                                class="mt-2"
+                                v-model="move.where" :options="foremans" placeholder="Укажите бригадира" label="name" track-by="id">
+                            </multiselect> -->
+
+                            <multiselect  
+                                class="mt-4"
+                                v-model="moveOutside.where" 
+                                :options="inventories" 
+                                placeholder="Укажите склад" 
+                                label="name" 
+                                track-by="id"
+                            >
+                            </multiselect>
+
+                            <v-text-field
+                                class="mt-4"
+                                v-model="moveOutside.quantity"
+                                label="Количество"
+                                variant="underlined"
+                                required
+                                density="comfortable"
+                                type="number"
+                                @keyup.enter="moveOutsideIt()"
+                            ></v-text-field>
+
+                            <span class="mt-2">Ед. изм.: {{ moveOutside.unit }}</span>
+
+                        </v-col>
+                    </v-row>
+                </v-container>
+                <!-- <small>* обязательные поля</small> -->
+            </v-card-text>
+            <v-card-actions>
+                <v-spacer></v-spacer>
+                
+                <v-btn
+                    color="default"
+                    text
+                    @click="moveOutsideDialog = false"
+                >
+                    Отмена
+                </v-btn>
+
+                <v-btn
+                    color="success"
+                    text
+                    @click="moveOutsideIt()"
+                >
+                    Переместить
+                </v-btn>
+            </v-card-actions>
+        </v-card>
+    </v-dialog>
 </template>
 
 <script>
@@ -154,6 +246,30 @@ export default {
 
     components: {
         Multiselect,
+    },
+
+    data() {
+        return {
+            moveDialog: false,
+            move: {
+                product: null,
+                where: null,
+                quantity: 0,
+                unit: null,
+            },
+
+            moveOutsideDialog: false,
+            moveOutside: {
+                product: null,
+                unit: null,
+                where: null,
+                quantity: 0,
+            },
+            
+            inventories: [],
+            stocks: [],
+            foremans: [],
+        } 
     },
 
     mounted() {
@@ -174,40 +290,52 @@ export default {
                     })
                 }
 
-                console.log(this.stocks);
+                // console.log(this.stocks);
             })
 
             // axios.get('/api/v1/foremans').then((response) => {
             //     this.foremans = response.data;
             // })
         }
-    },
 
-    data() {
-        return {
-            moveDialog: false,
-            move: {
-                product: null,
-                where: null,
-                quantity: 0,
-                unit: null,
-            },
-            stocks: [],
-            foremans: [],
-        } 
+        // get inventories
+        axios.get('/api/v1/inventories/dropdown').then((response) => {
+            var res = response.data.data;
+
+            for (var i = 0; i < res.length; i++) {
+                var inventory = res[i];
+                // console.log(inventory.construction);
+
+                if (this.inventory.id == inventory.id) continue;
+
+                inventory.name = inventory.construction.name
+
+                this.inventories.push(inventory);
+            }
+        
+        });
     },
 
     methods: {
         showMoveDialog() {
             this.moveDialog = true;
 
-            console.log('[show move]')
+            // console.log('[show move]')
+        },
+
+        showMoveOutsideDialog() {
+            this.moveOutsideDialog = true;
+
+            // console.log('[show move]')
         },
 
         moveIt() {
+            // TODO: check for quantity
+
             if (!window.confirm('Вы уверены, что хотите переместить?')) {
                 return;
             }
+
             var data = {
                 stock: this.move.product,
                 where: this.move.where,
@@ -227,8 +355,38 @@ export default {
             })
         },
 
+        moveOutsideIt() {
+            console.log(this.moveOutside);
+            
+            // TODO: check for quantity
+
+            if (!window.confirm('Вы уверены, что хотите переместить?')) {
+                return;
+            }
+            var data = {
+                sender_id: this.inventory.id,
+                stock: this.moveOutside.product,
+                where: this.moveOutside.where,
+                quantity: this.moveOutside.quantity,
+            }
+
+            axios.post('/api/v1/move-stocks-outside', data).then((response) => {
+                this.moveOutside = {
+                    product: null,
+                    where: null,
+                    unit: null,
+                    quantity: 0,
+                };
+                
+                this.moveOutsideDialog = false;
+                               
+                location.reload();
+            })
+        },
+
         onProductSelect(val) {
             this.move.unit = val.unit;
+            this.moveOutside.unit = val.unit;
         }
     }
 }

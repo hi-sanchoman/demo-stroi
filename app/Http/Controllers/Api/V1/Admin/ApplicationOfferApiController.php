@@ -38,6 +38,7 @@ class ApplicationOfferApiController extends Controller
         return ['data' => [
             'applicationId' => $applicationProduct->application_id,
             'offers' => $applicationProduct->offers,
+            'offer' => $applicationOffer,
         ]];
 
         // return (new ApplicationOfferResource($applicationOffer))
@@ -66,7 +67,7 @@ class ApplicationOfferApiController extends Controller
     public function update(Request $request, $id)
     {
         // dd($request->all());
-        
+
         $input = $request->all();
         $input['company_id'] = $request->company['id'];
 
@@ -74,8 +75,8 @@ class ApplicationOfferApiController extends Controller
         $offer->update($input);
 
         return (new ApplicationOfferResource($offer))
-                ->response()
-                ->setStatusCode(Response::HTTP_ACCEPTED);
+            ->response()
+            ->setStatusCode(Response::HTTP_ACCEPTED);
     }
 
     /**

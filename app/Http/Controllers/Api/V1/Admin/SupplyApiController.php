@@ -35,11 +35,11 @@ class SupplyApiController extends Controller
     public function index(Request $request)
     {
         $collection = [];
-        
+
         $supplies = Supply::query()
             ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.product.categories'])
             ->get();
-        
+
         foreach ($supplies as $item) {
             if (!isset($collection[$item->applicationProduct->product->id])) {
                 $collection[$item->applicationProduct->product->id] = [
@@ -59,6 +59,6 @@ class SupplyApiController extends Controller
             $result[] = $item;
         }
 
-        return $result;
+        return ['data' => $result];
     }
 }

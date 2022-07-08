@@ -8,6 +8,7 @@ use App\Models\Inventory;
 use App\Models\InventoryApplication;
 use App\Models\InventoryStock;
 use App\Models\ApplicationProduct;
+use App\Models\Application;
 use App\Models\InventoryLog;
 use Gate;
 use Illuminate\Http\Request;
@@ -20,7 +21,8 @@ class InventoryApplicationApiController extends Controller
 {
 
 
-    public function update(Request $request, $inventoryId) {
+    public function update(Request $request, $inventoryId)
+    {
         $inventoryApplication = InventoryApplication::whereId($inventoryId)->firstOrFail();
         // dd($inventoryApplication->toArray());
 
@@ -31,7 +33,7 @@ class InventoryApplicationApiController extends Controller
             $inventoryApplication->declined = 0;
             $inventoryApplication->status = 'accepted';
             $inventoryApplication->save();
-        
+
             $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.application'])->firstOrCreate([
                 'inventory_id' => $inventoryApplication->inventory_id,
                 'application_product_id' => $inventoryApplication->application_product_id,
@@ -39,12 +41,34 @@ class InventoryApplicationApiController extends Controller
             $stock->quantity += $inventoryApplication->accepted;
             $stock->save();
 
+            $log = $request->user()->email . ' принял товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $stock->applicationProduct->product->unit . ' по заявке №' . $stock->applicationProduct->application_id;
+
+            if ($inventoryApplication->reason != null) {
+                $log .= ' с примечанием: ' . $inventoryApplication->reason;
+            }
+
             InventoryLog::create([
                 'inventory_id' => $stock->inventory_id,
                 'user_id' => $request->user()->id,
-                'log' => $request->user()->email . ' принял товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $inventoryApplication->prepared . ' ' . $stock->applicationProduct->product->unit . ' по заявке №' . $stock->applicationProduct->application_id,
+                'log' => $log,
             ]);
 
+            // check whether application should be closed
+            $application = Application::with(['applicationApplicationProducts'])->whereId($stock->applicationProduct->application_id)->firstOrFail();
+
+            $closed = true;
+
+            foreach ($application->applicationApplicationProducts as $product) {
+                if (abs(($product->quantity - $product->prepared) / $product->prepared) > 0.00001) {
+                    $closed = false;
+                    break;
+                }
+            }
+
+            if ($closed) {
+                $application->status = 'completed';
+                $application->save();
+            }
         } else {
             $inventoryApplication->declined = $inventoryApplication->prepared;
             $inventoryApplication->accepted = 0;

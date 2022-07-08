@@ -114,7 +114,7 @@
                                     <th>Сумма</th>
                                     <th>Компания</th> -->
                                     <th>Примечание</th>
-                                    <th v-if="isCanPrepareQuantity()">Подготовлено</th>
+                                    <!-- <th v-if="isCanPrepareQuantity()">Подготовлено</th> -->
                                     <!-- <th v-if="isCanReceiveQuantity()">Получено</th> -->
                                     <!-- <th>Файлы</th> -->
                                     <th></th>
@@ -189,7 +189,8 @@
                                         </td>  -->
                                         
                                         <td>{{ item.notes }}</td>
-                                        <td v-if="isCanPrepareQuantity()" class="d-flex mt-3 justify-center" s>
+                                        
+                                        <!-- <td v-if="isCanPrepareQuantity()" class="d-flex mt-3 justify-center" s>
                                             <v-text-field
                                                 v-model="products[index].toBePrepared"
                                                 type="number"
@@ -208,9 +209,8 @@
                                             >
                                                 <v-icon>mdi-check</v-icon>
                                             </v-btn>
+                                        </td>   -->
 
-                                            <!-- <span v-if="item.quantity == item.prepared">{{ item.prepared }}</span> -->
-                                        </td>  
                                         <!-- <td class="d-flex">
                                             <input
                                                 v-if="application.status == 'in_progress'"
@@ -249,19 +249,29 @@
                                                 <v-icon>mdi-close</v-icon>
                                             </v-btn>
 
-                                            <v-btn @click="addOffer(item.id)"
+                                            <v-btn                                                 
+                                                v-if="application.status == 'in_progress' && isSupplier()"
+                                                @click="addOffer(item.id)"
                                                 color="info"
                                                 size="small"
-                                                v-if="application.status == 'in_progress' && isSupplier()"
                                             >
                                                 + компания
+                                            </v-btn>
+
+                                            <v-btn                                                 
+                                                v-if="isWarehouseManager() && products[index].quantity != products[index].prepared"
+                                                @click="showAcceptProduct(item)"
+                                                color="info"
+                                                size="small"
+                                            >
+                                                принять товар
                                             </v-btn>
                                         </td>
                                     </tr>
 
-                                    <tr v-if="isWarehouseManager() && incoming(item.inventory_applications).length > 0" class="bg-slate-100">
+                                    <!-- <tr v-if="isWarehouseManager() && incoming(item.inventory_applications).length > 0" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
-                                            <v-table class="mt-4 mb-8 mx-8 border">
+                                            <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible;">
                                                 <thead>
                                                     <tr>
                                                         <th>Статья расходов</th>
@@ -285,7 +295,7 @@
                                                 </tbody>  
                                             </v-table>
                                         </td>
-                                    </tr>
+                                    </tr> -->
 
                                     <tr v-if="!isWarehouseManager() && item.offers != null && item.offers.length > 0 && (application.status == 'in_progress' || application.status == 'in_review')" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
@@ -318,6 +328,7 @@
 
                                                                 <v-btn
                                                                     v-if="offer.status == 'draft' && isEditable()"
+                                                                    class="mt-1"
                                                                     color="primary"
                                                                     size="x-small"
                                                                     plain
@@ -332,6 +343,7 @@
                                                         <td>
                                                             <v-text-field
                                                                 v-if="offer.status == 'draft' && isEditable()"
+                                                                @change="offerHasChanged($event, offer)"
                                                                 v-model="offer.quantity"
                                                                 label=""
                                                                 type="number"
@@ -364,11 +376,13 @@
                                                         </td>
 
                                                         <td>
-                                                            <v-btn @click="updateOffer(offer)"
+                                                            <v-btn 
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                :id="'offer_' + offer.id"
+                                                                @click="updateOffer(offer)"
                                                                 color="success"
                                                                 size="small"
                                                                 class="mr-2"
-                                                                v-if="offer.status == 'draft' && isEditable()"
                                                             >
                                                                 Сохранить
                                                             </v-btn>
@@ -709,6 +723,76 @@
                 </v-card-actions>
             </v-card>
         </v-dialog>
+
+        <!-- Accept Product Dialog -->
+        <v-dialog
+            v-model="acceptProductDialog"
+            persistent
+        >
+            <v-card
+                class="min-w-5xl w-7xl" style="width: 500px"
+            >
+                <v-card-title>
+                    <span class="text-h5">Приемка товара</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">{{ priemka.name }}</v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col
+                                cols="12"
+                            >
+                                <v-textarea
+                                    class="mt-2"
+                                    v-model="priemka.notes"
+                                    label="Примечание"
+                                    variant="underlined"
+                                    required
+                                    density="comfortable"
+                                ></v-textarea>
+
+                                <v-text-field
+                                    class="mt-2"
+                                    v-model="priemka.quantity"
+                                    label="Количество"
+                                    variant="underlined"
+                                    required
+                                    density="comfortable"
+                                    type="number"
+                                    @keyup.enter="acceptProduct()"
+                                ></v-text-field>
+
+                                <span class="mt-2">Ед. изм.: {{ priemka.unit }}</span>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <!-- <small>* обязательные поля</small> -->
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+                    
+                    <v-btn
+                        color="default"
+                        text
+                        @click="acceptProductDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn
+                        color="success"
+                        text
+                        @click="acceptProduct()"
+                    >
+                        Принять
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+        
     </div>
 </template>
 
@@ -774,6 +858,15 @@ export default {
             declineProductDialog: false,
             declinedProductReason: null,
             declineInventoryApplicationId: null,
+
+            priemka: {
+                applicationProductId: null,
+                name: null,
+                unit: null,
+                quantity: null,
+                notes: null,
+            },
+            acceptProductDialog: false,
         }
     },
 
@@ -1020,7 +1113,7 @@ export default {
                     if (this.products[i].id == applicationProductId) {
                         console.log(this.products[i]);
 
-                        this.products[i].offers = response.data.data.offers;
+                        this.products[i].offers.push(response.data.data.offer);
 
                         this.snackbar.text = 'Предложение от новой компании успешно добавлено.'
                         this.snackbar.status = true                      
@@ -1032,6 +1125,8 @@ export default {
         updateOffer(offer) {
             try {
                 axios.put(`/api/v1/application-offers/${offer.id}`, offer).then((response) => {
+                    document.getElementById('offer_' + offer.id).style.visibility = 'hidden';
+
                     this.snackbar.text = 'Предложение от компании сохранено.'
                     this.snackbar.status = true
                 })
@@ -1116,17 +1211,52 @@ export default {
         //     })
         // },
 
-        acceptProduct(item) {
-            var data = {
-                'mode': 'accept'
+        showAcceptProduct(item) {
+            this.priemka.product = item;
+            this.priemka.name = item.product.name;
+            this.priemka.unit = item.product.unit;
+
+            this.acceptProductDialog = true;
+        },
+
+        acceptProduct() {
+            this.priemka.product.toBePrepared = this.priemka.quantity;
+
+            // create inventory application
+            var productData = {
+                product: this.priemka.product,
+                notes: this.priemka.notes,
             };
 
-            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
-                this.getApplication();
+            axios.put('/api/v1/application-products/' + this.priemka.product.id + '/prepare', productData).then((response) => {
+                this.priemka.product.prepared = response.data.prepared;
+                this.priemka.product.toBePrepared = null;
 
-                this.snackbar.text = 'Приход товара принят';
-                this.snackbar.status = true
+                // accept application
+                var data = {
+                    'mode': 'accept'
+                };
+
+                axios.put('/api/v1/inventory-applications/' + response.data.inventory.id, data).then((response) => {
+                    this.getApplication();
+
+                    this.snackbar.text = 'Приход товара принят';
+                    this.snackbar.status = true
+
+                    this.priemka = {
+                        product: null,
+                        name: null,
+                        notes: null,
+                        quantity: null,
+                    };
+
+                    this.acceptProductDialog = false;
+                })
             })
+
+
+            
+            
         },
 
         showDeclineProduct(item) {
@@ -1157,8 +1287,13 @@ export default {
             })
         },
 
-        incoming(items) {
-            return items.filter(el => el.status == 'waiting');
+        // incoming(items) {
+        //     return items.filter(el => el.status == 'waiting');
+        // },
+
+        offerHasChanged($event, offer) {
+            // console.log('offer has changed: ' + offer.id);
+            document.getElementById('offer_' + offer.id).style.visibility = 'visible';
         }
     },  
 
@@ -1174,3 +1309,14 @@ export default {
     }
 }
 </script>
+
+
+<style>
+.multiselect--active {
+    z-index: 1000;
+}
+
+.v-table__wrapper {
+    overflow: inherit !important;
+}
+</style>

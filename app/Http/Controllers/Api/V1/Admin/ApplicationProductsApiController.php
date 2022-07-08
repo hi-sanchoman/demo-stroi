@@ -71,7 +71,7 @@ class ApplicationProductsApiController extends Controller
             ]);
         }
 
-        
+
 
         return (new ApplicationProductResource($applicationProduct))
             ->response()
@@ -94,7 +94,7 @@ class ApplicationProductsApiController extends Controller
 
         $applicationProduct = ApplicationProduct::with(['application', 'application.construction'])
             ->where('id', $id)->firstOrFail();
-        $applicationProduct->prepared += $request->toBePrepared;
+        $applicationProduct->prepared += $request->product['toBePrepared'];
         $applicationProduct->save();
 
         // get main inventory
@@ -103,14 +103,25 @@ class ApplicationProductsApiController extends Controller
             ->firstOrFail();
 
         // create application request for a WareHouse manager
-        InventoryApplication::create([
+        $inventoryApplication = InventoryApplication::create([
             'inventory_id' => $inventory->id,
             'application_product_id' => $applicationProduct->id,
-            'prepared' => $request->toBePrepared,
+            'prepared' => $request->product['toBePrepared'],
+            'reason' => $request->notes,
+        ]);
+
+        // add to supply
+        Supply::create([
+            'construction_id' => $applicationProduct->application->construction_id,
+            'application_product_id' => $applicationProduct->id,
+            'quantity' => $request->product['toBePrepared'],
         ]);
 
         DB::commit();
 
-        return $applicationProduct->prepared;
+        return [
+            'prepared' => $applicationProduct->prepared,
+            'inventory' => $inventoryApplication,
+        ];
     }
 }

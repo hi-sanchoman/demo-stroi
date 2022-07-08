@@ -16,10 +16,13 @@
                 
 
                 <v-col cols="10" class="pl-5">
+                    <!-- INCOMING -->
                     <template v-for="item in incoming" :key="item.id">
                         <div class="flex justify-between border rounded mb-4 px-2 py-2">
-                            <div><span class="font-bold">{{ item.application_product.product.name }}</span> 
-                            в количестве {{ item.prepared }} по заявке №{{ item.application_product.application.id }}  
+                            <div>
+                                От склада <strong>{{ item.sender.construction.name }}</strong> 
+                                отправлено <strong>{{ item.stock.application_product.product.name }}</strong> 
+                                в количестве <strong>{{ item.quantity }}</strong> {{ item.stock.application_product.product.unit }}
                             </div>
 
                             <div class="mt-2">
@@ -29,6 +32,7 @@
                         </div>
                     </template>
 
+                    <!-- STOCKS -->
                     <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
@@ -147,16 +151,21 @@ export default {
             })
         },
 
-        
+        getIncoming() {
+            axios.get('/api/v1/temp-incoming/' + this.$route.params.id).then((response) => {
+                this.incoming = response.data.data;
+            });
+        },
 
         acceptProduct(item) {
             var data = {
                 'mode': 'accept'
             };
 
-            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
+            axios.put('/api/v1/temp-inventory-accept/' + item.id, data).then((response) => {
                 // this.getIncoming();
                 this.getStocks();
+                this.getIncoming();
             })
         },
 
@@ -165,9 +174,10 @@ export default {
                 'mode': 'decline'
             };
 
-            axios.put('/api/v1/inventory-applications/' + item.id, data).then((response) => {
+            axios.put('/api/v1/temp-inventory-decline/' + item.id, data).then((response) => {
                 // this.getIncoming();
                 this.getStocks();
+                this.getIncoming();
             })
         }
 
@@ -183,6 +193,8 @@ export default {
         this.getInventory();
 
         this.getStocks();
+
+        this.getIncoming();
     },
 
     watch: {

@@ -28,28 +28,30 @@ class ApplicationApiController extends Controller
         // responsible user watching applications to review
         if ($status == 'incoming') {
             $path = ApplicationPath::where('responsible_id', $request->user()->id)->first();
-            
+
             $statuses = ApplicationStatus::query()
                 ->where('status', 'incoming')
                 ->where('application_path_id', $path->id)->get();
-            
+
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
                 ->whereIn('id', $statuses->pluck('application_id'))
                 ->whereNot('status', 'draft')
+                ->orderBy('id', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
         } else if ($status == 'declined_by_me') {
             $path = ApplicationPath::where('responsible_id', $request->user()->id)->first();
-            
+
             $statuses = ApplicationStatus::query()
                 ->where('status', 'declined')
                 ->where('application_path_id', $path->id)->get();
-            
+
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
                 ->whereIn('id', $statuses->pluck('application_id'))
+                ->orderBy('id', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -57,15 +59,17 @@ class ApplicationApiController extends Controller
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
                 ->where('status', 'in_progress')
+                ->orderBy('id', 'DESC')
                 ->get();
-            
+
             return new ApplicationResource($collection);
         } else if ($status == 'in_progress_economist') {
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
                 ->where('status', 'in_review')
+                ->orderBy('id', 'DESC')
                 ->get();
-            
+
             return new ApplicationResource($collection);
         } else if ($status == 'in_progress_warehouse') {
             $collection = Application::query()
@@ -73,8 +77,17 @@ class ApplicationApiController extends Controller
                 ->where('status', 'in_progress')
                 ->orWhere('status', 'in_review')
                 ->orWhere('status', 'signed')
+                ->orderBy('id', 'DESC')
                 ->get();
-            
+
+            return new ApplicationResource($collection);
+        } else if ($status == 'completed') {
+            $collection = Application::query()
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->where('status', 'completed')
+                ->orderBy('id', 'DESC')
+                ->get();
+
             return new ApplicationResource($collection);
         }
 
@@ -83,8 +96,9 @@ class ApplicationApiController extends Controller
             ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
             ->where('status', $status)
             ->where('owner_id', $request->user()->id)
+            ->orderBy('id', 'DESC')
             ->get();
-        
+
         return new ApplicationResource($collection);
     }
 
@@ -148,7 +162,7 @@ class ApplicationApiController extends Controller
     {
         abort_if(Gate::denies('application_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible' ]));
+        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
     }
 
     public function update(Request $request, Application $application)

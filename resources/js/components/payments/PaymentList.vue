@@ -32,7 +32,7 @@
                                     Количество
                                 </th>
                                 <th>
-                                    Сумма
+                                    Сумма / Оплачено / Остаток
                                 </th>
                                 <th>
                                     Оплатить
@@ -56,7 +56,7 @@
                                 <td width="30%">{{ payment.application_product.product.name }}</td>
                                 <td>{{ payment.company.name }}</td>
                                 <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td>
-                                <td>{{ payment.paidTotal }} / {{ payment.price * payment.quantity }} тг</td>
+                                <td>{{ payment.price * payment.quantity }} / {{ payment.paidTotal }} / {{ (payment.price * payment.quantity - payment.paidTotal) }} тг</td>
                                 <td class="pt-6">
                                     <v-text-field
                                         v-model="payment.order_paid"

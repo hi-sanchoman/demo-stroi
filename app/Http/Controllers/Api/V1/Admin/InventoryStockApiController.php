@@ -20,17 +20,18 @@ class InventoryStockApiController extends Controller
     public function index(Request $request, $inventoryId)
     {
         $collection = [];
-        
+
         $inventories = InventoryStock::query()
             ->where('inventory_id', $inventoryId)
             ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product'])
             ->get();
-        
+
         return ['data' => $inventories];
     }
 
 
-    public function incoming(Request $request, $applicationId) {
+    public function incoming(Request $request, $applicationId)
+    {
         $collection = [];
 
         // get application
@@ -51,7 +52,8 @@ class InventoryStockApiController extends Controller
         return ['data' => $inventoryApplications];
     }
 
-    public function show(Request $request, $inventoryId) {
+    public function show(Request $request, $inventoryId)
+    {
         // dd($inventoryId);
 
         $inventory = Inventory::with(['stocks', 'stocks.applicationProduct', 'stocks.applicationProduct.product'])
@@ -62,9 +64,10 @@ class InventoryStockApiController extends Controller
     }
 
 
-    public function history(Request $request, $id) {
+    public function history(Request $request, $id)
+    {
         $inventory = Inventory::with(['logs', 'logs.user'])->findOrFail($id);
 
-        return $inventory->logs;
+        return $inventory->logs()->with('user')->orderBy('id', 'DESC')->get();
     }
 }

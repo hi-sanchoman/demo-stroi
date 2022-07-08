@@ -52,7 +52,7 @@ class ApplicationStatusApiController extends Controller
 
             // set next responsible's status to 'incoming'
             $nextStep = $applicationStatus->application_path_id + 1;
-            
+
             // first responsible just signed up
             if ($nextStep == 2) {
                 ApplicationStatus::query()
@@ -68,10 +68,10 @@ class ApplicationStatusApiController extends Controller
                     ->update(['status' => 'incoming']);
             }
 
-            // TODO: hardcoded: kurtayev
-            if ($request->user()->email == 'kurtayev@mail.com') {
+            // TODO: hardcoded: kurtayev -> SET A ROLE, not an email!!!
+            if ($request->user()->email == 'kurtayev.meirzhan@gmail.com') {
                 $applicationStatus->application->status = 'in_progress';
-            // final responsible
+                // final responsible
             } else if ($nextStep == $totalSteps + 1) {
                 $applicationStatus->application->status = 'in_progress';
                 // $applicationStatus->application->status = 'signed';
@@ -81,6 +81,10 @@ class ApplicationStatusApiController extends Controller
             }
 
             $applicationStatus->application->save();
+
+
+            // notify next via email that he has an incoming request
+
 
             // log to history
             ApplicationLog::create([
@@ -106,6 +110,8 @@ class ApplicationStatusApiController extends Controller
             // set application's status to 'declined'
             $applicationStatus->application->status = 'declined';
             $applicationStatus->application->save();
+
+            // notify prev via email that request was declined
 
             // log to history
             ApplicationLog::create([

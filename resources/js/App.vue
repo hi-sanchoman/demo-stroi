@@ -35,7 +35,7 @@
         </router-link>
 
         <router-link 
-          v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'"
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant')"
           to="/payments" class="text-decoration-none"
         >
           <v-btn flat class="text-white">Реестр платежей</v-btn>

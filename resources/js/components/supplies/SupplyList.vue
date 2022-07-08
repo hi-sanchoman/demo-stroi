@@ -163,7 +163,8 @@ export default {
         getSupplies() {
             // get applications 
             axios.get('/api/v1/supplies').then((response) => {
-                this.inventories = response.data
+                console.log(response);
+                this.inventories = response.data.data;
             })
         },
 
