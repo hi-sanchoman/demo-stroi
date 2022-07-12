@@ -142,7 +142,7 @@ export default {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
-                // console.log(this.currentUser)
+                console.log(this.currentUser)
             })
         },
 
