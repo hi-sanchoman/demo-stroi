@@ -107,11 +107,13 @@ class PaymentApiController extends Controller
     {
         $applicationOffer = ApplicationOffer::with(['company', 'applicationProduct', 'applicationProduct.product'])->where('id', $id)->firstOrFail();
 
+        // save to be paid value
+        $toBePaid = $applicationOffer->to_be_paid;
+
+        // update offer
         $applicationOffer->paidTotal += $applicationOffer->to_be_paid;
         $applicationOffer->to_be_paid = 0;
         $applicationOffer->save();
-
-        $toBePaid = $applicationOffer->to_be_paid;
 
         // notify CEO
         // TODO: hard-coded CEO email!

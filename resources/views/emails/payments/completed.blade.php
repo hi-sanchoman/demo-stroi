@@ -1,7 +1,7 @@
 Произведена следующая оплата<br>
 <br>
 Компания: {{ $payment->company->name }}<br>
-Товар/Услуга: {{ $payment->applicationProduct->product }}<br>
+Товар/Услуга: {{ $payment->applicationProduct->product->name }}<br>
 Сумма: {{ $paid }}<br>
 <br>
 
