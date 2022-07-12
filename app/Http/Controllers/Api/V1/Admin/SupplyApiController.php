@@ -13,25 +13,6 @@ use App\Models\Product;
 
 class SupplyApiController extends Controller
 {
-    public function history(Request $request, $productId)
-    {
-        $product = Product::findOrFail($productId);
-
-        $result = [];
-
-        $collection = Supply::query()
-            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category'])
-            ->get();
-
-        foreach ($collection as $item) {
-            if ($item->applicationProduct->product->id == $product->id) {
-                $result[] = $item;
-            }
-        }
-
-        return $result;
-    }
-
     public function index(Request $request)
     {
         $collection = [];
@@ -60,5 +41,25 @@ class SupplyApiController extends Controller
         }
 
         return ['data' => $result];
+    }
+
+
+    public function history(Request $request, $productId)
+    {
+        $product = Product::findOrFail($productId);
+
+        $result = [];
+
+        $collection = Supply::query()
+            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category'])
+            ->get();
+
+        foreach ($collection as $item) {
+            if ($item->applicationProduct->product->id == $product->id) {
+                $result[] = $item;
+            }
+        }
+
+        return $result;
     }
 }

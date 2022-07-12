@@ -991,6 +991,13 @@
     "@nodelib/fs.scandir" "2.1.5"
     "fastq" "^1.6.0"
 
+"@onesignal/onesignal-vue3@^1.0.2":
+  "integrity" "sha512-vII2s7/e8veseex0hKWJHbVZDkFTh/WO76DfVvrAq0IJKv9c216TXDp3Xs6WDRQoODgPhpvI3TnHq8i1E2u+Vw=="
+  "resolved" "https://registry.npmjs.org/@onesignal/onesignal-vue3/-/onesignal-vue3-1.0.2.tgz"
+  "version" "1.0.2"
+  dependencies:
+    "vue" "^3.2.0"
+
 "@trysound/sax@0.2.0":
   "integrity" "sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA=="
   "resolved" "https://registry.npmjs.org/@trysound/sax/-/sax-0.2.0.tgz"
@@ -2409,6 +2416,11 @@
   "integrity" "sha512-/WwNkdXfckNgw6S5R125rrW8ez139lBHWouiBvX8dfMFtcn6V81REDqnH7+CRpRipfYlyU1CmOnOxrmGcFOjeA=="
   "resolved" "https://registry.npmjs.org/csstype/-/csstype-2.6.20.tgz"
   "version" "2.6.20"
+
+"de-indent@^1.0.2":
+  "integrity" "sha512-e/1zu3xH5MQryN2zdVaF0OrdNLUbvWxzMbi+iNA6Bky7l1RoP8a2fIbRocyHclXt/arDrrR6lL3TqFD9pMQTsg=="
+  "resolved" "https://registry.npmjs.org/de-indent/-/de-indent-1.0.2.tgz"
+  "version" "1.0.2"
 
 "debug@^4.1.0":
   "integrity" "sha512-PRWFHuSU3eDtQJPvnNY7Jcket1j0t5OuOsFzPPzsekD52Zl8qUfFIPEiswXqIvHWGVHOgX+7G/vCNNhehwxfkQ=="
@@ -5276,6 +5288,14 @@
   dependencies:
     "hash-sum" "^1.0.2"
     "loader-utils" "^1.0.2"
+
+"vue-template-compiler@^2.6.10":
+  "integrity" "sha512-FgaeXI80FzhtDEsixq3WBrHLWpU2gzLb2DFusm62TrmCQyETsnUp0kTLpbExrTUw7g5YOnRf+xkh73nuEX+jGQ=="
+  "resolved" "https://registry.npmjs.org/vue-template-compiler/-/vue-template-compiler-2.7.4.tgz"
+  "version" "2.7.4"
+  dependencies:
+    "de-indent" "^1.0.2"
+    "he" "^1.2.0"
 
 "vue@^3.2.0", "vue@^3.2.31", "vue@^3.2.33", "vue@3.2.33":
   "integrity" "sha512-si1ExAlDUrLSIg/V7D/GgA4twJwfsfgG+t9w10z38HhL/HA07132pUQ2KuwAo8qbCyMJ9e6OqrmWrOCr+jW7ZQ=="

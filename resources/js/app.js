@@ -26,14 +26,17 @@ import { loadFonts } from './plugins/webfontloader'
 // import HttpClient from './httpclient.js'
 import axios from 'axios'
 
+import OneSignalVuePlugin from '@onesignal/onesignal-vue3'
+
+
 loadFonts()
 
 // Routes
 const routes = [
   { path: '/', component: HelloWorld },
-  
+
   { path: '/login', component: Login },
-  
+
   { path: '/applications/create', name: 'applications.create', component: ApplicationCreate },
   { path: '/applications/:id/edit', name: 'applications.edit', component: ApplicationEdit },
   { path: '/applications/', name: 'applications.index', component: ApplicationList },
@@ -41,7 +44,7 @@ const routes = [
   { path: '/inventories', name: 'inventories.index', component: InventoryList },
   { path: '/inventories/:id', name: 'inventories.show', component: InventoryShow },
   { path: '/inventories/:id/history', name: 'inventories.history', component: InventoryHistory },
-  
+
   { path: '/supplies', name: 'supplies.index', component: SupplyList },
 
   { path: '/storages', component: HelloWorld },
@@ -66,9 +69,10 @@ router.beforeEach((to, from, next) => {
     } else {
       next()
     }
-  } else if(to.matched.some(record => record.meta.guest)) {
+  } else if (to.matched.some(record => record.meta.guest)) {
     if (isLoggedIn()) {
-      next({path: '/',
+      next({
+        path: '/',
         query: { redirect: to.fullPath }
       })
     } else {
@@ -88,9 +92,12 @@ const vuetify = createVuetify({
 
 app.use(vuetify)
 app.use(router)
+app.use(OneSignalVuePlugin, {
+  appId: 'cdd5b7ea-8ed3-432d-907b-5fbed34e5d32',
+})
 
 // not auth interceptor
-axios.interceptors.request.use(function(config) {
+axios.interceptors.request.use(function (config) {
   const token = localStorage.getItem('token')
   config.headers.Authorization = 'Bearer ' + token
 
@@ -109,7 +116,7 @@ axios.interceptors.response.use(function (response) {
     localStorage.removeItem('token')
     router.push('/login')
   }
-  
+
   return Promise.reject(error)
 })
 

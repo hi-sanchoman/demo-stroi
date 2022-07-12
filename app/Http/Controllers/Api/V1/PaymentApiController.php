@@ -9,7 +9,9 @@ use App\Models\ApplicationProduct;
 
 class PaymentApiController extends Controller
 {
-    public function payments() {
+    public function payments()
+    {
+
         $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
         // dd($applications->toArray());
 
@@ -26,14 +28,15 @@ class PaymentApiController extends Controller
                 }
             }
         }
-        
+
         return [
             'data' => $data,
         ];
     }
 
 
-    public function paymentsToPay() {
+    public function paymentsToPay()
+    {
         $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
         // dd($applications->toArray());
 
@@ -48,7 +51,7 @@ class PaymentApiController extends Controller
                 }
             }
         }
-        
+
         return [
             'data' => $data,
         ];
@@ -62,7 +65,7 @@ class PaymentApiController extends Controller
     {
         foreach ($request->data as $offer) {
             if (!isset($offer['to_be_paid'])) continue;
-            
+
             ApplicationOffer::where('id', $offer['id'])->update([
                 'to_be_paid' => $offer['to_be_paid'],
             ]);
@@ -82,7 +85,7 @@ class PaymentApiController extends Controller
                 }
             }
         }
-        
+
         return [
             'data' => $data,
         ];
@@ -91,7 +94,7 @@ class PaymentApiController extends Controller
     /**
      * Set payment request as paid
      */
-    public function setPaid(Request $request, $id) 
+    public function setPaid(Request $request, $id)
     {
         $applicationOffer = ApplicationOffer::where('id', $id)->firstOrFail();
         $applicationOffer->paidTotal += $applicationOffer->to_be_paid;
