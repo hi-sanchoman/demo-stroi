@@ -202,6 +202,10 @@ export default {
     countNewApplications: 0,
   }),
 
+  beforeCreate() {
+    this.$OneSignal.showSlidedownPrompt()
+  },
+
   watch: {
     '$route' () {
       if (this.currentUser == null) {
