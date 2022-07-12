@@ -93,7 +93,7 @@ const vuetify = createVuetify({
 app.use(vuetify)
 app.use(router)
 app.use(OneSignalVuePlugin, {
-  appId: 'cdd5b7ea-8ed3-432d-907b-5fbed34e5d32',
+  appId: '6e633a0b-7f5c-4b5b-b2cf-b6c05a382e4a',
 })
 
 // not auth interceptor

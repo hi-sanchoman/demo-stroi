@@ -203,7 +203,7 @@ export default {
   }),
 
   beforeCreate() {
-    this.$OneSignal.showSlidedownPrompt()
+    // this.$OneSignal.showSlidedownPrompt()
   },
 
   watch: {

@@ -6,12 +6,15 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApplicationStatusRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
 use App\Http\Resources\Admin\ApplicationStatusResource;
+use App\Mail\ApplicationDeclined;
+use App\Mail\ApplicationSigned;
 use App\Models\Application;
 use App\Models\ApplicationLog;
 use App\Models\ApplicationPath;
 use App\Models\ApplicationStatus;
 use App\Models\Badge;
 use Gate;
+use Mail;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -53,7 +56,7 @@ class ApplicationStatusApiController extends Controller
 
             // set next responsible's status to 'incoming'
             $nextStep = $applicationStatus->application_path_id + 1;
-            $nextUser = ApplicationPath::whereId($nextStep)->first();
+            $nextUserNote = ApplicationPath::with(['responsible'])->whereId($nextStep)->first();
 
             // first responsible just signed up
             if ($nextStep == 2) {
@@ -85,9 +88,9 @@ class ApplicationStatusApiController extends Controller
             $applicationStatus->application->save();
 
             // add new +1 badge
-            if ($nextUser != null) {
+            if ($nextUserNote != null) {
                 $badge = Badge::firstOrCreate([
-                    'user_id' => $nextUser->responsible_id,
+                    'user_id' => $nextUserNote->responsible_id,
                     'type' => 'applications'
                 ]);
                 $badge->quantity += 1;
@@ -95,6 +98,8 @@ class ApplicationStatusApiController extends Controller
             }
 
             // notify next via email that he has an incoming request
+            // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+            Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
 
 
             // log to history
@@ -110,7 +115,7 @@ class ApplicationStatusApiController extends Controller
 
             // prev step
             $prevStep = $applicationStatus->application_path_id - 1;
-            $prevUser = ApplicationPath::whereId($prevStep)->first();
+            $prevUserNote = ApplicationPath::with(['responsible'])->whereId($prevStep)->first();
 
             if ($prevStep > 0) {
                 ApplicationStatus::query()
@@ -124,9 +129,9 @@ class ApplicationStatusApiController extends Controller
             $applicationStatus->application->save();
 
             // add new +1 badge
-            if ($prevUser != null) {
+            if ($prevUserNote != null) {
                 $badge = Badge::firstOrCreate([
-                    'user_id' => $prevUser->responsible_id,
+                    'user_id' => $prevUserNote->responsible_id,
                     'type' => 'applications'
                 ]);
                 $badge->quantity += 1;
@@ -134,6 +139,8 @@ class ApplicationStatusApiController extends Controller
             }
 
             // notify prev via email that request was declined
+            // Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));            
+            Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
 
             // log to history
             ApplicationLog::create([
