@@ -109,6 +109,7 @@
 import useApplications from "../../composables/applications"
 import ApplicationSidebar from "./ApplicationSidebar.vue"
 import axios from 'axios'
+import { store } from '../../store.js'
 
 export default {
     components: {
@@ -119,12 +120,15 @@ export default {
         return {
             applications: [],
             currentUser: null,
+            store,
         } 
     },
     
     methods: {
         readApplicationsBadge() {
-            axios.put('/api/v1/read-badge', { type: 'applications' });
+            axios.put('/api/v1/read-badge', { type: 'applications' }).then((response) => {
+                this.store.badgeNew = 0;
+            });
         },
 
         getCurrentUser() {

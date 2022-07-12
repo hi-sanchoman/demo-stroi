@@ -76,8 +76,8 @@ class PaymentApiController extends Controller
 
         // notify accountant
         // TODO: hard-coded accountant email!
-        // Mail::to('aijanim_89@mail.ru')->send(new PaymentOrdered());
-        Mail::to('noreply.oks@yandex.kz')->send(new PaymentOrdered());
+        Mail::to('aijanim_89@mail.ru')->send(new PaymentOrdered());
+        // Mail::to('noreply.oks@yandex.kz')->send(new PaymentOrdered());
 
 
         $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
@@ -117,8 +117,8 @@ class PaymentApiController extends Controller
 
         // notify CEO
         // TODO: hard-coded CEO email!
-        // Mail::to('kurtayev.meirzhan@gmail.com')->send(new PaymentCompleted($applicationOffer, $toBePaid));
-        Mail::to('noreply.oks@yandex.kz')->send(new PaymentCompleted($applicationOffer, $toBePaid));
+        Mail::to('kurtayev.meirzhan@gmail.com')->send(new PaymentCompleted($applicationOffer, $toBePaid));
+        // Mail::to('noreply.oks@yandex.kz')->send(new PaymentCompleted($applicationOffer, $toBePaid));
 
         return 1;
     }

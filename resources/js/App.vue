@@ -19,10 +19,10 @@
         >
           <v-btn flat class="text-white">
             Заявки 
-            <span v-if="countNewApplications > 0">
+            <span v-if="store.badgeNew > 0">
               <v-badge
                 color="error"
-                :content="countNewApplications"
+                :content="store.badgeNew"
                 inline
               ></v-badge>
             </span>
@@ -118,10 +118,10 @@
             <v-btn flat class="">
               Заявки
               
-              <span v-if="countNewApplications > 0">
+              <span v-if="store.badgeNew > 0">
               <v-badge
                 color="error"
-                :content="countNewApplications"
+                :content="store.badgeNew"
                 inline
               ></v-badge>
             </span>
@@ -185,6 +185,7 @@
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios'
+import { store } from './store.js'
 
 export default {
   name: 'App',
@@ -199,7 +200,7 @@ export default {
     drawer: false,
     group: null,
     currentUser: null,
-    countNewApplications: 0,
+    store,
   }),
 
   beforeCreate() {
@@ -254,7 +255,7 @@ export default {
 
     getCountNewApplications() {
       axios.get('/api/v1/badges-unread?type=applications').then((response) => {
-        this.countNewApplications = response.data;
+        this.store.badgeNew = response.data;
       });
     }
   },

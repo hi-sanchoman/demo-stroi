@@ -98,8 +98,8 @@ class ApplicationStatusApiController extends Controller
             }
 
             // notify next via email that he has an incoming request
-            // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
-            Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
+            Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+            // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
 
 
             // log to history
@@ -139,8 +139,8 @@ class ApplicationStatusApiController extends Controller
             }
 
             // notify prev via email that request was declined
-            // Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));            
-            Mail::to('noreply.oks@yandex.kz')->send(new ApplicationDeclined($applicationStatus->application));
+            Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
+            // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationDeclined($applicationStatus->application));
 
             // log to history
             ApplicationLog::create([
