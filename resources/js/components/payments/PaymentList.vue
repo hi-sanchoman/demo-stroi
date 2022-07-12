@@ -185,6 +185,8 @@ export default {
 
     mounted() {
         // this.getApplications('draft')
+        this.getCurrentUser();
+
         this.getPayments()
     },
 
