@@ -12,6 +12,7 @@
         "laravel/sanctum": "^2.15",
         "laravel/tinker": "^2.7",
         "laraveldaily/laravel-charts": "^0.1.29",
+        "pusher/pusher-php-server": "^7.0",
         "spatie/laravel-medialibrary": "^10.0.7",
         "yajra/laravel-datatables-oracle": "^9.19"
     },

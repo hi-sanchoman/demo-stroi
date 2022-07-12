@@ -22,9 +22,9 @@
                                 <th class="text-left">
                                     № заявки
                                 </th> 
-                                <th class="text-left">
+                                <!-- <th class="text-left">
                                     Наименование ресурса
-                                </th>
+                                </th> -->
                                 <th class="text-left">
                                     Компания
                                 </th>
@@ -48,10 +48,9 @@
                                 v-for="payment in payments"
                                 :key="payment.id"
                             >
-                                <td>{{ payment.application_product.application.construction.name }}</td>
-                                <td>{{ payment.application_product.application.id }}</td>
-                                <td width="30%">{{ payment.application_product.product.name }}</td>
-                                <td>{{ payment.company.name }}</td>
+                                <td>{{ payment.application.construction.name }}</td>
+                                <td>{{ payment.application.id }}</td>
+                                <td width="30%">{{ payment.company.name }}</td>
                                 <td>{{ payment.to_be_paid }} тг</td>
                                 <!-- <td>
 

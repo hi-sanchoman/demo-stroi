@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Models\ApplicationOffer;
+use App\Models\Payment;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -20,9 +20,9 @@ class PaymentCompleted extends Mailable
      *
      * @return void
      */
-    public function __construct(ApplicationOffer $offer, $paid)
+    public function __construct(Payment $payment, $paid)
     {
-        $this->payment = $offer;
+        $this->payment = $payment;
         $this->paid = $paid;
     }
 

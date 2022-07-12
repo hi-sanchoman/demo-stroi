@@ -8,6 +8,8 @@ use App\Models\ApplicationOffer;
 use App\Models\ApplicationProduct;
 use Symfony\Component\HttpFoundation\Response;
 use App\Http\Resources\Admin\ApplicationOfferResource;
+use App\Models\Payment;
+use DB;
 
 class ApplicationOfferApiController extends Controller
 {
@@ -67,12 +69,36 @@ class ApplicationOfferApiController extends Controller
     public function update(Request $request, $id)
     {
         // dd($request->all());
+        DB::beginTransaction();
 
         $input = $request->all();
         $input['company_id'] = $request->company['id'];
 
-        $offer = ApplicationOffer::whereId($id)->firstOrFail();
+        $offer = ApplicationOffer::with(['applicationProduct'])->whereId($id)->firstOrFail();
         $offer->update($input);
+
+        // update payment
+        $payment = Payment::firstOrCreate([
+            'company_id' => $offer->company_id,
+            'application_id' => $offer->applicationProduct->application_id,
+        ]);
+
+        $offer->payment_id = $payment->id;
+        $offer->save();
+
+        // update payment total amount
+        $newAmount = 0;
+
+        $offers = ApplicationOffer::where('payment_id', $payment->id)->get();
+        foreach ($offers as $offer) {
+            $newAmount += $offer->price * $offer->quantity;
+        }
+
+        $payment->amount = $newAmount;
+        $payment->save();
+
+
+        DB::commit();
 
         return (new ApplicationOfferResource($offer))
             ->response()

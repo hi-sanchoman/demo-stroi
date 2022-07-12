@@ -22,14 +22,14 @@
                                 <th class="text-left">
                                     № заявки
                                 </th> 
-                                <th class="text-left">
+                                <!-- <th class="text-left">
                                     Наименование ресурса
                                 </th>
                                 <th class="text-left">
-                                    Компания
-                                </th>
-                                <th class="text-left">
                                     Количество
+                                </th> -->
+                                <th class="text-left">
+                                    Компания
                                 </th>
                                 <th>
                                     Сумма
@@ -52,35 +52,86 @@
                             <tr v-if="payments.length <= 0">
                                 <td colspan="5">Нет данных.</td>
                             </tr>
-
-                            <tr
+                            
+                            <template
                                 v-for="payment in payments"
                                 :key="payment.id"
                             >
-                                <td>{{ payment.application_product.application.construction.name }}</td>
-                                <td>{{ payment.application_product.application.id }}</td>
-                                <td width="30%">{{ payment.application_product.product.name }}</td>
-                                <td>{{ payment.company.name }}</td>
-                                <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td>
-                                <td>{{ payment.price * payment.quantity }} ₸</td>
-                                <td>{{ payment.paidTotal }} ₸</td>
-                                <td>{{ (payment.price * payment.quantity - payment.paidTotal) }} ₸</td>
-                                <td class="pt-6">
-                                    <v-text-field
-                                        v-model="payment.order_paid"
-                                        type="number"
-                                        density="compact"
-                                        class="w-24"
-                                        variant="underlined"
-                                        style="width: 150px"
-                                        v-if="payment.application_product.application.status == 'in_progress'"
-                                    >
-                                    </v-text-field>
-                                </td>
-                                <td>
-                                    {{ payment.to_be_paid ? `${payment.to_be_paid} ₸` : '' }} 
-                                </td>
-                            </tr>
+                                <tr
+                                >
+                                    <td>{{ payment.application.construction.name }}</td>
+                                    <td>{{ payment.application.id }}</td>
+                                    <!-- <td width="30%">{{ payment.application_product.product.name }}</td> -->
+                                    <!-- <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td> -->
+                                    <td width="30%">
+                                        {{ payment.company.name }}<br>
+
+                                        <v-btn 
+                                            v-if="payment.offers.length > 1"
+                                            class="mt-2"
+                                            size="small"
+                                            @click="showOffers(payment)"
+                                        >
+                                            Показать позиции
+                                        </v-btn>                                
+                                    </td>
+                                    <td>{{ payment.amount }} ₸</td>
+                                    <td>{{ payment.paid }} ₸</td>
+                                    <td>{{ (payment.amount - payment.paid) }} ₸</td>
+                                    <td class="pt-6">
+                                        <v-text-field
+                                            v-model="payment.order_paid"
+                                            type="number"
+                                            density="compact"
+                                            class="w-24"
+                                            variant="underlined"
+                                            style="width: 150px"
+                                            v-if="payment.application.status == 'in_progress'"
+                                        >
+                                        </v-text-field>
+                                    </td>
+                                    <td>
+                                        {{ payment.to_be_paid ? `${payment.to_be_paid} ₸` : '' }} 
+                                    </td>
+                                </tr>
+
+                                <template v-if="payment.offers.length > 1">
+                                    <tr :id="'offers_' + payment.id" style="display: none;">
+                                        <td colspan="8" class="border-none">
+                                            <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible;">
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 25%">Статья расходов</th>
+                                                        <th style="width: 25%">Название товара</th>
+                                                        <th style="width: 10%">Кол-во</th>
+                                                        <th style="width: 10%">Цена за ед.</th>
+                                                        <th>Общая сумма</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr v-for="offer in payment.offers" :key="offer.id">
+                                                        <td class="">
+                                                            {{ offer.application_product.category.name }}
+                                                        </td>
+                                                        <td class="">
+                                                            {{ offer.application_product.product.name }}
+                                                        </td>
+                                                        <td>
+                                                            {{ offer.quantity }} {{ offer.application_product.product.unit }}
+                                                        </td>
+                                                        <td>
+                                                            {{ offer.price }}
+                                                        </td>
+                                                        <td>
+                                                            {{ offer.price * offer.quantity }} ₸
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </v-table>
+                                        </td>
+                                    </tr>                                    
+                                </template>
+                            </template>
                         </tbody>
                     </v-table>
 
@@ -142,7 +193,7 @@ export default {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
-                console.log(this.currentUser)
+                // console.log(this.currentUser)
             })
         },
 
@@ -152,7 +203,7 @@ export default {
             // get applications 
             axios.get('/api/v1/payments').then((response) => {
                 this.payments = response.data.data
-                console.log(this.payments)
+                // console.log(this.payments)
             });
         },
 
@@ -160,11 +211,11 @@ export default {
             var data = [];
 
             for (var i = 0; i < this.payments.length; i++) {
-                var offer = this.payments[i];
+                var payment = this.payments[i];
 
                 data.push({
-                    'id': offer.id,
-                    'to_be_paid': offer.order_paid,
+                    'id': payment.id,
+                    'to_be_paid': payment.order_paid,
                 });
             }
 
@@ -180,6 +231,11 @@ export default {
                 this.snackbar.status = true;
             });
         },
+
+        showOffers(payment) {
+            var offersTable = document.getElementById('offers_' + payment.id);
+            offersTable.style.display = offersTable.style.display == 'none' ? 'table-row' : 'none';
+        }
 
     },
 
