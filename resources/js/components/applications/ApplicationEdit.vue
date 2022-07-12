@@ -102,14 +102,21 @@
                             
                         </v-row>
 
-                        <v-table style="overflow-x:auto;">
+                        <v-table style="overflow: visible;">
                             <thead>
                                 <tr>
                                     <th>№</th>
                                     <th>Статья расходов</th>
                                     <th>Наименование ресурсов</th>
                                     <th>Ед. изм.</th>
-                                    <th>Кол-во</th>
+                                    
+                                    <th v-if="!isWarehouseManager()">Кол-во</th>
+                                    <template v-else>
+                                        <th>заказано</th>
+                                        <th>фактически</th>
+                                        <th>остаток</th>
+                                    </template>
+
                                     <!-- <th>Цена</th>
                                     <th>Сумма</th>
                                     <th>Компания</th> -->
@@ -128,7 +135,9 @@
                                         <td>{{ item.category.name }}</td>
                                         <td>{{ item.product.name }}</td>
                                         <td>{{ item.product.unit }}</td>
-                                        <td :class="application.status == 'draft' ? 'd-flex mt-3' : ''">
+
+
+                                        <td v-if="!isWarehouseManager()" :class="application.status == 'draft' ? 'd-flex mt-3' : ''">
                                             <v-text-field
                                                 v-model="products[index].quantity"
                                                 type="number"
@@ -145,6 +154,11 @@
                                                 {{ products[index].quantity }}
                                             </span>
                                         </td>
+                                        <template v-else>
+                                            <td>{{ products[index].quantity }}</td>
+                                            <td>{{ products[index].prepared }}</td>
+                                            <td>{{ products[index].quantity - products[index].prepared }}</td>
+                                        </template>
                                         <!-- <td>
                                             <v-text-field
                                                 v-model="products[index].price"
@@ -299,7 +313,7 @@
 
                                     <tr v-if="!isWarehouseManager() && item.offers != null && item.offers.length > 0 && (application.status == 'in_progress' || application.status == 'in_review')" class="bg-slate-100">
                                         <td colspan="9" class="border-none">
-                                            <v-table class="mt-4 mb-8 mx-8 border" style="overflow-x:auto;">
+                                            <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible;">
                                                 <thead>
                                                     <tr>
                                                         <th style="width: 25%">Название компании</th>
@@ -441,7 +455,7 @@
                                             Подписание заявки
                                         </v-expansion-panel-title>
 
-                                        <v-expansion-panel-text style="overflow-x:auto;">
+                                        <v-expansion-panel-text style="">
                                             <v-list-item
                                                 v-for="item in application.application_application_statuses" :key="item.id"
                                             >
@@ -734,7 +748,7 @@
             persistent
         >
             <v-card
-                class="min-w-5xl w-7xl" style="width: 500px"
+                class="oks-dialog min-w-5xl w-7xl" style=""
             >
                 <v-card-title>
                     <span class="text-h5">Приемка товара</span>
@@ -1321,6 +1335,26 @@ export default {
 }
 
 .v-table__wrapper {
-    overflow: inherit !important;
+    overflow-x: auto;
+    overflow-y: visible !important;
+}
+
+.v-table__wrapper table {
+    overflow-x: auto;
+    overflow-y: visible !important;
+}
+
+@media only screen and (min-width: 768px) {
+    .oks-dialog {
+        width: 500px;
+    }
+
+    .v-table__wrapper {
+        overflow: visible !important;
+    }
+
+    .v-table__wrapper table {
+        overflow: visible !important;
+    }
 }
 </style>

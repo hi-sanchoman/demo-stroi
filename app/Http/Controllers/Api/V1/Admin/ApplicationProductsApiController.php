@@ -111,8 +111,9 @@ class ApplicationProductsApiController extends Controller
         ]);
 
         // add to supply
-        Supply::create([
-            'construction_id' => $applicationProduct->application->construction_id,
+        // TODO: check by product_id & product_category_id & construction_id
+        $supplyNote = Supply::create([
+            'construction_id' => $applicationProduct->application->construction->id,
             'application_product_id' => $applicationProduct->id,
             'quantity' => $request->product['toBePrepared'],
         ]);

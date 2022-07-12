@@ -76,7 +76,7 @@
         persistent
     >
         <v-card
-            class="min-w-5xl w-7xl" style="width: 500px"
+            class="oks-dialog min-w-5xl w-7xl" style=""
         >
             <v-card-title>
                 <span class="text-h5">Перемещение товара</span>
@@ -158,7 +158,7 @@
         persistent
     >
         <v-card
-            class="min-w-5xl w-7xl" style="width: 500px"
+            class="oks-dialog min-w-5xl w-7xl" style=""
         >
             <v-card-title>
                 <span class="text-h5">Перемещение товара</span>
@@ -391,3 +391,13 @@ export default {
     }
 }
 </script>
+
+
+<style>
+@media only screen and (min-width: 768px) {
+    .oks-dialog {
+        width: 500px;
+    }
+}
+
+</style>

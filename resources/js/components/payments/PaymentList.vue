@@ -32,7 +32,13 @@
                                     Количество
                                 </th>
                                 <th>
-                                    Сумма / Оплачено / Остаток
+                                    Сумма
+                                </th>
+                                <th>
+                                    Оплачено
+                                </th>
+                                <th>
+                                    Остаток
                                 </th>
                                 <th>
                                     Оплатить
@@ -56,7 +62,9 @@
                                 <td width="30%">{{ payment.application_product.product.name }}</td>
                                 <td>{{ payment.company.name }}</td>
                                 <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td>
-                                <td>{{ payment.price * payment.quantity }} / {{ payment.paidTotal }} / {{ (payment.price * payment.quantity - payment.paidTotal) }} тг</td>
+                                <td>{{ payment.price * payment.quantity }} ₸</td>
+                                <td>{{ payment.paidTotal }} ₸</td>
+                                <td>{{ (payment.price * payment.quantity - payment.paidTotal) }} ₸</td>
                                 <td class="pt-6">
                                     <v-text-field
                                         v-model="payment.order_paid"
@@ -70,7 +78,7 @@
                                     </v-text-field>
                                 </td>
                                 <td>
-                                    {{ payment.to_be_paid ? `${payment.to_be_paid} тг` : '' }} 
+                                    {{ payment.to_be_paid ? `${payment.to_be_paid} ₸` : '' }} 
                                 </td>
                             </tr>
                         </tbody>

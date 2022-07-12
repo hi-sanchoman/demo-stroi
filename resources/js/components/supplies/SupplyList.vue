@@ -49,7 +49,7 @@
                             >
                                 <td>{{ index + 1 }}</td>
                                 <td>{{ inventory.item.application_product.product.name }}</td>
-                                <td>{{ inventory.item.application_product.product.categories[0].name }}</td>
+                                <td>{{ inventory.item.application_product.category.name }}</td>
                                 <td>{{ inventory.item.application_product.product.unit }}</td>
                                 <td>{{ inventory.total }}</td>
                                 <td></td>
@@ -75,7 +75,7 @@
                         <v-row no-gutters class="">
 
                             <v-col cols="12" class="">
-                                <v-table transition="slide-x-transition">
+                                <v-table transition="slide-x-transition" style="overflow-x: auto">
                                     <thead>
                                         <tr>
                                             <th class="text-left">
@@ -109,10 +109,10 @@
                                         >
                                             <td>{{ index + 1 }}</td>
                                             <td>{{ inventory.application_product.product.name }}</td>
-                                            <td>{{ inventory.application_product.product.categories[0].name }}</td>
+                                            <td>{{ inventory.application_product.category.name }}</td>
                                             <td>{{ inventory.application_product.product.unit }}</td>
                                             <td>{{ inventory.quantity }}</td>
-                                            <td>{{ inventory.application_product.updated_at }}</td>
+                                            <td>{{ inventory.created_at }}</td>
                                         </tr>
                                     </tbody>
                                 </v-table>

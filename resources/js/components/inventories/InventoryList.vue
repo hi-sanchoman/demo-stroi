@@ -15,7 +15,9 @@
                 <div v-for="inventory in inventories" :key="inventory.id" class="border rounded px-4 py-4 w-fit">
                     <h2 class="block mb-4">{{ inventory.construction.name }}</h2>
 
-                    <a :href="'/inventories/' + inventory.id" class="mt-4 py-2 px-2 block text-decoration-none text-black border hover:bg-slate-200">Перейти</a>
+                    <router-link :to="'/inventories/' + inventory.id" class="text-decoration-none text-black">
+                        <a class="mt-4 py-2 px-2 block text-decoration-none text-black border hover:bg-slate-200">Перейти</a>
+                    </router-link>
                 </div>
             </v-row>    
         </v-container>

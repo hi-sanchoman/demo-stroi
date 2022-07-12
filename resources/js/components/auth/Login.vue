@@ -67,7 +67,7 @@ export default {
         login() {
             axios.post('/api/v1/auth/login', this.formData).then((response) => {
                 localStorage.setItem('token', response.data)
-                this.$router.push('/')
+                this.$router.push('/applications?status=redirect')
             }).catch((exception) => {
                 this.errors = exception.response.data.errors
             })

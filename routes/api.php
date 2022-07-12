@@ -83,4 +83,11 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::get('/temp-incoming/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'getIncoming']);
     Route::put('/temp-inventory-accept/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'acceptIncoming']);
     Route::put('/temp-inventory-decline/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'declineIncoming']);
+
+
+
+
+
+    Route::get('/badges-unread', [App\Http\Controllers\Api\V1\UserController::class, 'getUnreadBadge']);
+    Route::put('/read-badge', [App\Http\Controllers\Api\V1\UserController::class, 'readBadge']);
 });

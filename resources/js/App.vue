@@ -17,7 +17,16 @@
           v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Foreman')"
           to="/applications?status=redirect" class="text-decoration-none"
         >
-          <v-btn flat class="text-white">Заявки</v-btn>
+          <v-btn flat class="text-white">
+            Заявки 
+            <span v-if="countNewApplications > 0">
+              <v-badge
+                color="error"
+                :content="countNewApplications"
+                inline
+              ></v-badge>
+            </span>
+          </v-btn>
         </router-link>
 
         <router-link 
@@ -106,7 +115,17 @@
           <router-link             
             to="/applications?status=redirect" class="text-decoration-none"
           >
-            <v-btn flat class="">Заявки</v-btn>
+            <v-btn flat class="">
+              Заявки
+              
+              <span v-if="countNewApplications > 0">
+              <v-badge
+                color="error"
+                :content="countNewApplications"
+                inline
+              ></v-badge>
+            </span>
+            </v-btn>
           </router-link>
         </v-list-item>
 
@@ -180,6 +199,7 @@ export default {
     drawer: false,
     group: null,
     currentUser: null,
+    countNewApplications: 0,
   }),
 
   watch: {
@@ -213,6 +233,8 @@ export default {
         if (this.currentUser != null) {
           // console.log(this.currentUser.roles[0].title)
           // this.redirectUser()
+
+          this.getCountNewApplications();
         }
       })
     },
@@ -224,6 +246,12 @@ export default {
       } else {
         this.$router.push('/other')
       }
+    },
+
+    getCountNewApplications() {
+      axios.get('/api/v1/badges-unread?type=applications').then((response) => {
+        this.countNewApplications = response.data;
+      });
     }
   },
 

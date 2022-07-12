@@ -92,6 +92,12 @@ export default {
             })
         },
 
+        getInventory() {
+            // get applications 
+            axios.get('/api/v1/inventories/' + this.$route.params.id).then((response) => {
+                this.inventory = response.data.data;
+            })
+        },
 
         getLogs() {
             axios.get('/api/v1/inventories/' + this.$route.params.id + '/history').then((response) => {
@@ -109,6 +115,8 @@ export default {
         // get current user
         this.getCurrentUser();
 
+        this.getInventory();
+
         this.getLogs();
     },
 
@@ -120,7 +128,7 @@ export default {
                 if (status == 'waiting') {
                     // this.getIncoming();
                 } else if (status == 'accepted') {
-                    this.getStocks();
+                    this.$router.push('/inventories/' + this.$route.params.id + '?status=accepted');
                 } else if (status == 'declined') {
                     console.log('get declined');
                 }

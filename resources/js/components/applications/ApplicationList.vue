@@ -59,6 +59,7 @@
                                     
                                     <v-row
                                         v-if="application.status == 'in_review'"
+                                        class="py-3"
                                     >
                                         <v-chip
                                             v-for="item in application.application_application_statuses" 
@@ -122,12 +123,18 @@ export default {
     },
     
     methods: {
+        readApplicationsBadge() {
+            axios.put('/api/v1/read-badge', { type: 'applications' });
+        },
+
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
                 // console.log(this.currentUser)
 
                 if (this.$route.query.status == 'redirect') {
+                    this.readApplicationsBadge();
+
                     if (this.currentUser.roles[0].title == 'PTD Engineer') {
                         this.$router.push('/applications?status=draft')
                         return
