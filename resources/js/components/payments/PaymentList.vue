@@ -85,6 +85,7 @@
                     </v-table>
 
                     <v-btn
+                        v-if="this.currentUser != null && this.currentUser.roles[0].title == 'Vice President'"
                         class="mt-5"
                         @click="updatePayments"
                         color="primary"

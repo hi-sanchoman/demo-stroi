@@ -32,6 +32,6 @@ class ApplicationDeclined extends Mailable
     public function build()
     {
         $application = $this->application;
-        return $this->view('emails.applications.declined', compact('application'));
+        return $this->view('emails.applications.declined', compact('application'))->subject('Ваша заявка отклонена');
     }
 }

@@ -4,8 +4,11 @@ namespace App\Http\Controllers\Api\V1;
 
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\PaymentCompleted;
+use App\Mail\PaymentOrdered;
 use App\Models\ApplicationOffer;
 use App\Models\ApplicationProduct;
+use Mail;
 
 class PaymentApiController extends Controller
 {
@@ -71,6 +74,12 @@ class PaymentApiController extends Controller
             ]);
         }
 
+        // notify accountant
+        // TODO: hard-coded accountant email!
+        // Mail::to('aijanim_89@mail.ru')->send(new PaymentOrdered());
+        Mail::to('noreply.oks@yandex.kz')->send(new PaymentOrdered());
+
+
         $applications = ApplicationProduct::with(['application', 'product', 'category', 'offers', 'offers.company', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.application', 'offers.applicationProduct.application.construction'])->get();
         // dd($applications->toArray());
 
@@ -96,10 +105,18 @@ class PaymentApiController extends Controller
      */
     public function setPaid(Request $request, $id)
     {
-        $applicationOffer = ApplicationOffer::where('id', $id)->firstOrFail();
+        $toBePaid = $applicationOffer->to_be_paid;
+
+        $applicationOffer = ApplicationOffer::with(['company', 'applicationProduct', 'applicationProduct.product'])->where('id', $id)->firstOrFail();
         $applicationOffer->paidTotal += $applicationOffer->to_be_paid;
         $applicationOffer->to_be_paid = 0;
         $applicationOffer->save();
+
+
+        // notify CEO
+        // TODO: hard-coded CEO email!
+        // Mail::to('kurtayev.meirzhan@gmail.com')->send(new PaymentCompleted($applicationOffer, $toBePaid));
+        Mail::to('noreply.oks@yandex.kz')->send(new PaymentCompleted($applicationOffer, $toBePaid));
 
         return 1;
     }

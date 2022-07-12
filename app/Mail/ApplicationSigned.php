@@ -32,6 +32,6 @@ class ApplicationSigned extends Mailable
     public function build()
     {
         $application = $this->application;
-        return $this->view('emails.applications.signed', compact('application'));
+        return $this->view('emails.applications.signed', compact('application'))->subject('Новая заявка на подписание');
     }
 }
