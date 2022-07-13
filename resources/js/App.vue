@@ -118,13 +118,12 @@
             <v-btn flat class="">
               Заявки
               
-              <span v-if="store.badgeNew > 0">
               <v-badge
+                v-if="store.badgeNew > 0"
                 color="error"
                 :content="store.badgeNew"
                 inline
               ></v-badge>
-            </span>
             </v-btn>
           </router-link>
         </v-list-item>
