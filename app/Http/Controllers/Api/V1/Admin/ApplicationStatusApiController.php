@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\V1\Admin;
 
+use App\Events\ApplicationSigned as EventsApplicationSigned;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApplicationStatusRequest;
 use App\Http\Requests\UpdateApplicationStatusRequest;
@@ -10,6 +11,7 @@ use App\Mail\ApplicationDeclined;
 use App\Mail\ApplicationSigned;
 use App\Models\Application;
 use App\Models\ApplicationLog;
+use App\Models\ApplicationOpenedStatus;
 use App\Models\ApplicationPath;
 use App\Models\ApplicationStatus;
 use App\Models\Badge;
@@ -89,18 +91,27 @@ class ApplicationStatusApiController extends Controller
 
             // add new +1 badge
             if ($nextUserNote != null) {
-                $badge = Badge::firstOrCreate([
+                // $badge = Badge::firstOrCreate([
+                //     'user_id' => $nextUserNote->responsible_id,
+                //     'type' => 'applications'
+                // ]);
+                // $badge->quantity += 1;
+                // $badge->save();
+
+                $openedStatus = ApplicationOpenedStatus::firstOrCreate([
                     'user_id' => $nextUserNote->responsible_id,
-                    'type' => 'applications'
+                    'application_id' => $applicationStatus->application->id,
                 ]);
-                $badge->quantity += 1;
-                $badge->save();
+                $openedStatus->status = 'unread';
+                $openedStatus->save();
             }
 
             // notify next via email that he has an incoming request
-            Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+            // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
             // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
 
+            // fire event
+            // broadcast(new EventsApplicationSigned('Новая заявка', 'У вас новая заявка на рассмотрение', 'url', env('APP_URL') . '/applications/' . $applicationStatus->application->id, $nextUserNote->responsible))->toOthers();
 
             // log to history
             ApplicationLog::create([
@@ -130,12 +141,19 @@ class ApplicationStatusApiController extends Controller
 
             // add new +1 badge
             if ($prevUserNote != null) {
-                $badge = Badge::firstOrCreate([
+                // $badge = Badge::firstOrCreate([
+                //     'user_id' => $prevUserNote->responsible_id,
+                //     'type' => 'applications'
+                // ]);
+                // $badge->quantity += 1;
+                // $badge->save();
+
+                $openedStatus = ApplicationOpenedStatus::firstOrCreate([
                     'user_id' => $prevUserNote->responsible_id,
-                    'type' => 'applications'
+                    'application_id' => $applicationStatus->application->id,
                 ]);
-                $badge->quantity += 1;
-                $badge->save();
+                $openedStatus->status = 'unread';
+                $openedStatus->save();
             }
 
             // notify prev via email that request was declined

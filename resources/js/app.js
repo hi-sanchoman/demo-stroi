@@ -26,8 +26,8 @@ import { loadFonts } from './plugins/webfontloader'
 // import HttpClient from './httpclient.js'
 import axios from 'axios'
 
-import OneSignalVuePlugin from '@onesignal/onesignal-vue3'
-
+// import OneSignalVuePlugin from '@onesignal/onesignal-vue3'
+import firebaseMessaging from './firebase'
 
 loadFonts()
 
@@ -92,9 +92,9 @@ const vuetify = createVuetify({
 
 app.use(vuetify)
 app.use(router)
-app.use(OneSignalVuePlugin, {
-  appId: '6e633a0b-7f5c-4b5b-b2cf-b6c05a382e4a',
-})
+// app.use(OneSignalVuePlugin, {
+//   appId: '6e633a0b-7f5c-4b5b-b2cf-b6c05a382e4a',
+// })
 
 // not auth interceptor
 axios.interceptors.request.use(function (config) {
@@ -122,5 +122,8 @@ axios.interceptors.response.use(function (response) {
 
 
 app.provide('isLoading', false)
+
+// firebase messaging
+app.config.globalProperties.$messaging = firebaseMessaging
 
 app.mount('#app')

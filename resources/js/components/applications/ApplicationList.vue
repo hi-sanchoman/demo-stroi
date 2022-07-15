@@ -8,11 +8,11 @@
             </v-row> -->
 
             <v-row no-gutters class="mt-10">
-                <v-col cols="12" md="2" class="border px-5 py-5">
+                <v-col cols="12" md="3" class="border px-5 py-5">
                     <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
                 </v-col>
 
-                <v-col cols="12" md="10" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
                     <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
@@ -41,7 +41,7 @@
                             <tr
                                 v-for="application in applications"
                                 :key="application.id"
-                                
+                                :class="application.opened_statuses.length > 0 ? 'tr-unread' : 'tr-read'"
                             >
                                 <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.id }}</td>
                                 <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.construction.name }}</td>
@@ -134,10 +134,11 @@ export default {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
-                // console.log(this.currentUser)
 
                 if (this.$route.query.status == 'redirect') {
-                    this.readApplicationsBadge();
+                    console.log('redirect')
+                    
+                    // this.readApplicationsBadge();
 
                     if (this.currentUser.roles[0].title == 'PTD Engineer') {
                         this.$router.push('/applications?status=draft')
@@ -211,3 +212,10 @@ export default {
     }
 }
 </script>
+
+
+<style>
+.tr-unread td {
+    font-weight: bold;
+}
+</style>

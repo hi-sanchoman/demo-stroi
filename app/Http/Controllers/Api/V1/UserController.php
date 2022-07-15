@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
+use App\Models\ApplicationOpenedStatus;
 use App\Models\Badge;
 
 class UserController extends Controller
@@ -20,13 +21,18 @@ class UserController extends Controller
     {
         // dd($request->all());
 
-        $badge = Badge::query()
-            ->where('type', $request->type)
-            ->where('status', 'unread')
-            ->where('user_id', $request->user()->id)
-            ->first();
+        // $badge = Badge::query()
+        //     ->where('type', $request->type)
+        //     ->where('status', 'unread')
+        //     ->where('user_id', $request->user()->id)
+        //     ->first();
+        // return $badge != null ? $badge->quantity : 0;
 
-        return $badge != null ? $badge->quantity : 0;
+        $unread = ApplicationOpenedStatus::query()
+            ->where('user_id', $request->user()->id)
+            ->where('status', 'unread')
+            ->count();
+        return $unread;
     }
 
     public function readBadge(Request $request)

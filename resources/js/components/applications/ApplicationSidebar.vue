@@ -171,7 +171,7 @@ export default {
     props: ['currentUser'],
 
     mounted() {
-        console.log('user', this.currentUser)
+        // console.log()
     }
 }
 </script>

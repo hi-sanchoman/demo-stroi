@@ -10,12 +10,12 @@
             
 
             <v-row no-gutters class="mt-10">
-                <v-col cols="12" md="2" class="border px-5 py-5">
+                <v-col cols="12" md="4" lg="3" class="border px-5 py-5">
                     <InventorySidebar v-if="currentUser != null && inventory != null" :currentUser="currentUser" :inventory="inventory" />
                 </v-col>
                 
 
-                <v-col cols="12" md="10" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                <v-col cols="12" md="8" lg="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
                     <v-table transition="slide-x-transition" style="overflow-x:auto;">
                         <thead>
                             <tr>

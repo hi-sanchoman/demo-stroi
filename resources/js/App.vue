@@ -185,6 +185,8 @@
 import HelloWorld from './components/HelloWorld.vue'
 import axios from 'axios'
 import { store } from './store.js'
+import { getToken, getMessaging, onMessage } from 'firebase/messaging'
+import messaging from './firebase'
 
 export default {
   name: 'App',
@@ -219,6 +221,35 @@ export default {
   },
 
   methods: {
+    listenForNotifications() {
+      const messaging = getMessaging();
+      onMessage(messaging, (payload) => {
+        console.log('Message received. ', payload);
+        // ...
+      });
+
+      // Echo.private('user-' + this.currentUser.id)
+      //   .listen('ApplicationSigned', ev => {
+      //     if (! ('Notification' in window)) {
+      //       alert('Web Notification is not supported');
+      //       return;
+      //     }
+
+      //     Notification.requestPermission( permission => {
+      //       let notification = new Notification(ev.title, {
+      //         body: ev.body,
+      //         icon: "https://pusher.com/static_logos/320x320.png" // optional image url
+      //       });
+      //       // link to page on clicking the notification
+      //       notification.onclick = () => {
+      //         if (ev.action === 'url') {
+      //           window.open(ev.data); 
+      //         }
+      //       };
+      //     });
+      //   })
+    },
+
     logout() {
       axios.post('/api/v1/auth/logout').then((response) => {
         localStorage.removeItem('token');
@@ -231,14 +262,32 @@ export default {
 
     getCurrentUser() {
       axios.get('/api/v1/me').then((response) => {
-        // console.log("current user", response)
+        console.log("current user", response.data)
         this.currentUser = response.data
 
         if (this.currentUser != null) {
           // console.log(this.currentUser.roles[0].title)
           // this.redirectUser()
 
-          this.getCountNewApplications();
+          // get token
+          getToken(messaging, { vapidKey: 'BOOU1xNcZUUoL7b7DZlDJ4uCqGD9syLMBEguNTmTvkTegJ5wiZfGc2O30Jws7XjkzfQZSKNbhuKAQyaNP9txa7M' }).then((currentToken) => {
+            if (currentToken) {
+              console.log("token: " + currentToken);
+
+              // Send the token to your server and update the UI if necessary
+              // ...
+            } else {
+              // Show permission request UI
+              console.log('No registration token available. Request permission to generate one.');
+              // ...
+            }
+          }).catch((err) => {
+            console.log('An error occurred while retrieving token. ', err);
+            // ...
+          });
+
+          // get new badges
+          this.getCountNewApplications();    
         }
       })
     },
@@ -260,7 +309,9 @@ export default {
   },
 
   mounted() {
-    this.getCurrentUser()
+    // this.getCurrentUser()
+    
+    this.listenForNotifications();
   }
 }
 </script>

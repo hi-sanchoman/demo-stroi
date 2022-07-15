@@ -9,6 +9,7 @@ use App\Http\Resources\Admin\ApplicationResource;
 use App\Models\Application;
 use App\Models\ApplicationProduct;
 use App\Models\ApplicationLog;
+use App\Models\ApplicationOpenedStatus;
 use App\Models\ApplicationPath;
 use App\Models\ApplicationStatus;
 use Gate;
@@ -34,7 +35,11 @@ class ApplicationApiController extends Controller
                 ->where('application_path_id', $path->id)->get();
 
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
                 ->whereIn('id', $statuses->pluck('application_id'))
                 ->whereNot('status', 'draft')
                 ->orderBy('id', 'DESC')
@@ -49,7 +54,11 @@ class ApplicationApiController extends Controller
                 ->where('application_path_id', $path->id)->get();
 
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
                 ->whereIn('id', $statuses->pluck('application_id'))
                 ->orderBy('id', 'DESC')
                 ->get();
@@ -57,7 +66,11 @@ class ApplicationApiController extends Controller
             return new ApplicationResource($collection);
         } else if ($status == 'in_progress_supplier') {
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
                 ->where('status', 'in_progress')
                 ->orderBy('id', 'DESC')
                 ->get();
@@ -65,7 +78,11 @@ class ApplicationApiController extends Controller
             return new ApplicationResource($collection);
         } else if ($status == 'in_progress_economist') {
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
                 ->where('status', 'in_review')
                 ->orderBy('id', 'DESC')
                 ->get();
@@ -73,7 +90,11 @@ class ApplicationApiController extends Controller
             return new ApplicationResource($collection);
         } else if ($status == 'in_progress_warehouse') {
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
                 ->where('status', 'in_progress')
                 ->orWhere('status', 'in_review')
                 ->orWhere('status', 'signed')
@@ -83,7 +104,11 @@ class ApplicationApiController extends Controller
             return new ApplicationResource($collection);
         } else if ($status == 'completed') {
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
                 ->where('status', 'completed')
                 ->orderBy('id', 'DESC')
                 ->get();
@@ -93,7 +118,11 @@ class ApplicationApiController extends Controller
 
         // user watches own draft applications
         $collection = Application::query()
-            ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible'])
+            ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                return $q
+                    ->where('user_id', $request->user()->id)
+                    ->where('status', 'unread');
+            }])
             ->where('status', $status)
             ->where('owner_id', $request->user()->id)
             ->orderBy('id', 'DESC')
@@ -158,9 +187,15 @@ class ApplicationApiController extends Controller
         }
     }
 
-    public function show(Application $application)
+    public function show(Request $request, Application $application)
     {
         abort_if(Gate::denies('application_show'), Response::HTTP_FORBIDDEN, '403 Forbidden');
+
+        // make read status for a user
+        ApplicationOpenedStatus::query()
+            ->where('application_id', $application->id)
+            ->where('user_id', $request->user()->id)
+            ->update(['status' => 'read']);
 
         return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
     }

@@ -45,7 +45,7 @@
                     active-color="primary"
                     @click="showMoveDialog()"
                 >
-                    <v-list-item-title v-text="'Перемещение (бригадирам)'"></v-list-item-title>
+                    <v-list-item-title class="text-xs md:text-sm" v-text="'Перемещение (бригадирам)'"></v-list-item-title>
                 </v-list-item>
 
                 <v-list-item
@@ -397,6 +397,13 @@ export default {
 @media only screen and (min-width: 768px) {
     .oks-dialog {
         width: 500px;
+    }
+}
+
+@media only screen and (max-width: 1025px) {
+    .v-container {
+        max-width: 1000px !important;
+        width: 1000px !important;
     }
 }
 

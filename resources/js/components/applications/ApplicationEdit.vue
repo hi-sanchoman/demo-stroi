@@ -8,11 +8,11 @@
             </v-row> -->
 
             <v-row no-gutters class="mt-10">
-                <v-col cols="12" md="2" class="border px-5 py-5">
+                <v-col cols="12" md="3" class="border px-5 py-5">
                     <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
                 </v-col>
 
-                <v-col cols="12" md="10" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
                     <div v-if="errors">
                         <div v-for="(v, k) in errors" :key="k" class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
                             <p v-for="error in v" :key="error" class="text-sm">
@@ -822,6 +822,7 @@ import useApplications from "../../composables/applications"
 import Multiselect from 'vue-multiselect'
 import axios from 'axios'
 import ApplicationSidebar from "./ApplicationSidebar.vue";
+import { store } from "../../store";
 
 export default {
     components: {
@@ -833,6 +834,8 @@ export default {
 
     data() {
         return {
+            store,
+
             snackbar: {
                 status: false,
                 text: '',
@@ -922,6 +925,8 @@ export default {
     },
 
     methods: {
+        
+
         showNotes() {
             this.current.isAddNotes = true
         },
@@ -935,9 +940,8 @@ export default {
                 }
 
                 // get application
-                this.getApplication()
-                
-            })
+                this.getApplication();     
+            });
         },
 
         getApplication() {
@@ -954,6 +958,9 @@ export default {
                 // if (this.currentUser.roles[0].title == 'Warehouse Manager') {
                 //     this.getIncoming();
                 // }
+                
+                // count badges
+                this.getCountNewApplications();
             })
         },  
 
@@ -1312,6 +1319,14 @@ export default {
         offerHasChanged($event, offer) {
             // console.log('offer has changed: ' + offer.id);
             document.getElementById('offer_' + offer.id).style.visibility = 'visible';
+        },
+
+        getCountNewApplications() {
+            axios.get('/api/v1/badges-unread?type=applications').then((response) => {
+                console.log("count of badges: ", response.data);
+
+                this.store.badgeNew = response.data;
+            });
         }
     },  
 
@@ -1320,7 +1335,7 @@ export default {
             handler(newValue) {
                 const { status } = newValue
 
-                console.log(status);
+                console.log({ status });
             },
             immediate: true,
         }
