@@ -178,6 +178,17 @@
         indeterminate
       ></v-progress-circular>
     </v-container>
+
+    <v-alert
+      v-if="showNotification"
+      type="success"
+      border
+      style="position: absolute; top: 100px; right: 20px; z-index: 999;"
+    >
+      Новое уведомление!<br><br>
+      {{ notification.title }}<br> 
+      {{ notification.body }} 
+    </v-alert>
   </v-app>
 </template>
 
@@ -202,6 +213,11 @@ export default {
     group: null,
     currentUser: null,
     store,
+    showNotification: false,
+    notification: {
+      title: null,
+      body: null,
+    },
   }),
 
   beforeCreate() {
@@ -223,9 +239,25 @@ export default {
   methods: {
     listenForNotifications() {
       const messaging = getMessaging();
+      
       onMessage(messaging, (payload) => {
         console.log('Message received. ', payload);
-        // ...
+        
+        this.notification = {
+          title: payload.notification.title,
+          body: payload.notification.body,
+        };
+
+        this.showNotification = true;
+
+        setTimeout(() => {
+          this.notification = {
+            title: null,
+            body: null,
+          };
+
+          this.showNotification = false;
+        }, 5000);
       });
 
       // Echo.private('user-' + this.currentUser.id)
@@ -275,7 +307,9 @@ export default {
               console.log("token: " + currentToken);
 
               // Send the token to your server and update the UI if necessary
-              // ...
+              axios.post('/api/v1/device-token', { device_token: currentToken }).then((response) => {
+                console.log('token is saved');
+              });
             } else {
               // Show permission request UI
               console.log('No registration token available. Request permission to generate one.');
@@ -310,7 +344,7 @@ export default {
 
   mounted() {
     // this.getCurrentUser()
-    
+
     this.listenForNotifications();
   }
 }

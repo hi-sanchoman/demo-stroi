@@ -42,7 +42,7 @@ class ApplicationApiController extends Controller
                 }])
                 ->whereIn('id', $statuses->pluck('application_id'))
                 ->whereNot('status', 'draft')
-                ->orderBy('id', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);

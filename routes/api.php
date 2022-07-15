@@ -3,6 +3,7 @@
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', 'middleware' => ['auth:sanctum']], function () {
     // User
     Route::get('/me', [App\Http\Controllers\Api\V1\UserController::class, 'me']);
+    Route::post('/device-token', [App\Http\Controllers\Api\V1\UserController::class, 'saveDeviceToken']);
 
     // Construction
     Route::apiResource('constructions', 'ConstructionApiController');

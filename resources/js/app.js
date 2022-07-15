@@ -27,7 +27,7 @@ import { loadFonts } from './plugins/webfontloader'
 import axios from 'axios'
 
 // import OneSignalVuePlugin from '@onesignal/onesignal-vue3'
-import firebaseMessaging from './firebase'
+import messaging from './firebase'
 
 loadFonts()
 
@@ -124,6 +124,6 @@ axios.interceptors.response.use(function (response) {
 app.provide('isLoading', false)
 
 // firebase messaging
-app.config.globalProperties.$messaging = firebaseMessaging
+app.config.globalProperties.$messaging = messaging
 
 app.mount('#app')

@@ -19,9 +19,20 @@ use Gate;
 use Mail;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Kreait\Firebase\Contract\Messaging;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
+
 
 class ApplicationStatusApiController extends Controller
 {
+    // protected $messaging;
+
+    // public function __construct(Messaging $messaging)
+    // {
+    //     $this->messaging = $messaging;
+    // }
+
     public function index()
     {
         abort_if(Gate::denies('application_status_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
@@ -47,6 +58,29 @@ class ApplicationStatusApiController extends Controller
 
     public function update(Request $request, ApplicationStatus $applicationStatus)
     {
+        $messaging = app('firebase.messaging');
+
+        // dd($messaging);
+
+        // $notification_id = 'dRMJYf1B1M3Xpj2CUEqtFG:APA91bGBUf2yeoWGjm8ZkgDPOG8-YvvU2eHfy6JH7KY2Z3v6UzL1HMIE_1OV5gM7yiB2GF0KN07agFQk2-AZTY4bKdn3iBEifXbrzDt7htb67TmWpaSDP6Em6EK50vpmdwAuFU7-4ZV4';
+        // $title = "Новая заявка";
+        // $message = "у вас новая заявка на рассмотрение";
+
+        // $id = 1;
+        // $type = "basic";
+
+        // $res = sendNotificationFCM($notification_id, $title, $message, $id, $type);
+
+        // if ($res === 'ok') {
+        //     // success code
+        //     dd('sent');
+        // } else {
+        //     // fail code
+        //     dd($res);
+        // }
+
+
+
         $input = $request->all();
 
         $totalSteps = ApplicationPath::count();
@@ -104,14 +138,19 @@ class ApplicationStatusApiController extends Controller
                 ]);
                 $openedStatus->status = 'unread';
                 $openedStatus->save();
+
+                // notify next via email
+                Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
+
+                // notify via push
+                $message = CloudMessage::withTarget('token', $nextUserNote->responsible->device_token)
+                    ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
+                    ->withData(['key' => 'value']);
+                $messaging->send($message);
             }
 
-            // notify next via email that he has an incoming request
-            // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
-            // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
 
-            // fire event
-            // broadcast(new EventsApplicationSigned('Новая заявка', 'У вас новая заявка на рассмотрение', 'url', env('APP_URL') . '/applications/' . $applicationStatus->application->id, $nextUserNote->responsible))->toOthers();
 
             // log to history
             ApplicationLog::create([
@@ -154,11 +193,19 @@ class ApplicationStatusApiController extends Controller
                 ]);
                 $openedStatus->status = 'unread';
                 $openedStatus->save();
+
+                // notify prev via email that request was declined
+                Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
+                // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationDeclined($applicationStatus->application));
+
+                // notify via push
+                $message = CloudMessage::withTarget('token', $prevUserNote->responsible->device_token)
+                    ->withNotification(Notification::create('Заявка отклонена', 'Ваша заявка отклонена'))
+                    ->withData(['key' => 'value']);
+                $messaging->send($message);
             }
 
-            // notify prev via email that request was declined
-            Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
-            // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationDeclined($applicationStatus->application));
+
 
             // log to history
             ApplicationLog::create([

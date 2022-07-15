@@ -17,6 +17,14 @@ class UserController extends Controller
         return User::with(['roles'])->findOrFail($request->user()->id);
     }
 
+    public function saveDeviceToken(Request $request)
+    {
+        $request->user()->device_token = $request->device_token;
+        $request->user()->save();
+
+        return 1;
+    }
+
     public function getUnreadBadge(Request $request)
     {
         // dd($request->all());
