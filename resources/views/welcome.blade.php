@@ -27,7 +27,7 @@
 
     <script>
         if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('firebase-messaging-sw.js')
+            navigator.serviceWorker.register('firebase-messaging-sw.js', { type: 'module' })
                 .then(reg => {
                     console.log(`Service Worker Registration (Scope: ${reg.scope})`);
                 })

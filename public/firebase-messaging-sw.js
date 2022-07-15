@@ -13,9 +13,9 @@
 
 // const app = firebase.initializeApp(firebaseConfig)
 
-importScripts('https://www.gstatic.com/firebasejs/9.9.0/firebase-app.js')
-importScripts('https://www.gstatic.com/firebasejs/9.9.0/firebase-messaging.js')
-// import { onBackgroundMessage } from "firebase/messaging/sw";
+import { initializeApp } from 'firebase/app'
+import { getMessaging } from 'firebase/messaging'
+import { onBackgroundMessage } from "firebase/messaging/sw";
 
 
 const firebaseApp = initializeApp({
@@ -31,15 +31,15 @@ const firebaseApp = initializeApp({
 const messaging = getMessaging(firebaseApp);
 
 // on background
-// onBackgroundMessage(messaging, (payload) => {
-//   console.log('[firebase-messaging-sw.js] Received background message ', payload);
+onBackgroundMessage(messaging, (payload) => {
+  console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
-//   // Customize notification here
-//   const notificationTitle = 'OKS OASIS';
-//   const notificationOptions = {
-//     body: 'У вас новое уведомление.',
-//     icon: '/images/launcher.png'
-//   };
+  // Customize notification here
+  const notificationTitle = 'OKS OASIS';
+  const notificationOptions = {
+    body: 'У вас новое уведомление.',
+    icon: '/images/launcher.png'
+  };
 
-//   self.registration.showNotification(notificationTitle, notificationOptions);
-// });
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
