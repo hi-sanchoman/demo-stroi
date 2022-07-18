@@ -401,10 +401,10 @@ export default {
 }
 
 @media only screen and (max-width: 1025px) {
-    .v-container {
+    /* .v-container {
         max-width: 1000px !important;
         width: 1000px !important;
-    }
+    } */
 }
 
 </style>

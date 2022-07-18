@@ -7,12 +7,12 @@
                 </v-col>
             </v-row> -->
 
-            <v-row no-gutters class="mt-10">
+            <v-row no-gutters class="mt-5">
                 <v-col cols="12" class="mb-5">
                     <h2>Накопители</h2>
                 </v-col>
 
-                <v-col cols="12" class="pl-5">
+                <v-col cols="12" class="">
                     <v-table transition="slide-x-transition" style="overflow-x:auto;">
                         <thead>
                             <tr>

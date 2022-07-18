@@ -7,7 +7,7 @@
                 </v-col>
             </v-row> -->
 
-            <v-row no-gutters class="mt-10">
+            <v-row no-gutters class="mt-5">
                 <v-col cols="12" class="mb-5">
                     <h2>Входящие на оплату</h2>
                 </v-col>

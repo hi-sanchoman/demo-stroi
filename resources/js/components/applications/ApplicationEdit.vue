@@ -102,7 +102,7 @@
                             
                         </v-row>
 
-                        <v-table style="overflow: visible;">
+                        <v-table style="">
                             <thead>
                                 <tr>
                                     <th>№</th>
@@ -429,18 +429,17 @@
                         </v-btn>
                     </v-form>
 
-                    <v-container class="mt-10" v-if="application != null">
+                    <v-container class="mt-5 px-0 md:px-2" v-if="application != null">
                         <v-row 
                             v-if="currentUser != null && application.status == 'declined' && application.owner_id == currentUser.id"
-                            class="my-5"
+                            class="mb-5"
                             no-gutters
                         >
                             <v-col cols="12">
                                 <v-btn
-                                    size="large"
                                     color="primary"
                                     @click="makeApplicationEditable()"
-                                    class="ml-5"
+                                    class=""
                                 >
                                     Внести корректировки в заявку
                                 </v-btn>
@@ -448,20 +447,20 @@
                         </v-row>
                         
                         <v-row no-gutters v-if="!isWarehouseManager()">
-                            <v-col cols="12">
-                                <v-expansion-panels v-model="showPanels">
+                            <v-col no-gutters cols="12">
+                                <v-expansion-panels no-gutters v-model="showPanels">
                                     <v-expansion-panel value="sign">
                                         <v-expansion-panel-title>
                                             Подписание заявки
                                         </v-expansion-panel-title>
 
-                                        <v-expansion-panel-text style="">
-                                            <v-list-item
+                                        <v-expansion-panel-text no-gutters style="" class="px-0">
+                                            <v-list-item no-gutters
                                                 v-for="item in application.application_application_statuses" :key="item.id"
                                             >
                                                 <v-list-item-header>
                                                     <v-list-item-title>
-                                                        <v-col cols="12">
+                                                        <v-col cols="12" class="px-0">
                                                             <strong>{{ item.application_path.id }}. {{ item.application_path.position }}</strong>
                                                             - {{ item.application_path.responsible.name }}  
                                                         </v-col> 
@@ -469,7 +468,7 @@
                                                         <!-- declined -->
                                                         <span v-if="item.status == 'declined'">
                                                             <v-chip
-                                                                class="ma-2"
+                                                                class="mr-2"
                                                                 color="red"
                                                                 text-color="white"
                                                             >
@@ -482,7 +481,7 @@
                                                         <!-- accepted -->
                                                         <span v-else-if="item.status == 'accepted'">
                                                             <v-chip
-                                                                class="ma-2"
+                                                                class="mr-2"
                                                                 color="green"
                                                                 text-color="white"
                                                             >
@@ -498,7 +497,7 @@
                                                                 size="small"
                                                                 color="success"
                                                                 @click="signApplication(item)"
-                                                                class="ml-5"
+                                                                class="mr-5"
                                                             >
                                                                 Подписать
                                                             </v-btn>
@@ -508,7 +507,7 @@
                                                                 size="small"
                                                                 color="error"
                                                                 @click="showDecline(item)"
-                                                                class="ml-5"
+                                                                class=""
                                                             >
                                                                 Отклонить
                                                             </v-btn>
@@ -1357,6 +1356,14 @@ export default {
 .v-table__wrapper table {
     overflow-x: auto;
     overflow-y: visible !important;
+}
+
+.v-expansion-panel-text__wrapper {
+    padding-left: 0 !important;
+}
+
+.v-list-item-title {
+    white-space: normal !important;
 }
 
 @media only screen and (min-width: 768px) {
