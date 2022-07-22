@@ -17,6 +17,7 @@ import InventoryShow from './components/inventories/InventoryShow.vue'
 import PaymentList from './components/payments/PaymentList.vue'
 import ToPayList from './components/payments/ToPayList.vue'
 import SupplyList from './components/supplies/SupplyList.vue'
+import ProfileEdit from './components/profile/ProfileEdit.vue'
 
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -36,6 +37,7 @@ const routes = [
   { path: '/', component: HelloWorld },
 
   { path: '/login', component: Login },
+  { path: '/profile', component: ProfileEdit },
 
   { path: '/applications/create', name: 'applications.create', component: ApplicationCreate },
   { path: '/applications/:id/edit', name: 'applications.edit', component: ApplicationEdit },

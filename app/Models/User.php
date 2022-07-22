@@ -44,6 +44,7 @@ class User extends Authenticatable
         'updated_at',
         'deleted_at',
         'device_token',
+        'photo_url',
     ];
 
     public function getIsAdminAttribute()

@@ -4,6 +4,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     // User
     Route::get('/me', [App\Http\Controllers\Api\V1\UserController::class, 'me']);
     Route::post('/device-token', [App\Http\Controllers\Api\V1\UserController::class, 'saveDeviceToken']);
+    Route::put('/profile', [App\Http\Controllers\Api\V1\UserController::class, 'updateProfile']);
+    Route::post('/upload-photo', [App\Http\Controllers\Api\V1\UserController::class, 'uploadPhoto']);
 
     // Construction
     Route::apiResource('constructions', 'ConstructionApiController');

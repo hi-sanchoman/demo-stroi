@@ -81,13 +81,13 @@
       
         <v-menu activator="parent" transition="slide-x-transition" anchor="start">
           <v-list>
-            <!-- <router-link to="/profile" class="text-decoration-none text-black">
+            <router-link to="/profile" class="text-decoration-none text-black">
               <v-list-item value="profile">
                 <v-list-item-title>
                   Профиль
                 </v-list-item-title>
               </v-list-item>
-            </router-link> -->
+            </router-link>
             
             <router-link @click="logout" to="/logout" class="text-decoration-none text-black">
               <v-list-item value="logout">

@@ -58,4 +58,40 @@ class UserController extends Controller
             $badge->save();
         }
     }
+
+    public function updateProfile(Request $request)
+    {
+        if ($request->has('password')) {
+            // update password
+        }
+
+        $user = $request->user();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->save();
+
+        return 'ok';
+    }
+    
+
+    public function uploadPhoto(Request $request) 
+    {        
+        $file = request()->file('file');
+
+        $path = time() . '.' . $file->getClientOriginalExtension();
+
+        $file->move(public_path('/uploads'), $path);
+
+        $photoUrl = '/uploads/' . $path;
+
+        $user = $request->user();
+        $user->photo_url = $photoUrl;
+        $user->save();
+
+        return [
+            'data' => [
+                'photo' => $photoUrl,
+            ],
+        ];
+    }
 }

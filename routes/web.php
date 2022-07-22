@@ -26,6 +26,7 @@ Route::get('/payments', 'ApplicationController@index');
 Route::get('/to-pay', 'ApplicationController@index');
 
 
+Route::get('/profile', 'ApplicationController@index');
 Route::get('/logout', 'ApplicationController@index');
 
 
