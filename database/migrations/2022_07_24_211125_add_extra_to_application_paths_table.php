@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('device_token')->nullable();
+        Schema::table('application_paths', function (Blueprint $table) {
+            $table->string('type')->default('product');
+            $table->integer('order')->unsigned()->default(0);
         });
     }
 
@@ -25,8 +26,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('device_token');
+        Schema::table('application_paths', function (Blueprint $table) {
+            $table->dropColumn('type');
+            $table->dropColumn('order');
         });
     }
 };

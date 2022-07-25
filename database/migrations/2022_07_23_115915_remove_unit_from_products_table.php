@@ -13,8 +13,8 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('device_token')->nullable();
+        Schema::table('products', function (Blueprint $table) {
+            $table->dropColumn('unit');
         });
     }
 
@@ -25,8 +25,8 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('device_token');
+        Schema::table('products', function (Blueprint $table) {
+            $table->string('unit')->nullable();
         });
     }
 };

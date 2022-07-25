@@ -1,9 +1,6 @@
 <template>
   <v-app>
-    <v-app-bar
-      color="deep-purple"
-      dark
-    >
+    <v-app-bar color="deep-purple" dark>
       <v-app-bar-nav-icon @click="drawer = !drawer"></v-app-bar-nav-icon>
 
       <v-toolbar-title class="flex-grow-1">
@@ -13,47 +10,36 @@
       </v-toolbar-title>
 
       <v-row class="d-none d-md-flex md-flex-grow-1 md-flex-row">
-        <router-link 
+        <router-link
           v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Foreman')"
-          to="/applications?status=redirect" class="text-decoration-none"
-        >
+          to="/applications?status=all" class="text-decoration-none">
           <v-btn flat class="text-white">
-            Заявки 
+            Заявки
             <span v-if="store.badgeNew > 0">
-              <v-badge
-                color="error"
-                :content="store.badgeNew"
-                inline
-              ></v-badge>
+              <v-badge color="error" :content="store.badgeNew" inline></v-badge>
             </span>
           </v-btn>
         </router-link>
 
-        <router-link 
-          v-if="currentUser != null && currentUser.roles[0].title == 'Warehouse Manager'"
-          to="/inventories" class="text-decoration-none"
-        >
+        <router-link
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Warehouse Manager' || currentUser.roles[0].title == 'Section Manager' || currentUser.roles[0].title == 'Foreman')"
+          to="/inventories" class="text-decoration-none">
           <v-btn flat class="text-white">Склады</v-btn>
         </router-link>
-        
-        <router-link 
-          v-if="currentUser != null && currentUser.roles[0].title == 'Accountant'"
-          to="/to-pay" class="text-decoration-none"
-        >
+
+        <router-link v-if="currentUser != null && currentUser.roles[0].title == 'Accountant'" to="/to-pay"
+          class="text-decoration-none">
           <v-btn flat class="text-white">На оплату</v-btn>
         </router-link>
 
-        <router-link 
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant')"
-          to="/payments" class="text-decoration-none"
-        >
+        <router-link
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor')"
+          to="/payments" class="text-decoration-none">
           <v-btn flat class="text-white">Реестр платежей</v-btn>
         </router-link>
 
-        <router-link 
-          v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'"
-          to="/supplies" class="text-decoration-none"
-        >
+        <router-link v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'" to="/supplies"
+          class="text-decoration-none">
           <v-btn flat class="text-white">Накопители</v-btn>
         </router-link>
 
@@ -68,17 +54,14 @@
 
         <div class="flex-grow-1"></div>
 
-        <router-link 
-          v-if="currentUser != null"
-          to="/#" class="text-decoration-none"
-        >
+        <router-link v-if="currentUser != null" to="/#" class="text-decoration-none">
           <v-btn flat class="text-white">{{ currentUser.email }}</v-btn>
         </router-link>
       </v-row>
 
       <v-btn icon>
         <v-icon>mdi-account-circle-outline</v-icon>
-      
+
         <v-menu activator="parent" transition="slide-x-transition" anchor="start">
           <v-list>
             <router-link to="/profile" class="text-decoration-none text-black">
@@ -88,7 +71,7 @@
                 </v-list-item-title>
               </v-list-item>
             </router-link>
-            
+
             <router-link @click="logout" to="/logout" class="text-decoration-none text-black">
               <v-list-item value="logout">
                 <v-list-item-title>
@@ -102,60 +85,41 @@
 
     </v-app-bar>
 
-    <v-navigation-drawer
-      v-model="drawer"
-      absolute
-      temporary
-    >
-      <v-list
-        nav
-        dense
-      >       
-        <v-list-item v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Foreman')">
-          <router-link             
-            to="/applications?status=redirect" class="text-decoration-none"
-          >
+    <v-navigation-drawer v-model="drawer" absolute temporary>
+      <v-list nav dense>
+        <v-list-item
+          v-if="currentUser != null && (currentUser.roles[0].title != 'Accountant' && currentUser.roles[0].title != 'Foreman')">
+          <router-link to="/applications?status=all" class="text-decoration-none">
             <v-btn flat class="">
               Заявки
-              
-              <v-badge
-                v-if="store.badgeNew > 0"
-                color="error"
-                :content="store.badgeNew"
-                inline
-              ></v-badge>
+
+              <v-badge v-if="store.badgeNew > 0" color="error" :content="store.badgeNew" inline></v-badge>
             </v-btn>
           </router-link>
         </v-list-item>
 
-        <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Warehouse Manager'">
-          <router-link             
-            to="/inventories" class="text-decoration-none"
-          >
+        <v-list-item
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Warehouse Manager' || currentUser.roles[0].title == 'Section Manager' || currentUser.roles[0].title == 'Foreman')">
+          <router-link to="/inventories" class="text-decoration-none">
             <v-btn flat class="">Склады</v-btn>
           </router-link>
         </v-list-item>
 
         <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Accountant'">
-          <router-link             
-            to="/to-pay" class="text-decoration-none"
-          >
+          <router-link to="/to-pay" class="text-decoration-none">
             <v-btn flat class="">На оплату</v-btn>
           </router-link>
         </v-list-item>
 
-        <v-list-item v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant')">
-          <router-link             
-            to="/payments" class="text-decoration-none"
-          >
+        <v-list-item
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor')">
+          <router-link to="/payments" class="text-decoration-none">
             <v-btn flat class="">Реестр платежей</v-btn>
           </router-link>
         </v-list-item>
 
         <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'">
-          <router-link             
-            to="/supplies" class="text-decoration-none"
-          >
+          <router-link to="/supplies" class="text-decoration-none">
             <v-btn flat class="">Накопители</v-btn>
           </router-link>
         </v-list-item>
@@ -171,23 +135,14 @@
     </v-main>
 
     <v-container v-if="isLoading">
-      <v-progress-circular
-        :size="70"
-        :width="7"
-        color="primary"
-        indeterminate
-      ></v-progress-circular>
+      <v-progress-circular :size="70" :width="7" color="primary" indeterminate></v-progress-circular>
     </v-container>
 
-    <v-alert
-      v-if="showNotification"
-      type="success"
-      border
-      style="position: absolute; top: 100px; right: 20px; z-index: 999;"
-    >
+    <v-alert v-if="showNotification" type="success" border
+      style="position: absolute; top: 100px; right: 20px; z-index: 999;">
       Новое уведомление!<br><br>
-      {{ notification.title }}<br> 
-      {{ notification.body }} 
+      {{ notification.title }}<br>
+      {{ notification.body }}
     </v-alert>
   </v-app>
 </template>
@@ -225,7 +180,7 @@ export default {
   },
 
   watch: {
-    '$route' () {
+    '$route'() {
       if (this.currentUser == null) {
         // console.log("get current user data")
         this.getCurrentUser()
@@ -239,10 +194,10 @@ export default {
   methods: {
     listenForNotifications() {
       const messaging = getMessaging();
-      
+
       onMessage(messaging, (payload) => {
         console.log('Message received. ', payload);
-        
+
         this.notification = {
           title: payload.notification.title,
           body: payload.notification.body,
@@ -321,7 +276,7 @@ export default {
           });
 
           // get new badges
-          this.getCountNewApplications();    
+          this.getCountNewApplications();
         }
       })
     },
@@ -352,14 +307,14 @@ export default {
 
  
 <style lang="css">
-  .slide-enter-active,
-  .slide-leave-active {
-    transition: opacity 0.3s, transform 0.3s;
-  }
+.slide-enter-active,
+.slide-leave-active {
+  transition: opacity 0.3s, transform 0.3s;
+}
 
-  .slide-enter-from,
-  .slide-leave-to {
-    opacity: 0;
-    transform: translate(-30%);
-  }
+.slide-enter-from,
+.slide-leave-to {
+  opacity: 0;
+  transform: translate(-30%);
+}
 </style>

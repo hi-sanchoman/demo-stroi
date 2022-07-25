@@ -23,10 +23,13 @@
 
                         </th>
                         <th>
-                            {{ trans('cruds.applicationPath.fields.id') }}
+                            {{ trans('cruds.applicationPath.fields.order') }}
                         </th>
                         <th>
                             {{ trans('cruds.applicationPath.fields.position') }}
+                        </th>
+                        <th>
+                            {{ trans('cruds.applicationPath.fields.type') }}
                         </th>
                         <th>
                             {{ trans('cruds.applicationPath.fields.construction') }}
@@ -46,11 +49,16 @@
 
                             </td>
                             <td>
-                                {{ $applicationPath->id ?? '' }}
+                                {{ $applicationPath->order ?? '' }}
                             </td>
                             <td>
                                 {{ $applicationPath->position ?? '' }}
                             </td>
+                            
+                            <td>
+                                {{ $applicationPath->type ?? '' }}
+                            </td>
+
                             <td>
                                 {{ $applicationPath->construction->name ?? '' }}
                             </td>
@@ -128,7 +136,7 @@
 
   $.extend(true, $.fn.dataTable.defaults, {
     orderCellsTop: true,
-    order: [[ 1, 'desc' ]],
+    order: [[ 1, 'asc' ]],
     pageLength: 100,
   });
   let table = $('.datatable-ApplicationPath:not(.ajaxTable)').DataTable({ buttons: dtButtons })

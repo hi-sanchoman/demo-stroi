@@ -1,6 +1,6 @@
 <?php
 
-Route::get('/', function() {
+Route::get('/', function () {
     return view('welcome');
 });
 
@@ -20,6 +20,9 @@ Route::get('/applications/{id}/edit', 'ApplicationController@edit');
 Route::get('/supplies', 'ApplicationController@index');
 
 Route::get('/inventories', 'ApplicationController@index');
+Route::get('/inventories/{id}/products', 'ApplicationController@index');
+Route::get('/inventories/{id}/equipment', 'ApplicationController@index');
+Route::get('/inventories/{id}/services', 'ApplicationController@index');
 Route::get('/inventories/{id}', 'ApplicationController@index');
 Route::get('/inventories/{id}/history', 'ApplicationController@index');
 Route::get('/payments', 'ApplicationController@index');
@@ -38,6 +41,7 @@ Route::post('/upload-file', 'ApplicationController@uploadFile');
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
     Route::get('/', 'HomeController@index')->name('home');
+
     // Permissions
     Route::delete('permissions/destroy', 'PermissionsController@massDestroy')->name('permissions.massDestroy');
     Route::resource('permissions', 'PermissionsController');

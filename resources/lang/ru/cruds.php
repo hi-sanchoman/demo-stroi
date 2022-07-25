@@ -449,6 +449,10 @@ return [
             'construction_helper' => ' ',
             'responsible'         => 'Responsible',
             'responsible_helper'  => ' ',
+            'type'                => 'Type',
+            'type_helper'         => ' ',
+            'order'               => 'Order',
+            'order_helper'        => ' ',
         ],
     ],
     'applicationStatus' => [

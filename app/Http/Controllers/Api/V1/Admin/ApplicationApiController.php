@@ -27,12 +27,28 @@ class ApplicationApiController extends Controller
         $status = $request->has('status') ? $request->status : 'draft';
 
         // responsible user watching applications to review
-        if ($status == 'incoming') {
-            $path = ApplicationPath::where('responsible_id', $request->user()->id)->first();
+        if ($status == 'all') {
+            $collection = Application::query()
+                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
+                    return $q
+                        ->where('user_id', $request->user()->id)
+                        ->where('status', 'unread');
+                }])
+                ->orderBy('updated_at', 'DESC')
+                ->get();
+
+            return new ApplicationResource($collection);
+        } else if ($status == 'incoming') {
+            $path = ApplicationPath::query()
+                ->where('responsible_id', $request->user()->id)
+                // ->where('construction_id', $application->construction_id)
+                ->first();
+            // dd($path);
 
             $statuses = ApplicationStatus::query()
                 ->where('status', 'incoming')
                 ->where('application_path_id', $path->id)->get();
+            // dd($statuses);
 
             $collection = Application::query()
                 ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
@@ -138,6 +154,7 @@ class ApplicationApiController extends Controller
 
             $input = $request->all();
             $input['status'] = 'draft';
+            $input['kind'] = $request->kind;
             $input['owner_id'] = $request->user()->id;
             $input['is_urgent'] = $request->is_urget ? 1 : 0;
             $input['issued_at'] = Carbon\Carbon::now();
@@ -145,20 +162,27 @@ class ApplicationApiController extends Controller
             // application
             $application = Application::create($input);
 
-            // application products
-            foreach ($input['products'] as $product) {
-                ApplicationProduct::create([
-                    'application_id' => $application->id,
-                    'product_id' => $product['product']['id'],
-                    'product_category_id' => $product['category']['id'],
-                    'quantity' => $product['quantity'],
-                    'notes' => $product['notes'],
-                    'is_delivered_by_us' => 0,
-                ]);
+            // depends on kind
+            if ($application->kind == 'product') {
+                // application products
+                foreach ($input['products'] as $product) {
+                    ApplicationProduct::create([
+                        'application_id' => $application->id,
+                        'product_id' => $product['product']['id'],
+                        'product_category_id' => $product['category']['id'],
+                        'unit_id' => $product['unit']['id'],
+                        'quantity' => $product['quantity'],
+                        'notes' => $product['notes'],
+                        'is_delivered_by_us' => 0,
+                    ]);
+                }
+            } else if ($application->kind == 'equipment') {
+            } else if ($application->kind == 'service') {
             }
+            // else -> throw error
 
             // application statuses
-            $path = ApplicationPath::get();
+            $path = ApplicationPath::where('type', $application->kind)->orderBy('order', 'asc')->get();
 
             foreach ($path as $step) {
                 ApplicationStatus::create([
@@ -197,7 +221,7 @@ class ApplicationApiController extends Controller
             ->where('user_id', $request->user()->id)
             ->update(['status' => 'read']);
 
-        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
+        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
     }
 
     public function update(Request $request, Application $application)
@@ -213,21 +237,59 @@ class ApplicationApiController extends Controller
             // application
             $application->update($input);
 
-            // application products
-            ApplicationProduct::where('application_id', $application->id)->delete();
+            $roles = $request->user()->roles()->pluck('title');
 
-            foreach ($input['products'] as $product) {
-                ApplicationProduct::create([
-                    'application_id' => $application->id,
-                    'product_id' => $product['product']['id'],
-                    'product_category_id' => $product['category']['id'],
-                    'quantity' => $product['quantity'],
-                    'notes' => $product['notes'],
-                    'is_delivered_by_us' => 0,
-                    // 'price' => $product['price'],
-                    // 'company' => $product['company'],
-                ]);
+            // is supplier or supervisor
+            if (array_intersect(['Supplier', 'Supervisor'], $roles->toArray()) > 0) {
+                // clear statuses till user's id
+                $statuses = ApplicationStatus::query()
+                    ->with(['application_path'])
+                    ->where('application_id', $application->id)
+                    ->get();
+
+                $setWaiting = false;
+
+                foreach ($statuses as $status) {
+                    if ($status->application_path->responsible_id == $request->user()->id) {
+                        $status->status = 'incoming';
+                        $status->save();
+
+                        $setWaiting = true;
+
+                        continue;
+                    }
+
+                    if ($setWaiting == true) {
+                        $status->status = 'waiting';
+                        $status->save();
+                    }
+                }
             }
+
+            // update products / equipments / services
+            else {
+                if ($application->kind == 'product') {
+                    // application products
+                    ApplicationProduct::where('application_id', $application->id)->delete();
+
+                    foreach ($input['products'] as $product) {
+                        ApplicationProduct::create([
+                            'application_id' => $application->id,
+                            'product_id' => $product['product']['id'],
+                            'product_category_id' => $product['category']['id'],
+                            'unit_id' => $product['unit']['id'],
+                            'quantity' => $product['quantity'],
+                            'notes' => $product['notes'],
+                            'is_delivered_by_us' => 0,
+                        ]);
+                    }
+                } else if ($application->kind == 'equipment') {
+                    // special equipment
+                } else if ($application->kind == 'service') {
+                    // service 
+                }
+            }
+
 
             // application log
             ApplicationLog::create([

@@ -15,17 +15,17 @@ class PaymentApiController extends Controller
 {
     public function payments()
     {
-        $payments = Payment::with(['application', 'application.construction', 'company', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.category'])->get();
-        // dd($applications->toArray());
+        $payments = Payment::with(['application', 'application.construction', 'company', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.category', 'offers.applicationProduct.unit'])->get();
+        // dd($payments->toArray());
 
         $data = [];
 
         foreach ($payments as $payment) {
-            if ($payment->application->status == 'in_progress') {
-                if ($payment->amount > 0 && $payment->company_id != null) {
-                    $data[] = $payment;
-                }
+            // if ($payment->application->status == 'in_progress') {
+            if ($payment->amount > 0 && $payment->company_id != null) {
+                $data[] = $payment;
             }
+            // }
         }
 
         return [
@@ -70,11 +70,11 @@ class PaymentApiController extends Controller
         $data = [];
 
         foreach ($payments as $payment) {
-            if ($payment->application->status == 'in_progress') {
-                if ($payment->to_be_paid > 0 && $payment->company_id != null) {
-                    $data[] = $payment;
-                }
+            // if ($payment->application->status == 'in_progress') {
+            if ($payment->to_be_paid > 0 && $payment->company_id != null) {
+                $data[] = $payment;
             }
+            // }
         }
 
         return [

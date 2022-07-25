@@ -18,7 +18,7 @@ class SupplyApiController extends Controller
         $collection = [];
 
         $supplies = Supply::query()
-            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category'])
+            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category', 'applicationProduct.unit'])
             ->get();
 
         foreach ($supplies as $item) {
@@ -51,7 +51,7 @@ class SupplyApiController extends Controller
         $result = [];
 
         $collection = Supply::query()
-            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category'])
+            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category', 'applicationProduct.unit'])
             ->get();
 
         foreach ($collection as $item) {

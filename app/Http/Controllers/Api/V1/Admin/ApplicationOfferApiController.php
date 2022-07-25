@@ -97,6 +97,9 @@ class ApplicationOfferApiController extends Controller
         $payment->amount = $newAmount;
         $payment->save();
 
+        if ($newAmount == 0) {
+            return ['error' => 'ОШИБКА: укажите сумму'];
+        }
 
         DB::commit();
 

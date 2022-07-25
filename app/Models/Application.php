@@ -14,7 +14,9 @@ class Application extends Model
     use HasFactory;
 
     public const KIND_SELECT = [
-        'acquisition_of_inventory' => 'Acquisition of inventory',
+        'product' => 'Acquisition of product',
+        'service' => 'Acquisition of service',
+        'equipment' => 'Acquisition of special equipment',
     ];
 
     public const STATUS_SELECT = [
@@ -23,6 +25,12 @@ class Application extends Model
         'declined'    => 'Declined',
         'in_progress' => 'In progress',
         'completed'   => 'Completed',
+    ];
+
+    public const TYPES = [
+        'product'   => 'Product',
+        'service'   => 'Service',
+        'equipment' => 'Special Equipment',
     ];
 
     public $table = 'applications';

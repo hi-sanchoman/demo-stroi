@@ -10,7 +10,9 @@
           <v-form ref="form">
             <div class="flex flex-column justify-center items-center text-center">
               <v-img class="bg-white mx-auto mt-4 mb-4 cursor-pointer" width="150" height="150" :aspect-ratio="1"
-                :src="formData.photoUrl ? formData.photoUrl : '/images/default_profile.png'" cover></v-img>
+                :src="formData.photoUrl ? formData.photoUrl : '/images/default_profile.png'" cover />
+
+
               <input class="mx-auto mt-2 mb-5" type="file" id="file" v-on:change="handleFileUpload($event)"
                 aria-label="photo" />
             </div>

@@ -20,6 +20,9 @@
                                     №
                                 </th>
                                 <th class="text-left">
+                                    Объект
+                                </th>
+                                <th class="text-left">
                                     Наименование ресурса
                                 </th>
                                 <th class="text-left">
@@ -41,30 +44,25 @@
                                 <td colspan="5">Нет данных.</td>
                             </tr>
 
-                            <tr
-                                v-for="(inventory, index) in inventories"
-                                :key="inventory.item.id"
-                                style="cursor:pointer"
-                                @click="showPosition(inventory)"
-                            >
+                            <tr v-for="(inventory, index) in inventories" :key="inventory.item.id"
+                                style="cursor:pointer" @click="showPosition(inventory)">
                                 <td>{{ index + 1 }}</td>
+                                <td>{{ inventory.item.construction.name }}</td>
                                 <td>{{ inventory.item.application_product.product.name }}</td>
                                 <td>{{ inventory.item.application_product.category.name }}</td>
-                                <td>{{ inventory.item.application_product.product.unit }}</td>
+                                <td>{{ inventory.item.application_product.unit.name }}</td>
                                 <td>{{ inventory.total }}</td>
                                 <td></td>
                             </tr>
                         </tbody>
                     </v-table>
                 </v-col>
-            </v-row>    
+            </v-row>
         </v-container>
 
 
         <!-- inventory history dialog -->
-        <v-dialog
-            v-model="historyDialog"
-        >
+        <v-dialog v-model="historyDialog">
             <v-card>
                 <v-card-title>
                     <span class="text-h5">История "{{ history.item.application_product.product.name }}"</span>
@@ -103,21 +101,18 @@
                                             <td colspan="5">Нет данных.</td>
                                         </tr>
 
-                                        <tr
-                                            v-for="(inventory, index) in historyInventories"
-                                            :key="inventory.id"
-                                        >
+                                        <tr v-for="(inventory, index) in historyInventories" :key="inventory.id">
                                             <td>{{ index + 1 }}</td>
                                             <td>{{ inventory.application_product.product.name }}</td>
                                             <td>{{ inventory.application_product.category.name }}</td>
-                                            <td>{{ inventory.application_product.product.unit }}</td>
+                                            <td>{{ inventory.application_product.unit.name }}</td>
                                             <td>{{ inventory.quantity }}</td>
                                             <td>{{ inventory.created_at }}</td>
                                         </tr>
                                     </tbody>
                                 </v-table>
                             </v-col>
-                        </v-row>    
+                        </v-row>
                     </v-container>
                 </v-card-text>
             </v-card>
@@ -141,9 +136,9 @@ export default {
             historyDialog: false,
             history: null,
             historyInventories: [],
-        } 
+        }
     },
-    
+
     methods: {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {

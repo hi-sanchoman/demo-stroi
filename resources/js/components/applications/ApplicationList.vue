@@ -38,60 +38,41 @@
                                 <td colspan="5">Нет заявок.</td>
                             </tr>
 
-                            <tr
-                                v-for="application in applications"
-                                :key="application.id"
-                                :class="application.opened_statuses.length > 0 ? 'tr-unread' : 'tr-read'"
-                            >
-                                <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.id }}</td>
-                                <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.construction.name }}</td>
-                                <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.issued_at }}</td>
-                                
-                                <td >
-                                    <v-chip
-                                        v-if="application.status == 'draft'"
-                                        class="ma-2"
-                                        color="grey"
-                                        text-color="white"
-                                    >
+                            <tr v-for="application in applications" :key="application.id"
+                                :class="application.opened_statuses.length > 0 ? 'tr-unread' : 'tr-read'">
+                                <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.id
+                                }}</td>
+                                <td @click="showApplication(application.id)" style="cursor: pointer">{{
+                                        application.construction.name
+                                }}</td>
+                                <td @click="showApplication(application.id)" style="cursor: pointer">{{
+                                        application.issued_at
+                                }}</td>
+
+                                <td>
+                                    <v-chip v-if="application.status == 'draft'" class="ma-2" color="grey"
+                                        text-color="white">
                                         Черновик
                                     </v-chip>
-                                    
-                                    <v-row
-                                        v-if="application.status == 'in_review'"
-                                        class="py-3"
-                                    >
-                                        <v-chip
-                                            v-for="item in application.application_application_statuses" 
-                                            :key="item.id"
-                                            class="ma-2"
-                                            :color="getStatusColor(item)"
-                                            text-color="white"
-                                        >
+
+                                    <v-row v-if="application.status == 'in_review'" class="py-3">
+                                        <v-chip v-for="item in application.application_application_statuses"
+                                            :key="item.id" class="ma-2" :color="getStatusColor(item)"
+                                            text-color="white">
                                             {{ getStatusText(item) }}
-                                        </v-chip>  
+                                        </v-chip>
                                     </v-row>
 
-                                    <v-col
-                                        v-if="application.status == 'declined'"
-                                    >
-                                        <v-chip
-                                            
-                                            class="ma-2"
-                                            color="red"
-                                            text-color="white"
-                                        >   
+                                    <v-col v-if="application.status == 'declined'">
+                                        <v-chip class="ma-2" color="red" text-color="white">
                                             Отклонено
-                                        </v-chip>        
+                                        </v-chip>
                                     </v-col>
                                 </td>
-                                
+
                                 <td>
-                                    <v-btn @click="deleteApplication(application.id)"
-                                        color="error"
-                                        size="small"
-                                        v-if="application.status == 'draft'"
-                                    >
+                                    <v-btn @click="deleteApplication(application.id)" color="error" size="small"
+                                        v-if="application.status == 'draft'">
                                         Удалить
                                     </v-btn>
                                 </td>
@@ -100,7 +81,7 @@
                     </v-table>
                 </v-col>
             </v-row>
-            
+
         </v-container>
     </div>
 </template>
@@ -121,9 +102,9 @@ export default {
             applications: [],
             currentUser: null,
             store,
-        } 
+        }
     },
-    
+
     methods: {
         readApplicationsBadge() {
             axios.put('/api/v1/read-badge', { type: 'applications' }).then((response) => {
@@ -137,26 +118,27 @@ export default {
 
                 if (this.$route.query.status == 'redirect') {
                     console.log('redirect')
-                    
+
                     // this.readApplicationsBadge();
 
-                    if (this.currentUser.roles[0].title == 'PTD Engineer') {
-                        this.$router.push('/applications?status=draft')
-                        return
-                    } else if (this.currentUser.roles[0].title == 'Supplier') {
-                        this.$router.push('/applications?status=in_progress_supplier')
-                        return
-                    } else if (this.currentUser.roles[0].title == 'Economist' || 
-                        this.currentUser.roles[0].title == 'Chief Financial Officer'
-                    ) {
-                        this.$router.push('/applications?status=in_progress_economist')
-                        return
-                    } else if (this.currentUser.roles[0].title == 'Warehouse Manager') {
-                        this.$router.push('/applications?status=in_progress_warehouse')
-                        return
-                    }
+                    // if (this.currentUser.roles[0].title == 'PTD Engineer') {
+                    //     this.$router.push('/applications?status=draft')
+                    //     return
+                    // } else if (this.currentUser.roles[0].title == 'Supplier') {
+                    //     this.$router.push('/applications?status=in_progress_supplier')
+                    //     return
+                    // } else if (this.currentUser.roles[0].title == 'Economist' ||
+                    //     this.currentUser.roles[0].title == 'Chief Financial Officer'
+                    // ) {
+                    //     this.$router.push('/applications?status=in_progress_economist')
+                    //     return
+                    // }
+                    // } else if (this.currentUser.roles[0].title == 'Warehouse Manager') {
+                    //     this.$router.push('/applications?status=in_progress_warehouse')
+                    //     return
+                    // }
 
-                    this.$router.push('/applications?status=incoming')
+                    this.$router.push('/applications?status=all')
                 }
             })
         },
@@ -166,6 +148,8 @@ export default {
         },
 
         getApplications(status) {
+            console.log(`get applications with ${status} status`);
+
             // get applications 
             axios.get('/api/v1/applications?status=' + status).then((response) => {
                 this.applications = response.data.data
@@ -177,7 +161,7 @@ export default {
             if (!window.confirm('Вы действительно хотите?')) {
                 return
             }
-            
+
             axios.delete('/api/v1/applications/' + id).then((response) => {
                 this.getApplications()
             })

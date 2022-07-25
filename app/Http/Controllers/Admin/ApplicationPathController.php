@@ -7,6 +7,7 @@ use App\Http\Requests\MassDestroyApplicationPathRequest;
 use App\Http\Requests\StoreApplicationPathRequest;
 use App\Http\Requests\UpdateApplicationPathRequest;
 use App\Models\ApplicationPath;
+use App\Models\Application;
 use App\Models\Construction;
 use App\Models\User;
 use Gate;
@@ -19,7 +20,7 @@ class ApplicationPathController extends Controller
     {
         abort_if(Gate::denies('application_path_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        $applicationPaths = ApplicationPath::with(['construction', 'responsible'])->get();
+        $applicationPaths = ApplicationPath::with(['construction', 'responsible'])->orderBy('order', 'ASC')->get();
 
         return view('admin.applicationPaths.index', compact('applicationPaths'));
     }
@@ -29,10 +30,11 @@ class ApplicationPathController extends Controller
         abort_if(Gate::denies('application_path_create'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $constructions = Construction::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $applicationTypes = Application::TYPES;
 
         $responsibles = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
-        return view('admin.applicationPaths.create', compact('constructions', 'responsibles'));
+        return view('admin.applicationPaths.create', compact('constructions', 'responsibles', 'applicationTypes'));
     }
 
     public function store(StoreApplicationPathRequest $request)
@@ -47,12 +49,13 @@ class ApplicationPathController extends Controller
         abort_if(Gate::denies('application_path_edit'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
         $constructions = Construction::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
+        $applicationTypes = Application::TYPES;
 
         $responsibles = User::pluck('name', 'id')->prepend(trans('global.pleaseSelect'), '');
 
         $applicationPath->load('construction', 'responsible');
 
-        return view('admin.applicationPaths.edit', compact('applicationPath', 'constructions', 'responsibles'));
+        return view('admin.applicationPaths.edit', compact('applicationPath', 'constructions', 'responsibles', 'applicationTypes'));
     }
 
     public function update(UpdateApplicationPathRequest $request, ApplicationPath $applicationPath)

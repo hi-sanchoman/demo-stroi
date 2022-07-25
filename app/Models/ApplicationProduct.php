@@ -24,6 +24,7 @@ class ApplicationProduct extends Model
         'application_id',
         'product_id',
         'product_category_id',
+        'unit_id',
         'quantity',
         'prepared',
         'delivered',
@@ -53,13 +54,19 @@ class ApplicationProduct extends Model
         return $this->hasMany(ApplicationOffer::class);
     }
 
-    public function inventoryApplications() {
+    public function inventoryApplications() 
+    {
         return $this->hasMany(InventoryApplication::class);
     }
 
     public function category()
     {
         return $this->belongsTo(ProductCategory::class, 'product_category_id');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 
     protected function serializeDate(DateTimeInterface $date)

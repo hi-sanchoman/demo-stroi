@@ -18,10 +18,10 @@
                             <tr>
                                 <th class="text-left">
                                     Объект
-                                </th> 
+                                </th>
                                 <th class="text-left">
                                     № заявки
-                                </th> 
+                                </th>
                                 <!-- <th class="text-left">
                                     Наименование ресурса
                                 </th>
@@ -50,52 +50,42 @@
                         </thead>
                         <tbody>
                             <tr v-if="payments.length <= 0">
-                                <td colspan="5">Нет данных.</td>
+                                <td colspan="8">Нет данных.</td>
                             </tr>
-                            
-                            <template
-                                v-for="payment in payments"
-                                :key="payment.id"
-                            >
-                                <tr
-                                >
+
+                            <template v-for="payment in payments" :key="payment.id">
+                                <tr>
                                     <td>{{ payment.application.construction.name }}</td>
-                                    <td>{{ payment.application.id }}</td>
+                                    <td @click="goToApplication(payment.application.id)" style="cursor:pointer">
+                                        <span class="">{{ payment.application.id
+                                        }}</span>
+                                        <br />
+                                        {{ getKind(payment.application.kind) }}
+                                    </td>
                                     <!-- <td width="30%">{{ payment.application_product.product.name }}</td> -->
                                     <!-- <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td> -->
                                     <td width="30%">
                                         {{ payment.company.name }}<br>
 
-                                        <v-btn 
-                                            v-if="payment.offers.length > 1"
-                                            class="mt-2"
-                                            size="small"
-                                            @click="showOffers(payment)"
-                                        >
+                                        <v-btn v-if="payment.offers.length > 0" class="mt-2" size="small"
+                                            @click="showOffers(payment)">
                                             Показать позиции
-                                        </v-btn>                                
+                                        </v-btn>
                                     </td>
                                     <td>{{ payment.amount }} ₸</td>
                                     <td>{{ payment.paid }} ₸</td>
                                     <td>{{ (payment.amount - payment.paid) }} ₸</td>
                                     <td class="pt-6">
-                                        <v-text-field
-                                            v-model="payment.order_paid"
-                                            type="number"
-                                            density="compact"
-                                            class="w-24"
-                                            variant="underlined"
-                                            style="width: 150px"
-                                            v-if="payment.application.status == 'in_progress'"
-                                        >
+                                        <v-text-field v-model="payment.order_paid" type="number" density="compact"
+                                            class="w-24" variant="underlined" style="width: 150px">
                                         </v-text-field>
                                     </td>
                                     <td>
-                                        {{ payment.to_be_paid ? `${payment.to_be_paid} ₸` : '' }} 
+                                        {{ payment.to_be_paid ? `${payment.to_be_paid} ₸` : '' }}
                                     </td>
                                 </tr>
 
-                                <template v-if="payment.offers.length > 1">
+                                <template v-if="payment.offers.length > 0">
                                     <tr :id="'offers_' + payment.id" style="display: none;">
                                         <td colspan="8" class="border-none">
                                             <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible;">
@@ -108,66 +98,64 @@
                                                         <th>Общая сумма</th>
                                                     </tr>
                                                 </thead>
-                                                <tbody>
-                                                    <tr v-for="offer in payment.offers" :key="offer.id">
-                                                        <td class="">
-                                                            {{ offer.application_product.category.name }}
-                                                        </td>
-                                                        <td class="">
-                                                            {{ offer.application_product.product.name }}
-                                                        </td>
-                                                        <td>
-                                                            {{ offer.quantity }} {{ offer.application_product.product.unit }}
-                                                        </td>
-                                                        <td>
-                                                            {{ offer.price }}
-                                                        </td>
-                                                        <td>
-                                                            {{ offer.price * offer.quantity }} ₸
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </v-table>
-                                        </td>
-                                    </tr>                                    
-                                </template>
-                            </template>
+                        <tbody>
+                            <tr v-for="offer in payment.offers" :key="offer.id">
+                                <td class="">
+                                    {{ offer.application_product.category.name }}
+                                </td>
+                                <td class="">
+                                    {{ offer.application_product.product.name }}, {{ offer.application_product.unit.name
+                                    }}
+                                </td>
+                                <td>
+                                    {{ offer.quantity }} {{ offer.application_product.product.unit }}
+                                </td>
+                                <td>
+                                    {{ offer.price }} ₸
+                                </td>
+                                <td>
+                                    {{ offer.price * offer.quantity }} ₸
+                                </td>
+                            </tr>
+
                         </tbody>
                     </v-table>
-
-                    <v-btn
-                        v-if="this.currentUser != null && this.currentUser.roles[0].title == 'Vice President'"
-                        class="mt-5"
-                        @click="updatePayments"
-                        color="primary"
-                    >
-                        Отправить на оплату
-                    </v-btn>
-                </v-col>
-            </v-row>    
-        </v-container>
+                    </td>
+                    </tr>
+</template>
+</template>
 
 
-        <!-- Snackbar -->
-        <v-snackbar
-            v-model="snackbar.status"
-            :timeout="snackbar.timeout"
-        >
-            {{ snackbar.text }}
+<tr v-if="payments.length > 0">
+    <td colspan="3" class="text-right">ИТОГ</td>
+    <td>{{ payments.reduce((acc, i) => acc + i.amount, 0) }} ₸</td>
+    <td colspan="4"></td>
+</tr>
+</tbody>
+</v-table>
 
-            <template v-slot:actions>
-                <v-btn
-                    color="blue"
-                    variant="text"
-                    @click="snackbar.status = false"
-                >
-                    Закрыть
-                </v-btn>
-            </template>
-        </v-snackbar>
+<v-btn v-if="this.currentUser != null && this.currentUser.roles[0].title == 'Vice President'" class="mt-5"
+    @click="updatePayments" color="primary">
+    Отправить на оплату
+</v-btn>
+</v-col>
+</v-row>
+</v-container>
 
 
-    </div>
+<!-- Snackbar -->
+<v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
+    {{ snackbar.text }}
+
+    <template v-slot:actions>
+        <v-btn color="blue" variant="text" @click="snackbar.status = false">
+            Закрыть
+        </v-btn>
+    </template>
+</v-snackbar>
+
+
+</div>
 </template>
 
 <script>
@@ -186,9 +174,9 @@ export default {
             },
             payments: [],
             currentUser: null,
-        } 
+        }
     },
-    
+
     methods: {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
@@ -235,6 +223,20 @@ export default {
         showOffers(payment) {
             var offersTable = document.getElementById('offers_' + payment.id);
             offersTable.style.display = offersTable.style.display == 'none' ? 'table-row' : 'none';
+        },
+
+        goToApplication(id) {
+            this.$router.push(`/applications/${id}/edit`);
+        },
+
+        getKind(kind) {
+            let kinds = {
+                'product': 'заявка на товар',
+                'equipment': 'заявка на спец. технику',
+                'service': 'заявка на услугу',
+            }
+
+            return kinds[kind] ?? '';
         }
 
     },

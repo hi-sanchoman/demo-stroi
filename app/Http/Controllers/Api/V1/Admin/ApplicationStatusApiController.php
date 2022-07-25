@@ -59,31 +59,10 @@ class ApplicationStatusApiController extends Controller
     public function update(Request $request, ApplicationStatus $applicationStatus)
     {
         $messaging = app('firebase.messaging');
-
-        // dd($messaging);
-
-        // $notification_id = 'dRMJYf1B1M3Xpj2CUEqtFG:APA91bGBUf2yeoWGjm8ZkgDPOG8-YvvU2eHfy6JH7KY2Z3v6UzL1HMIE_1OV5gM7yiB2GF0KN07agFQk2-AZTY4bKdn3iBEifXbrzDt7htb67TmWpaSDP6Em6EK50vpmdwAuFU7-4ZV4';
-        // $title = "Новая заявка";
-        // $message = "у вас новая заявка на рассмотрение";
-
-        // $id = 1;
-        // $type = "basic";
-
-        // $res = sendNotificationFCM($notification_id, $title, $message, $id, $type);
-
-        // if ($res === 'ok') {
-        //     // success code
-        //     dd('sent');
-        // } else {
-        //     // fail code
-        //     dd($res);
-        // }
-
-
-
         $input = $request->all();
-
-        $totalSteps = ApplicationPath::count();
+        $totalSteps = ApplicationStatus::query()
+            ->where('application_id', $applicationStatus->application_id)
+            ->orderBy('id', 'asc')->get();
 
         if ($input['method'] == 'sign') {
             // set accepted
@@ -91,18 +70,20 @@ class ApplicationStatusApiController extends Controller
             $applicationStatus->save();
 
             // set next responsible's status to 'incoming'
-            $nextStep = $applicationStatus->application_path_id + 1;
+            $nextStep = $this->_getNextStep($applicationStatus, $totalSteps);
             $nextUserNote = ApplicationPath::with(['responsible'])->whereId($nextStep)->first();
 
-            // first responsible just signed up
-            if ($nextStep == 2) {
-                ApplicationStatus::query()
-                    ->where('application_id', $applicationStatus->application_id)
-                    ->whereNot('application_path_id', 1)
-                    ->update(['status' => 'waiting', 'declined_reason' => '']);
-            }
+            // dd($nextStep);
 
-            if ($nextStep <= $totalSteps) {
+            // first responsible just signed up
+            // if ($nextStep == 2) {
+            //     ApplicationStatus::query()
+            //         ->where('application_id', $applicationStatus->application_id)
+            //         ->whereNot('application_path_id', 1)
+            //         ->update(['status' => 'waiting', 'declined_reason' => '']);
+            // }
+
+            if ($nextStep <= count($totalSteps)) {
                 ApplicationStatus::query()
                     ->where('application_id', $applicationStatus->application_id)
                     ->where('application_path_id', $nextStep)
@@ -113,7 +94,7 @@ class ApplicationStatusApiController extends Controller
             if ($request->user()->email == 'kurtayev.meirzhan@gmail.com') {
                 $applicationStatus->application->status = 'in_progress';
                 // final responsible
-            } else if ($nextStep == $totalSteps + 1) {
+            } else if ($nextStep == count($totalSteps) + 1) {
                 $applicationStatus->application->status = 'in_progress';
                 // $applicationStatus->application->status = 'signed';
             } else {
@@ -141,16 +122,15 @@ class ApplicationStatusApiController extends Controller
 
                 // notify next via email
                 Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
-                // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationSigned($applicationStatus->application));
 
                 // notify via push
-                $message = CloudMessage::withTarget('token', $nextUserNote->responsible->device_token)
-                    ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
-                    ->withData(['key' => 'value']);
-                $messaging->send($message);
+                if ($nextUserNote->responsible->device_token != null) {
+                    $message = CloudMessage::withTarget('token', $nextUserNote->responsible->device_token)
+                        ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
+                        ->withData(['key' => 'value']);
+                    $messaging->send($message);
+                }
             }
-
-
 
             // log to history
             ApplicationLog::create([
@@ -164,7 +144,7 @@ class ApplicationStatusApiController extends Controller
             $applicationStatus->save();
 
             // prev step
-            $prevStep = $applicationStatus->application_path_id - 1;
+            $prevStep = $this->_getPrevStep($applicationStatus, $totalSteps);
             $prevUserNote = ApplicationPath::with(['responsible'])->whereId($prevStep)->first();
 
             if ($prevStep > 0) {
@@ -196,13 +176,14 @@ class ApplicationStatusApiController extends Controller
 
                 // notify prev via email that request was declined
                 Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
-                // Mail::to('noreply.oks@yandex.kz')->send(new ApplicationDeclined($applicationStatus->application));
 
                 // notify via push
-                $message = CloudMessage::withTarget('token', $prevUserNote->responsible->device_token)
-                    ->withNotification(Notification::create('Заявка отклонена', 'Ваша заявка отклонена'))
-                    ->withData(['key' => 'value']);
-                $messaging->send($message);
+                if ($prevUserNote->responsible->device_token != null) {
+                    $message = CloudMessage::withTarget('token', $prevUserNote->responsible->device_token)
+                        ->withNotification(Notification::create('Заявка отклонена', 'Ваша заявка отклонена'))
+                        ->withData(['key' => 'value']);
+                    $messaging->send($message);
+                }
             }
 
 
@@ -225,5 +206,31 @@ class ApplicationStatusApiController extends Controller
         $applicationStatus->delete();
 
         return response(null, Response::HTTP_NO_CONTENT);
+    }
+
+    private function _getNextStep($status, $steps)
+    {
+        foreach ($steps as $step) {
+            if ($step->id > $status->id) {
+                return $step->application_path_id;
+            }
+        }
+
+        return 0;
+    }
+
+    private function _getPrevStep($status, $steps)
+    {
+        $prev = 0;
+
+        foreach ($steps as $step) {
+            if ($step->id == $status->id) {
+                return $prev;
+            }
+
+            $prev = $step->application_path_id;
+        }
+
+        return $prev;
     }
 }

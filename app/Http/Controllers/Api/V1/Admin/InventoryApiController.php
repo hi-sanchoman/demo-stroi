@@ -38,10 +38,7 @@ class InventoryApiController extends Controller
 
     public function index(Request $request)
     {
-        $inventories = Inventory::query()
-            ->with(['construction', 'owner'])
-            ->whereOwnerId($request->user()->id)
-            ->get();
+        $inventories = $request->user()->inventories()->with(['construction'])->get();
 
         return ['data' => $inventories];
 
@@ -94,7 +91,7 @@ class InventoryApiController extends Controller
     }
 
 
-    public function getForemans()
+    public function foremans()
     {
         $users = User::with(['roles'])->get();
 
@@ -115,14 +112,14 @@ class InventoryApiController extends Controller
     {
         DB::beginTransaction();
 
-        $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product'])->findOrFail($request->stock['stock_id']);
+        $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])->findOrFail($request->stock['stock_id']);
         $stock->quantity -= $request->quantity;
         $stock->save();
 
         InventoryLog::create([
             'inventory_id' => $stock->inventory_id,
             'user_id' => $request->user()->id,
-            'log' => $request->user()->email . ' переместил из склада к (' . $request->where . ') товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $request->quantity . ' ' . $stock->applicationProduct->product->unit,
+            'log' => $request->user()->email . ' переместил из склада к (' . $request->where . ') товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $request->quantity . ' ' . $stock->applicationProduct->unit->name,
         ]);
 
         DB::commit();
@@ -135,7 +132,7 @@ class InventoryApiController extends Controller
         DB::beginTransaction();
 
         // remove quantity 
-        $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product'])->findOrFail($request->stock['stock_id']);
+        $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])->findOrFail($request->stock['stock_id']);
         $stock->quantity -= $request->quantity;
         $stock->save();
 
@@ -150,7 +147,40 @@ class InventoryApiController extends Controller
         $senderInvetory = Inventory::with(['construction'])->whereId($request->sender_id)->firstOrFail();
 
         // log
-        $log = $request->user()->email . ' переместил из склада (' . $senderInvetory->construction->name . ') в (' . $request->where['construction']['name'] . ') товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $request->quantity . ' ' . $stock->applicationProduct->product->unit;
+        $log = $request->user()->email . ' переместил из склада (' . $senderInvetory->construction->name . ') в (' . $request->where['construction']['name'] . ') товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $request->quantity . ' ' . $stock->applicationProduct->unit->name;
+
+        InventoryLog::create([
+            'inventory_id' => $stock->inventory_id,
+            'user_id' => $request->user()->id,
+            'log' => $log,
+        ]);
+
+        DB::commit();
+
+        return 1;
+    }
+
+    public function moveStocksForeman(Request $request)
+    {
+        DB::beginTransaction();
+
+        // remove quantity 
+        $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])->findOrFail($request->stock['stock_id']);
+        $stock->quantity -= $request->quantity;
+        $stock->save();
+
+        // move to temp
+        TempInventoryNote::create([
+            'sender_id' => $request->sender_id,
+            'foreman_id' => $request->where['id'],
+            'stock_id' => $request->stock['stock_id'],
+            'quantity' => $request->quantity,
+        ]);
+
+        $senderInvetory = Inventory::with(['construction'])->whereId($request->sender_id)->firstOrFail();
+
+        // log
+        $log = $request->user()->email . ' переместил из склада (' . $senderInvetory->construction->name . ') прорабу (' . $request->where['name'] . ') товар (' . $stock->applicationProduct->product->name . ') в количестве: ' . $request->quantity . ' ' . $stock->applicationProduct->unit->name;
 
         InventoryLog::create([
             'inventory_id' => $stock->inventory_id,
@@ -169,8 +199,9 @@ class InventoryApiController extends Controller
         $inventory = Inventory::with(['construction', 'owner'])->whereId($id)->firstOrFail();
 
         $tempNotes = TempInventoryNote::query()
-            ->with(['sender', 'sender.construction', 'receiver', 'receiver.construction', 'stock', 'stock.applicationProduct', 'stock.applicationProduct.product'])
-            ->whereReceiverId($inventory->id)
+            ->with(['sender', 'sender.construction', 'receiver', 'receiver.construction', 'stock', 'stock.applicationProduct', 'stock.applicationProduct.product', 'stock.applicationProduct.unit'])
+            ->where('receiver_id', $inventory->id)
+            ->orWhere('foreman_id', $request->user()->id)
             ->where('status', 'incoming')
             ->orderBy('id', 'DESC')
             ->get();
@@ -183,20 +214,27 @@ class InventoryApiController extends Controller
         DB::beginTransaction();
 
         // accept temp note
-        $tempNote = TempInventoryNote::with(['receiver', 'stock', 'stock.applicationProduct', 'stock.applicationProduct.product'])->whereId($id)->firstOrFail();
+        $tempNote = TempInventoryNote::with(['receiver', 'stock', 'stock.applicationProduct', 'stock.applicationProduct.application', 'stock.applicationProduct.product', 'stock.applicationProduct.unit'])->whereId($id)->firstOrFail();
         $tempNote->status = 'accepted';
         $tempNote->save();
 
         // add quantity
+        $inventoryId = $tempNote->receiver_id != null ? $tempNote->receiver_id : -1;
+
+        if ($inventoryId == -1) {
+            $foremanInventory = $request->user()->inventories()->where('construction_id', $tempNote->stock->applicationProduct->application->construction_id)->first();
+            $inventoryId = $foremanInventory->id;
+        }
+
         $stock = InventoryStock::firstOrNew([
-            'inventory_id' => $tempNote->receiver_id,
+            'inventory_id' => $inventoryId,
             'application_product_id' => $tempNote->stock->application_product_id
         ]);
         $stock->quantity += $tempNote->quantity;
         $stock->save();
 
         // save to log
-        $log = $request->user()->email . ' принял товар (' . $tempNote->stock->applicationProduct->product->name . ') в количестве: ' . $tempNote->quantity . ' ' . $tempNote->stock->applicationProduct->product->unit;
+        $log = $request->user()->email . ' принял товар (' . $tempNote->stock->applicationProduct->product->name . ') в количестве: ' . $tempNote->quantity . ' ' . $tempNote->stock->applicationProduct->unit->name;
 
         InventoryLog::create([
             'inventory_id' => $tempNote->receiver_id,
@@ -215,7 +253,7 @@ class InventoryApiController extends Controller
         DB::beginTransaction();
 
         // accept temp note
-        $tempNote = TempInventoryNote::with(['receiver', 'stock', 'stock.applicationProduct', 'stock.applicationProduct.product'])->whereId($id)->firstOrFail();
+        $tempNote = TempInventoryNote::with(['receiver', 'stock', 'stock.applicationProduct', 'stock.applicationProduct.application', 'stock.applicationProduct.product', 'stock.applicationProduct.unit'])->whereId($id)->firstOrFail();
         $tempNote->status = 'declined';
         $tempNote->save();
 
@@ -224,10 +262,18 @@ class InventoryApiController extends Controller
         $tempNote->stock->save();
 
         // save to log
-        $log = $request->user()->email . ' отказал в принятии товара (' . $tempNote->stock->applicationProduct->product->name . ') в количестве: ' . $tempNote->quantity . ' ' . $tempNote->stock->applicationProduct->product->unit;
+        $log = $request->user()->email . ' отказал в принятии товара (' . $tempNote->stock->applicationProduct->product->name . ') в количестве: ' . $tempNote->quantity . ' ' . $tempNote->stock->applicationProduct->unit->name;
+
+        // find inventory id
+        $inventoryId = $tempNote->receiver_id != null ? $tempNote->receiver_id : -1;
+
+        if ($inventoryId == -1) {
+            $foremanInventory = $request->user()->inventories()->where('construction_id', $tempNote->stock->applicationProduct->application->construction_id)->first();
+            $inventoryId = $foremanInventory->id;
+        }
 
         InventoryLog::create([
-            'inventory_id' => $tempNote->receiver_id,
+            'inventory_id' => $inventoryId,
             'user_id' => $request->user()->id,
             'log' => $log,
         ]);

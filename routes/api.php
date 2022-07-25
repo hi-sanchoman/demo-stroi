@@ -35,6 +35,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::get('/supplies', 'SupplyApiController@index');
 
     Route::get('inventories/dropdown', 'InventoryApiController@dropdown');
+    Route::get('inventories/{id}/foremans', 'InventoryApiController@foremans');
     Route::get('/inventories/{id}/stocks', 'InventoryStockApiController@index');
     Route::get('/inventories/{id}/incoming', 'InventoryStockApiController@incoming');
     Route::get('/inventories/{id}/history', 'InventoryStockApiController@history');
@@ -73,6 +74,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::apiResource('products', 'ProductApiController');
     Route::apiResource('categories', 'CategoryApiController');
     Route::apiResource('companies', 'CompanyApiController');
+    Route::apiResource('units', 'UnitApiController');
 
     Route::get('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'payments']);
     Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);
@@ -82,6 +84,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::get('/foremans', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'getForemans']);
     Route::post('/move-stocks', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'moveStocks']);
     Route::post('/move-stocks-outside', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'moveStocksOutside']);
+    Route::post('/move-stocks-foreman', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'moveStocksForeman']);
 
     Route::get('/temp-incoming/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'getIncoming']);
     Route::put('/temp-inventory-accept/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'acceptIncoming']);

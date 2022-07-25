@@ -23,7 +23,7 @@ class InventoryStockApiController extends Controller
 
         $inventories = InventoryStock::query()
             ->where('inventory_id', $inventoryId)
-            ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product'])
+            ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])
             ->get();
 
         return ['data' => $inventories];
@@ -56,7 +56,7 @@ class InventoryStockApiController extends Controller
     {
         // dd($inventoryId);
 
-        $inventory = Inventory::with(['stocks', 'stocks.applicationProduct', 'stocks.applicationProduct.product'])
+        $inventory = Inventory::with(['stocks', 'stocks.applicationProduct', 'stocks.applicationProduct.product', 'stocks.applicationProduct.unit'])
             ->where('id', $inventoryId)
             ->firstOrFail();
 

@@ -13,8 +13,9 @@ return new class extends Migration
      */
     public function up()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('device_token')->nullable();
+        Schema::table('application_products', function (Blueprint $table) {            
+            $table->unsignedBigInteger('unit_id')->nullable();
+            $table->foreign('unit_id', 'unit_fk_6663494')->references('id')->on('units');
         });
     }
 
@@ -25,8 +26,9 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn('device_token');
+        Schema::table('application_products', function (Blueprint $table) {
+            $table->dropForeign('unit_fk_6663494');
+            $table->dropColumn('unit_id');
         });
     }
 };

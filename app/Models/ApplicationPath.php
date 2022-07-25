@@ -22,6 +22,8 @@ class ApplicationPath extends Model
 
     protected $fillable = [
         'position',
+        'type',
+        'order',
         'construction_id',
         'responsible_id',
         'created_at',

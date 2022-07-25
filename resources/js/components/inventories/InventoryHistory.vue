@@ -7,13 +7,14 @@
                 </v-col>
             </v-row>
 
-            
+
 
             <v-row no-gutters class="mt-10">
                 <v-col cols="12" md="4" lg="3" class="border px-5 py-5">
-                    <InventorySidebar v-if="currentUser != null && inventory != null" :currentUser="currentUser" :inventory="inventory" />
+                    <InventorySidebar v-if="currentUser != null && inventory != null" :currentUser="currentUser"
+                        :inventory="inventory" />
                 </v-col>
-                
+
 
                 <v-col cols="12" md="8" lg="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
                     <v-table transition="slide-x-transition" style="overflow-x:auto;">
@@ -32,7 +33,7 @@
                                     Дата
                                 </th>
                                 <th>
-                                    
+
                                 </th>
                             </tr>
                         </thead>
@@ -41,11 +42,7 @@
                                 <td colspan="5">Нет данных.</td>
                             </tr>
 
-                            <tr
-                                v-for="(item, index) in logs"
-                                :key="item.id"
-                                class="hover:bg-slate-100"
-                            >
+                            <tr v-for="(item, index) in logs" :key="item.id" class="hover:bg-slate-100">
                                 <td>{{ index + 1 }}</td>
                                 <td>{{ item.log }}</td>
                                 <td>{{ item.user.email }}</td>
@@ -57,7 +54,7 @@
                         </tbody>
                     </v-table>
                 </v-col>
-            </v-row>    
+            </v-row>
         </v-container>
     </div>
 </template>
@@ -81,9 +78,9 @@ export default {
             inventory: null,
             logs: [],
             currentUser: null,
-        } 
+        }
     },
-    
+
     methods: {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
@@ -108,7 +105,7 @@ export default {
 
     },
 
-    mounted() {        
+    mounted() {
         console.log('mounted');
         // this.isLoading = true;
 
@@ -120,21 +117,21 @@ export default {
         this.getLogs();
     },
 
-    watch: {
-        '$route.query': {
-            handler(newValue) {
-                const { status } = newValue
+    // watch: {
+    //     '$route.query': {
+    //         handler(newValue) {
+    //             const { status } = newValue
 
-                if (status == 'waiting') {
-                    // this.getIncoming();
-                } else if (status == 'accepted') {
-                    this.$router.push('/inventories/' + this.$route.params.id + '?status=accepted');
-                } else if (status == 'declined') {
-                    console.log('get declined');
-                }
-            },
-            immediate: true,
-        }
-    }
+    //             if (status == 'waiting') {
+    //                 // this.getIncoming();
+    //             } else if (status == 'accepted') {
+    //                 this.$router.push('/inventories/' + this.$route.params.id + '?status=accepted');
+    //             } else if (status == 'declined') {
+    //                 console.log('get declined');
+    //             }
+    //         },
+    //         immediate: true,
+    //     }
+    // }
 }
 </script>
