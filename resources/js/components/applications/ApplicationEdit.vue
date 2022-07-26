@@ -456,6 +456,7 @@
 
                     <v-btn v-if="
                         isWarehouseManager() &&
+                        application.status == 'in_progress' &&
                         equipments[index].quantity !=
                         equipments[index].prepared
                     " @click="showAcceptProduct(item)" color="info" size="small">
