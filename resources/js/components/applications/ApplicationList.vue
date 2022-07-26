@@ -23,6 +23,9 @@
                                     Объект
                                 </th>
                                 <th class="text-left">
+                                    Тип
+                                </th>
+                                <th class="text-left">
                                     Дата заявки
                                 </th>
                                 <th class="text-left">
@@ -45,6 +48,9 @@
                                 <td @click="showApplication(application.id)" style="cursor: pointer">{{
                                         application.construction.name
                                 }}</td>
+                                <td>
+                                    {{ getKind(application.kind) }}
+                                </td>
                                 <td @click="showApplication(application.id)" style="cursor: pointer">{{
                                         application.issued_at
                                 }}</td>
@@ -175,6 +181,17 @@ export default {
 
         getStatusText(item) {
             return item.application_path.responsible.name
+        },
+
+        getKind: function getKind(kind) {
+            var _kinds$kind;
+
+            var kinds = {
+                'product': 'заявка на товар',
+                'equipment': 'заявка на спец. технику',
+                'service': 'заявка на услугу'
+            };
+            return (_kinds$kind = kinds[kind]) !== null && _kinds$kind !== void 0 ? _kinds$kind : '';
         }
 
     },

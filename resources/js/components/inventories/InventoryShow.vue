@@ -65,8 +65,24 @@
 
                             <tr v-for="(stock, index) in stocks" :key="stock.id" class="hover:bg-slate-100">
                                 <td>{{ index + 1 }}</td>
-                                <td>{{ stock.application_product.product.name }}</td>
-                                <td>{{ stock.application_product.unit.name }}</td>
+                                <td>
+                                    <span v-if="stock.application_product">
+                                        {{ stock.application_product.product.name }}
+                                    </span>    
+
+                                    <span v-else-if="stock.application_equipment">
+                                        {{ stock.application_equipment.equipment.name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span v-if="stock.application_product">
+                                        {{ stock.application_product.unit.name }}
+                                    </span> 
+                                    
+                                    <span v-else-if="stock.application_equipment">
+                                        шт
+                                    </span>
+                                </td>
                                 <td>{{ stock.quantity }}</td>
                                 <td>
                                     <!-- Management -->
@@ -139,11 +155,27 @@ export default {
             })
         },
 
-        getStocks() {
-            axios.get('/api/v1/inventories/' + this.$route.params.id + '/stocks').then((response) => {
+        // getStocks() {
+        //     axios.get('/api/v1/inventories/' + this.$route.params.id + '/stocks').then((response) => {
+        //         this.stocks = response.data.data;
+        //     })
+        // },
+
+        getProducts() {
+            axios.get('/api/v1/inventories/' + this.$route.params.id + '/products').then((response) => {
                 this.stocks = response.data.data;
             })
         },
+
+        
+
+
+
+
+
+
+
+
 
         getIncoming() {
             axios.get('/api/v1/temp-incoming/' + this.$route.params.id).then((response) => {
@@ -158,7 +190,7 @@ export default {
 
             axios.put('/api/v1/temp-inventory-accept/' + item.id, data).then((response) => {
                 // this.getIncoming();
-                this.getStocks();
+                this.getProducts();
                 this.getIncoming();
             })
         },
@@ -170,7 +202,7 @@ export default {
 
             axios.put('/api/v1/temp-inventory-decline/' + item.id, data).then((response) => {
                 // this.getIncoming();
-                this.getStocks();
+                this.getProducts();
                 this.getIncoming();
             })
         }
@@ -186,7 +218,7 @@ export default {
 
         this.getInventory();
 
-        this.getStocks();
+        this.getProducts();
 
         this.getIncoming();
     },
@@ -199,7 +231,8 @@ export default {
                 if (status == 'waiting') {
                     // this.getIncoming();
                 } else if (status == 'accepted') {
-                    this.getStocks();
+                    this.getProducts();
+                    this.getIncoming();
                 } else if (status == 'declined') {
                     console.log('get declined');
                 }

@@ -7,6 +7,7 @@ use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
 use App\Http\Resources\Admin\ApplicationResource;
 use App\Models\Application;
+use App\Models\ApplicationEquipment;
 use App\Models\ApplicationProduct;
 use App\Models\ApplicationLog;
 use App\Models\ApplicationOpenedStatus;
@@ -34,7 +35,7 @@ class ApplicationApiController extends Controller
                         ->where('user_id', $request->user()->id)
                         ->where('status', 'unread');
                 }])
-                ->orderBy('updated_at', 'DESC')
+                ->orderBy('created_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -149,6 +150,8 @@ class ApplicationApiController extends Controller
 
     public function store(Request $request)
     {
+        // dd($request->all());
+
         try {
             DB::beginTransaction();
 
@@ -177,6 +180,15 @@ class ApplicationApiController extends Controller
                     ]);
                 }
             } else if ($application->kind == 'equipment') {
+                foreach ($input['equipments'] as $equipment) {
+                    ApplicationEquipment::create([
+                        'application_id' => $application->id,
+                        'equipment_id' => $equipment['equipment']['id'],
+                        'quantity' => $equipment['quantity'],
+                        'notes' => $equipment['notes'],
+                        'is_delivered_by_us' => 0,
+                    ]);
+                }
             } else if ($application->kind == 'service') {
             }
             // else -> throw error
@@ -184,13 +196,16 @@ class ApplicationApiController extends Controller
             // application statuses
             $path = ApplicationPath::where('type', $application->kind)->orderBy('order', 'asc')->get();
 
+            $index = 0;
             foreach ($path as $step) {
                 ApplicationStatus::create([
                     'application_id' => $application->id,
                     'application_path_id' => $step->id,
-                    'status' => $step->id == 1 ? 'incoming' : 'waiting',
+                    'status' => $index == 0 ? 'incoming' : 'waiting',
                     'declined_reason' => '',
                 ]);
+
+                $index += 1;
             }
 
             // application log
@@ -221,7 +236,7 @@ class ApplicationApiController extends Controller
             ->where('user_id', $request->user()->id)
             ->update(['status' => 'read']);
 
-        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
+        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationEquipments', 'applicationEquipments.equipment', 'applicationEquipments.offers', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
     }
 
     public function update(Request $request, Application $application)
@@ -237,9 +252,9 @@ class ApplicationApiController extends Controller
             // application
             $application->update($input);
 
+            // make it editable again
             $roles = $request->user()->roles()->pluck('title');
-
-            // is supplier or supervisor
+            
             if (array_intersect(['Supplier', 'Supervisor'], $roles->toArray()) > 0) {
                 // clear statuses till user's id
                 $statuses = ApplicationStatus::query()
@@ -266,30 +281,36 @@ class ApplicationApiController extends Controller
                 }
             }
 
-            // update products / equipments / services
-            else {
-                if ($application->kind == 'product') {
-                    // application products
-                    ApplicationProduct::where('application_id', $application->id)->delete();
+            if ($application->kind == 'product') {
+                
+                // application products
+                ApplicationProduct::where('application_id', $application->id)->delete();
 
-                    foreach ($input['products'] as $product) {
-                        ApplicationProduct::create([
-                            'application_id' => $application->id,
-                            'product_id' => $product['product']['id'],
-                            'product_category_id' => $product['category']['id'],
-                            'unit_id' => $product['unit']['id'],
-                            'quantity' => $product['quantity'],
-                            'notes' => $product['notes'],
-                            'is_delivered_by_us' => 0,
-                        ]);
-                    }
-                } else if ($application->kind == 'equipment') {
-                    // special equipment
-                } else if ($application->kind == 'service') {
-                    // service 
+                foreach ($input['products'] as $product) {
+                    ApplicationProduct::create([
+                        'application_id' => $application->id,
+                        'product_id' => $product['product']['id'],
+                        'product_category_id' => $product['category']['id'],
+                        'unit_id' => $product['unit']['id'],
+                        'quantity' => $product['quantity'],
+                        'notes' => $product['notes'],
+                        'is_delivered_by_us' => 0,
+                    ]);
                 }
-            }
+            } else if ($application->kind == 'equipment') {
+                // is supplier or supervisor
+                ApplicationEquipment::where('application_id', $application->id)->delete();
 
+                foreach ($input['equipments'] as $item) {
+                    ApplicationEquipment::create([
+                        'application_id' => $application->id,
+                        'equipment_id' => $item['equipment']['id'],
+                        'quantity' => $item['quantity'],
+                        'notes' => $item['notes'],
+                        'is_delivered_by_us' => 0,
+                    ]);
+                }   
+            }
 
             // application log
             ApplicationLog::create([

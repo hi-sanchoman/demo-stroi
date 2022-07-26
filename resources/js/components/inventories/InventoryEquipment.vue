@@ -49,6 +49,9 @@
                   Дата принятия
                 </th>
                 <th class="text-left">
+                  Кол-во
+                </th>
+                <th class="text-left">
                   Часов отработано
                 </th>
                 <th>
@@ -61,16 +64,17 @@
                 <td colspan="5">Нет данных.</td>
               </tr> -->
 
-              <tr class="hover:bg-slate-100">
-                <td>1</td>
-                <td>Погрузчик</td>
-                <td>24 июль, 2022 г.</td>
-                <td>13</td>
+              <tr v-for="(stock, index) in stocks" :key="stock.id" class="hover:bg-slate-100">
+                <td>{{ (index + 1) }}</td>
+                <td>{{ stock.application_equipment.equipment.name }}</td>
+                <td>{{ stock.created_at }}</td>
+                <td>{{ stock.quantity }}</td>
+                <td>..</td>
                 <td>
-                  <v-btn color="info" size="small">+ запись</v-btn>
+                  <!-- <v-btn color="info" size="small">+ запись</v-btn> -->
                 </td>
               </tr>
-
+<!-- 
               <tr>
                 <td colspan="5">
                   <v-table>
@@ -83,7 +87,7 @@
                       </tr>
                     </thead>
             <tbody>
-              <tr>
+              <tr >
                 <td>24 июль, 2022 г.</td>
                 <td>7</td>
                 <td>-</td>
@@ -91,28 +95,13 @@
                   <v-btn color="error" size="small">удалить</v-btn>
                 </td>
               </tr>
-              <tr>
-                <td>25 июль, 2022</td>
-                <td>6</td>
-                <td>-</td>
-                <td>
-                  <v-btn color="error" size="small">удалить</v-btn>
-                </td>
-              </tr>
+              
             </tbody>
           </v-table>
           </td>
-          </tr>
+          </tr> -->
 
-          <tr v-for="(stock, index) in stocks" :key="stock.id" class="hover:bg-slate-100">
-            <td>{{ index + 1 }}</td>
-            <td>{{ stock.application_product.product.name }}</td>
-            <td>{{ stock.application_product.product.unit }}</td>
-            <td>{{ stock.quantity }}</td>
-            <td>
-              <!-- Management -->
-            </td>
-          </tr>
+          
           </tbody>
           </v-table>
         </v-col>
@@ -180,41 +169,12 @@ export default {
       })
     },
 
-    getStocks() {
-      axios.get('/api/v1/inventories/' + this.$route.params.id + '/stocks').then((response) => {
+    getEquipments() {
+      axios.get('/api/v1/inventories/' + this.$route.params.id + '/equipments').then((response) => {
         this.stocks = response.data.data;
       })
     },
-
-    getIncoming() {
-      axios.get('/api/v1/temp-incoming/' + this.$route.params.id).then((response) => {
-        this.incoming = response.data.data;
-      });
-    },
-
-    acceptProduct(item) {
-      var data = {
-        'mode': 'accept'
-      };
-
-      axios.put('/api/v1/temp-inventory-accept/' + item.id, data).then((response) => {
-        // this.getIncoming();
-        this.getStocks();
-        this.getIncoming();
-      })
-    },
-
-    declineProduct(item) {
-      var data = {
-        'mode': 'decline'
-      };
-
-      axios.put('/api/v1/temp-inventory-decline/' + item.id, data).then((response) => {
-        // this.getIncoming();
-        this.getStocks();
-        this.getIncoming();
-      })
-    }
+  
 
   },
 
@@ -227,9 +187,7 @@ export default {
 
     this.getInventory();
 
-    this.getStocks();
-
-    this.getIncoming();
+    this.getEquipments();
   },
 
   watch: {
@@ -240,7 +198,7 @@ export default {
         if (status == 'waiting') {
           // this.getIncoming();
         } else if (status == 'accepted') {
-          this.getStocks();
+          this.getEquipments();
         } else if (status == 'declined') {
           console.log('get declined');
         }

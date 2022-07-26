@@ -28,25 +28,39 @@
                         </multiselect>
 
                         <v-row class="mt-5">
-                            <v-col cols="12">Добавить товар к заявке:</v-col>
+                            <v-col v-if="form.kind == 'product'" cols="12">Добавить товар к заявке:</v-col>
+                            <v-col v-else-if="form.kind == 'equipment'" cols="12">Добавить спец. технику к заявке:
+                            </v-col>
+                            <v-col v-else-if="form.kind == 'service'" cols="12">Добавить услугу к заявке:</v-col>
                         </v-row>
 
                         <v-row>
-                            <v-col cols="12" md="3">
-                                <multiselect v-model="current.category" :options="categories"
-                                    placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
-                            </v-col>
+                            <template v-if="form.kind == 'product'">
+                                <v-col cols="12" md="3">
+                                    <multiselect v-model="current.category" :options="categories"
+                                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                                </v-col>
 
-                            <v-col cols="12" md="3">
-                                <multiselect v-model="current.product" :options="options" placeholder="Укажите товар"
-                                    label="name" track-by="name"></multiselect>
-                            </v-col>
+                                <v-col cols="12" md="3">
+                                    <multiselect v-model="current.product" :options="options"
+                                        placeholder="Укажите товар" label="name" track-by="name"></multiselect>
+                                </v-col>
 
-                            <v-col cols="12" md="2">
-                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
-                                    track-by="name"></multiselect>
-                            </v-col>
+                                <v-col cols="12" md="2">
+                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
+                                        label="name" track-by="name"></multiselect>
+                                </v-col>
+                            </template>
 
+                            <!-- Equipment -->
+                            <template v-else-if="form.kind == 'equipment'">
+                                <v-col cols="12" md="6">
+                                    <multiselect v-model="current.equipment" :options="equipmentOptions"
+                                        placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
+                                </v-col>
+                            </template>
+
+                            <!-- common -->
                             <v-col cols="12" md="1">
                                 <v-text-field v-model="current.quantity" label="Количество" @keyup.enter="addProduct()"
                                     variant="underlined" required density="comfortable" type="number"></v-text-field>
@@ -67,10 +81,9 @@
                                 </v-btn>
                             </v-col>
 
-
                         </v-row>
 
-                        <v-table>
+                        <v-table v-if="form.kind == 'product'">
                             <thead>
                                 <tr>
                                     <th>№</th>
@@ -104,8 +117,38 @@
                             </tbody>
                         </v-table>
 
-                        <v-btn v-if="form.construction != null && products.length > 0" class="mt-5"
-                            @click="saveApplication" color="primary">
+                        <v-table v-else-if="form.kind == 'equipment'">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Наименование спец. техники</th>
+                                    <th>Кол-во</th>
+                                    <th>Примечание</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr v-for="(item, index) in equipments" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.equipment.name }}</td>
+                                    <td class="d-flex mt-3">
+                                        <v-text-field v-model="equipments[index].quantity" type="number" variant="plain"
+                                            density="compact">
+                                        </v-text-field>
+                                    </td>
+                                    <td>{{ item.notes }}</td>
+                                    <td>
+                                        <v-btn size="small" color="error" @click="deleteProduct(item)">
+                                            <v-icon>mdi-close</v-icon>
+                                        </v-btn>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+
+                        <v-btn v-if="form.construction != null && (products.length > 0 || equipments.length > 0)"
+                            class="mt-5" @click="saveApplication" color="primary">
                             Создать
                         </v-btn>
                     </v-form>
@@ -137,6 +180,8 @@ export default {
         return {
             current: {
                 product: null,
+                equipment: null,
+                service: null,
                 category: null,
                 unit: null,
                 quantity: null,
@@ -145,13 +190,20 @@ export default {
             },
             options: [],
             categories: [],
-            products: [],
             units: [],
+            equipmentOptions: [],
+
+            services: [],
+            equipments: [],
+            products: [],
             form: {
                 // 'issued_at': new Date(),
                 'construction': null,
                 'is_urgent': false,
-                kind: this.$route.query.kind ?? 'product'
+                kind: this.$route.query.kind ?? 'product',
+                products: [],
+                equipments: [],
+                services: [],
             },
             constructions: [],
             currentUser: null,
@@ -168,36 +220,32 @@ export default {
         // get products -> async autocomplete TODO!
         axios.get('/api/v1/products').then((response) => {
             response.data.data.forEach((item) => {
-                // console.log(item)
                 this.options.push(item)
             });
-
-            // this.isLoading = false
         });
 
         // get categories
         axios.get('/api/v1/categories').then((response) => {
             response.data.data.forEach((item) => {
-                // console.log(item)
                 this.categories.push(item)
             });
-
-            // this.isLoading = false
         });
 
         // get units
         axios.get('/api/v1/units').then((response) => {
             response.data.data.forEach((item) => {
-                // console.log(item)
                 this.units.push(item)
             });
-
-            // this.isLoading = false
         });
 
         // get constructions
         axios.get('/api/v1/constructions').then((response) => {
             this.constructions = response.data.data
+        });
+
+        // get equipments
+        axios.get('/api/v1/equipments').then((response) => {
+            this.equipmentOptions = response.data.data;
         });
     },
 
@@ -218,17 +266,32 @@ export default {
                 return;
             }
 
-            this.products.push({
-                id: this.products.length + 1,
-                product: this.current.product,
-                unit: this.current.unit,
-                category: this.current.category,
-                quantity: this.current.quantity,
-                notes: this.current.notes,
-            })
+            if (this.form.kind == 'product') {
+                this.products.push({
+                    id: this.products.length + 1,
+                    product: this.current.product,
+                    unit: this.current.unit,
+                    category: this.current.category,
+                    quantity: this.current.quantity,
+                    notes: this.current.notes,
+                });
+            }
+
+            else if (this.form.kind == 'equipment') {
+                this.equipments.push({
+                    id: this.equipments.length + 1,
+                    equipment: this.current.equipment,
+                    quantity: this.current.quantity,
+                    notes: this.current.notes,
+                });
+
+                // console.log(this.equipments);
+            }
 
             this.current = {
                 product: null,
+                service: null,
+                equipment: null,
                 unit: null,
                 category: null,
                 quantity: null,
@@ -238,19 +301,30 @@ export default {
         },
 
         deleteProduct(item) {
-            this.products = this.products.filter(function (el) { return el.id != item.id })
+            if (this.form.kind == 'product') {
+                this.products = this.products.filter(function (el) { return el.id != item.id })
+            }
+
+            else if (this.form.kind == 'equipment') {
+                this.equipments = this.equipments.filter(el => el.id != item.id);
+            }
         },
 
         saveApplication() {
-            this.form.products = this.products
             this.form.construction_id = this.form.construction.id
 
-            console.log(this.form)
+            if (this.form.kind == 'product') {
+                this.form.products = this.products
+            } else if (this.form.kind == 'equipment') {
+                this.form.equipments = this.equipments;
+            }
+
+            // console.log(this.form)
+            // return;
 
             try {
                 axios.post('/api/v1/applications', this.form).then((response) => {
                     var application = response.data.data
-
                     this.$router.push({ name: 'applications.edit', params: { id: application.id } })
                 })
             } catch (e) {

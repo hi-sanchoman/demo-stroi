@@ -83,7 +83,7 @@ class ApplicationStatusApiController extends Controller
             //         ->update(['status' => 'waiting', 'declined_reason' => '']);
             // }
 
-            if ($nextStep <= count($totalSteps)) {
+            if ($nextStep != 0) {
                 ApplicationStatus::query()
                     ->where('application_id', $applicationStatus->application_id)
                     ->where('application_path_id', $nextStep)
@@ -91,7 +91,7 @@ class ApplicationStatusApiController extends Controller
             }
 
             // TODO: hardcoded: kurtayev -> SET A ROLE, not an email!!!
-            if ($request->user()->email == 'kurtayev.meirzhan@gmail.com') {
+            if ($request->user()->email == 'kurtayev.meirzhan@mail.ru') {
                 $applicationStatus->application->status = 'in_progress';
                 // final responsible
             } else if ($nextStep == count($totalSteps) + 1) {
@@ -121,14 +121,14 @@ class ApplicationStatusApiController extends Controller
                 $openedStatus->save();
 
                 // notify next via email
-                Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
 
                 // notify via push
                 if ($nextUserNote->responsible->device_token != null) {
                     $message = CloudMessage::withTarget('token', $nextUserNote->responsible->device_token)
                         ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
                         ->withData(['key' => 'value']);
-                    $messaging->send($message);
+                    // $messaging->send($message);
                 }
             }
 
@@ -175,14 +175,14 @@ class ApplicationStatusApiController extends Controller
                 $openedStatus->save();
 
                 // notify prev via email that request was declined
-                Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
+                // Mail::to($prevUserNote->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
 
                 // notify via push
                 if ($prevUserNote->responsible->device_token != null) {
                     $message = CloudMessage::withTarget('token', $prevUserNote->responsible->device_token)
                         ->withNotification(Notification::create('Заявка отклонена', 'Ваша заявка отклонена'))
                         ->withData(['key' => 'value']);
-                    $messaging->send($message);
+                    // $messaging->send($message);
                 }
             }
 

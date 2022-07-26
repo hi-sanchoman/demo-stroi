@@ -32,14 +32,14 @@
                 </v-list-item>
             </router-link>
 
-            <!-- <router-link :to="'/inventories/' + inventory.id + '/equipment/?status=accepted'"
+            <router-link :to="'/inventories/' + inventory.id + '/equipment/?status=accepted'"
                 class="text-decoration-none text-black">
                 <v-list-item key="equipment" value="equipment" active-color="primary">
                     <v-list-item-title v-text="'Спец. техника'"></v-list-item-title>
                 </v-list-item>
             </router-link>
 
-            <router-link :to="'/inventories/' + inventory.id + '/services/?status=accepted'"
+            <!-- <router-link :to="'/inventories/' + inventory.id + '/services/?status=accepted'"
                 class="text-decoration-none text-black">
                 <v-list-item key="services" value="services" active-color="primary">
                     <v-list-item-title v-text="'Услуги'"></v-list-item-title>

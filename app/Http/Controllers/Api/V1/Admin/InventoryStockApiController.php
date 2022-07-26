@@ -23,7 +23,34 @@ class InventoryStockApiController extends Controller
 
         $inventories = InventoryStock::query()
             ->where('inventory_id', $inventoryId)
+            ->where('application_equipment_id', null)
             ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])
+            ->get();
+
+        return ['data' => $inventories];
+    }
+
+    public function products(Request $request, $inventoryId)
+    {
+        $collection = [];
+
+        $inventories = InventoryStock::query()
+            ->where('inventory_id', $inventoryId)
+            ->where('application_equipment_id', null)
+            ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])
+            ->get();
+
+        return ['data' => $inventories];
+    }
+
+    public function equipments(Request $request, $inventoryId)
+    {
+        $collection = [];
+
+        $inventories = InventoryStock::query()
+            ->where('inventory_id', $inventoryId)
+            ->where('application_product_id', null)
+            ->with(['inventory', 'inventory.construction', 'applicationEquipment', 'applicationEquipment.equipment'])
             ->get();
 
         return ['data' => $inventories];
@@ -60,7 +87,15 @@ class InventoryStockApiController extends Controller
             ->where('id', $inventoryId)
             ->firstOrFail();
 
-        return $inventory->stocks;
+        $stocks = [];
+
+        foreach ($inventory->stocks as $stock) {
+            if ($stock->application_product_id != null) {
+                $stocks[] = $stock;
+            }
+        }
+
+        return $stocks;
     }
 
 

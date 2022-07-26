@@ -54,6 +54,11 @@ class Application extends Model
         'owner_id',
     ];
 
+    public function applicationEquipments()
+    {
+        return $this->hasMany(ApplicationEquipment::class);
+    }
+
     public function applicationApplicationProducts()
     {
         return $this->hasMany(ApplicationProduct::class, 'application_id', 'id');

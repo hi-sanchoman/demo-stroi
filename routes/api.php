@@ -30,6 +30,11 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::apiResource('application-offers', 'ApplicationOfferApiController');
 
 
+    Route::put('/application-equipments/{id}/prepare', 'ApplicationEquipmentsApiController@prepare');
+    Route::apiResource('application-equipments', 'ApplicationEquipmentsApiController');
+    Route::apiResource('equipment-offers', 'EquipmentOfferApiController');
+
+
     // Inventories
     Route::get('/history-supplies/{productId}', 'SupplyApiController@history');
     Route::get('/supplies', 'SupplyApiController@index');
@@ -37,6 +42,11 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::get('inventories/dropdown', 'InventoryApiController@dropdown');
     Route::get('inventories/{id}/foremans', 'InventoryApiController@foremans');
     Route::get('/inventories/{id}/stocks', 'InventoryStockApiController@index');
+
+    Route::get('/inventories/{id}/products', 'InventoryStockApiController@products');
+    Route::get('/inventories/{id}/equipments', 'InventoryStockApiController@equipments');
+
+
     Route::get('/inventories/{id}/incoming', 'InventoryStockApiController@incoming');
     Route::get('/inventories/{id}/history', 'InventoryStockApiController@history');
     Route::apiResource('inventories', 'InventoryApiController');
@@ -75,6 +85,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::apiResource('categories', 'CategoryApiController');
     Route::apiResource('companies', 'CompanyApiController');
     Route::apiResource('units', 'UnitApiController');
+    Route::apiResource('equipments', 'EquipmentApiController');
 
     Route::get('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'payments']);
     Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);

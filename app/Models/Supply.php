@@ -16,6 +16,7 @@ class Supply extends Model
     protected $fillable = [
         'construction_id',
         'application_product_id',
+        'application_equipment_id',
         'quantity',
         'created_at',
         'updated_at',
@@ -36,6 +37,11 @@ class Supply extends Model
     public function applicationProduct()
     {
         return $this->belongsTo(ApplicationProduct::class);
+    }
+
+    public function applicationEquipment()
+    {
+        return $this->belongsTo(ApplicationEquipment::class);
     }
 
     // public function getCreatedAtAttribute($value)

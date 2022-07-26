@@ -23,6 +23,7 @@ class InventoryApplication extends Model
     protected $fillable = [
         'inventory_id',
         'application_product_id',
+        'application_equipment_id',
         'prepared',
         'accepted',
         'declined',
@@ -44,5 +45,10 @@ class InventoryApplication extends Model
 
     public function applicationProduct() {
         return $this->belongsTo(ApplicationProduct::class);
+    }
+    
+    public function applicationEquipment()
+    {
+        return $this->belongsTo(ApplicationEquipment::class);
     }
 }

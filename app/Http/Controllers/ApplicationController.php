@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationOffer;
+use App\Models\EquipmentOffer;
 use Storage;
 
 class ApplicationController extends Controller
@@ -39,9 +40,17 @@ class ApplicationController extends Controller
 
         $file->move(public_path('/uploads'), $path);
 
-        $offer = ApplicationOffer::where('id', $request->offer_id)->firstOrFail();
-        $offer->file = $path;
-        $offer->save();
+        if ($request->kind == 'product') {
+            $offer = ApplicationOffer::where('id', $request->offer_id)->firstOrFail();
+            $offer->file = $path;
+            $offer->save();
+        }
+
+        else if ($request->kind == 'equipment') {
+            $offer = EquipmentOffer::where('id', $request->offer_id)->firstOrFail();
+            $offer->file = $path;
+            $offer->save();
+        }        
 
         return [
             'data' => [
