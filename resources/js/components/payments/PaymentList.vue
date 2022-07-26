@@ -100,22 +100,42 @@
                                                 </thead>
                         <tbody>
                             <tr v-for="offer in payment.offers" :key="offer.id">
-                                <td class="">
-                                    {{ offer.application_product.category.name }}
-                                </td>
-                                <td class="">
-                                    {{ offer.application_product.product.name }}, {{ offer.application_product.unit.name
-                                    }}
-                                </td>
-                                <td>
-                                    {{ offer.quantity }} {{ offer.application_product.product.unit }}
-                                </td>
-                                <td>
-                                    {{ offer.price }} ₸
-                                </td>
-                                <td>
-                                    {{ offer.price * offer.quantity }} ₸
-                                </td>
+                                <template v-if="offer.application_product">
+                                    <td class="">
+                                        {{ offer.application_product.category.name }}
+                                    </td>
+                                    <td class="">
+                                        {{ offer.application_product.product.name }}
+                                    </td>
+                                    <td>
+                                        {{ offer.quantity }} {{ offer.application_product.unit.name
+                                        }}
+                                    </td>
+                                    <td>
+                                        {{ offer.price }} ₸
+                                    </td>
+                                    <td>
+                                        {{ offer.price * offer.quantity }} ₸
+                                    </td>
+                                </template>
+
+                                <template v-else-if="offer.application_equipemnt">
+                                    <td class="">
+                                        -
+                                    </td>
+                                    <td class="">
+                                        {{ offer.application_equipemnt.equipment.name }}, шт
+                                    </td>
+                                    <td>
+                                        {{ offer.quantity }}
+                                    </td>
+                                    <td>
+                                        {{ offer.price }} ₸
+                                    </td>
+                                    <td>
+                                        {{ offer.price * offer.quantity }} ₸
+                                    </td>
+                                </template>
                             </tr>
 
                         </tbody>

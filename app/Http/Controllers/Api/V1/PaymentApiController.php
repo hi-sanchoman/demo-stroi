@@ -15,7 +15,7 @@ class PaymentApiController extends Controller
 {
     public function payments()
     {
-        $payments = Payment::with(['application', 'application.construction', 'company', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.category', 'offers.applicationProduct.unit'])->get();
+        $payments = Payment::with(['application', 'application.construction', 'company', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.category', 'offers.applicationProduct.unit', 'offers.applicationEquipment', 'offers.applicationEquipment.equipment',])->get();
         // dd($payments->toArray());
 
         $data = [];

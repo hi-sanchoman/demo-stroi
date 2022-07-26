@@ -48,9 +48,30 @@
                                 style="cursor:pointer" @click="showPosition(inventory)">
                                 <td>{{ index + 1 }}</td>
                                 <td>{{ inventory.item.construction.name }}</td>
-                                <td>{{ inventory.item.application_product.product.name }}</td>
-                                <td>{{ inventory.item.application_product.category.name }}</td>
-                                <td>{{ inventory.item.application_product.unit.name }}</td>
+                                <td>
+                                    <span v-if="inventory.item.application_product">
+                                        {{ inventory.item.application_product.product.name }}
+                                    </span>
+                                    <span v-else-if="inventory.item.application_equipment">
+                                        {{ inventory.item.application_equipment.equipment.name }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span v-if="inventory.item.application_product">
+                                        {{ inventory.item.application_product.category.name }}
+                                    </span>
+                                    <span v-else-if="inventory.item.application_equipment">
+                                        -
+                                    </span>
+                                </td>
+                                <td>
+                                    <span v-if="inventory.item.application_product">
+                                        {{ inventory.item.application_product.unit.name }}
+                                    </span>
+                                    <span v-else-if="inventory.item.application_equipment">
+                                        шт
+                                    </span>
+                                </td>
                                 <td>{{ inventory.total }}</td>
                                 <td></td>
                             </tr>
@@ -148,6 +169,8 @@ export default {
         },
 
         showPosition(item) {
+            if (!item.item.application_product) return;
+
             this.historyDialog = true
             this.history = item
             this.historyInventories = []

@@ -18,20 +18,31 @@ class SupplyApiController extends Controller
         $collection = [];
 
         $supplies = Supply::query()
-            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category', 'applicationProduct.unit'])
+            ->with(['construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.category', 'applicationProduct.unit', 'applicationEquipment', 'applicationEquipment.equipment',])
             ->get();
 
         foreach ($supplies as $item) {
-            if (!isset($collection[$item->applicationProduct->product->id])) {
-                $collection[$item->applicationProduct->product->id] = [
-                    'item' => $item,
-                    'total' => $item->quantity,
-                ];
+            if ($item->applicationProduct) {
+                if (!isset($collection[$item->applicationProduct->product->id])) {
+                    $collection[$item->applicationProduct->product->id] = [
+                        'item' => $item,
+                        'total' => $item->quantity,
+                    ];
 
-                continue;
+                    continue;
+                }
+                $collection[$item->applicationProduct->product->id]['total'] += $item->quantity;
+            } else if ($item->applicationEquipment) {
+                if (!isset($collection[$item->applicationEquipment->equipment->id])) {
+                    $collection[$item->applicationEquipment->equipment->id] = [
+                        'item' => $item,
+                        'total' => $item->quantity,
+                    ];
+
+                    continue;
+                }
+                $collection[$item->applicationEquipment->equipment->id]['total'] += $item->quantity;
             }
-
-            $collection[$item->applicationProduct->product->id]['total'] += $item->quantity;
         }
 
         $result = [];
