@@ -1767,8 +1767,6 @@ export default {
             }
 
             if (this.application.kind == 'service') {
-                dd('asd');
-
                 axios.post("/api/v1/service-offers", data).then((response) => {
                     // console.log(response);
 
