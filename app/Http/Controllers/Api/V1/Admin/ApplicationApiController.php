@@ -186,6 +186,7 @@ class ApplicationApiController extends Controller
                         'equipment_id' => $equipment['equipment']['id'],
                         'quantity' => $equipment['quantity'],
                         'notes' => $equipment['notes'],
+                        'days' => $equipment['days'],
                         'is_delivered_by_us' => 0,
                     ]);
                 }
@@ -249,13 +250,13 @@ class ApplicationApiController extends Controller
             $input = $request->all();
             $input['is_urgent'] = $request->is_urget ? 1 : 0;
 
-            // application
-            $application->update($input);
-
             // make it editable again
             $roles = $request->user()->roles()->pluck('title');
-            
-            if (array_intersect(['Supplier', 'Supervisor'], $roles->toArray()) > 0) {
+            // dd($roles->toArray());
+
+            if ($application->status == 'in_review' && count(array_intersect(['PTD Engineer', 'Supplier', 'Supervisor', 'Section Manager'], $roles->toArray())) > 0) {
+                // dd('test');
+
                 // clear statuses till user's id
                 $statuses = ApplicationStatus::query()
                     ->with(['application_path'])
@@ -279,37 +280,40 @@ class ApplicationApiController extends Controller
                         $status->save();
                     }
                 }
-            }
+            } else {
+                // dd($request->all());
 
-            if ($application->kind == 'product') {
-                
-                // application products
-                ApplicationProduct::where('application_id', $application->id)->delete();
+                if ($application->kind == 'product') {
 
-                foreach ($input['products'] as $product) {
-                    ApplicationProduct::create([
-                        'application_id' => $application->id,
-                        'product_id' => $product['product']['id'],
-                        'product_category_id' => $product['category']['id'],
-                        'unit_id' => $product['unit']['id'],
-                        'quantity' => $product['quantity'],
-                        'notes' => $product['notes'],
-                        'is_delivered_by_us' => 0,
-                    ]);
+                    // application products
+                    ApplicationProduct::where('application_id', $application->id)->delete();
+
+                    foreach ($input['products'] as $product) {
+                        ApplicationProduct::create([
+                            'application_id' => $application->id,
+                            'product_id' => $product['product']['id'],
+                            'product_category_id' => $product['category']['id'],
+                            'unit_id' => $product['unit']['id'],
+                            'quantity' => $product['quantity'],
+                            'notes' => $product['notes'],
+                            'is_delivered_by_us' => 0,
+                        ]);
+                    }
+                } else if ($application->kind == 'equipment') {
+                    // is supplier or supervisor
+                    ApplicationEquipment::where('application_id', $application->id)->delete();
+
+                    foreach ($input['equipments'] as $item) {
+                        ApplicationEquipment::create([
+                            'application_id' => $application->id,
+                            'equipment_id' => $item['equipment']['id'],
+                            'quantity' => $item['quantity'],
+                            'notes' => $item['notes'],
+                            'days' => $item['days'],
+                            'is_delivered_by_us' => 0,
+                        ]);
+                    }
                 }
-            } else if ($application->kind == 'equipment') {
-                // is supplier or supervisor
-                ApplicationEquipment::where('application_id', $application->id)->delete();
-
-                foreach ($input['equipments'] as $item) {
-                    ApplicationEquipment::create([
-                        'application_id' => $application->id,
-                        'equipment_id' => $item['equipment']['id'],
-                        'quantity' => $item['quantity'],
-                        'notes' => $item['notes'],
-                        'is_delivered_by_us' => 0,
-                    ]);
-                }   
             }
 
             // application log
@@ -318,6 +322,9 @@ class ApplicationApiController extends Controller
                 'user_id' => $application->owner_id,
                 'log' => $request->user()->name . ' отредактировал заявку под №' . $application->id,
             ]);
+
+            // application
+            $application->update($input);
 
             DB::commit();
 

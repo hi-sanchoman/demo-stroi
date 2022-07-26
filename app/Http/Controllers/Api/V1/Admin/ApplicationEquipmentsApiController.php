@@ -44,7 +44,7 @@ class ApplicationEquipmentsApiController extends Controller
 
   public function update(Request $request, ApplicationEquipment $applicationEquipment)
   {
-    $applicationEquipment->update($request->all());
+    $applicationEquipment->update(['status' => $request->status]);
 
     return 1;
 

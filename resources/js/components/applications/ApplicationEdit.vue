@@ -74,9 +74,14 @@
 
                             <!-- Equipment -->
                             <template v-else-if="application.kind == 'equipment'">
-                                <v-col cols="12" md="6">
+                                <v-col cols="12" md="4">
                                     <multiselect v-model="current.equipment" :options="equipmentOptions"
                                         placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
+                                </v-col>
+
+                                <v-col cols="12" md="2">
+                                    <v-text-field v-model="current.days" label="Срок (дней)" variant="underlined"
+                                        required density="comfortable" type="number"></v-text-field>
                                 </v-col>
                             </template>
 
@@ -385,6 +390,7 @@
         <tr>
             <th>№</th>
             <th>Наименование спец. техники</th>
+            <th>Срок (дней)</th>
 
             <th v-if="!isWarehouseManager()">Кол-во</th>
             <template v-else>
@@ -403,6 +409,7 @@
             <tr>
                 <td>{{ item.id }}</td>
                 <td>{{ item.equipment.name }}</td>
+                <td>{{ item.days }}</td>
                 <td v-if="!isWarehouseManager()" :class="
                     application.status == 'draft'
                         ? 'd-flex mt-3'
@@ -473,7 +480,7 @@
                 !isWarehouseManager() &&
                 item.offers != null &&
                 item.offers.length > 0 &&
-                allCompleted(item.offers) &&
+            
                 (application.status ==
                     'in_progress' ||
                     application.status ==
@@ -1009,6 +1016,7 @@ export default {
                 notes: null,
                 isAddNotes: false,
                 delivered: null,
+                days: null,
             },
             options: [],
             categories: [],
@@ -1178,6 +1186,7 @@ export default {
                     equipment: this.current.equipment,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
+                    days: this.current.days,
                 });
 
                 // console.log(this.equipments);
@@ -1192,6 +1201,7 @@ export default {
                 quantity: null,
                 notes: null,
                 isAddNotes: false,
+                days: null,
             };
         },
 

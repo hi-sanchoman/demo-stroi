@@ -54,9 +54,14 @@
 
                             <!-- Equipment -->
                             <template v-else-if="form.kind == 'equipment'">
-                                <v-col cols="12" md="6">
+                                <v-col cols="12" md="4">
                                     <multiselect v-model="current.equipment" :options="equipmentOptions"
                                         placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
+                                </v-col>
+
+                                <v-col cols="12" md="2">
+                                    <v-text-field v-model="current.days" label="Срок (дней)" variant="underlined"
+                                        required density="comfortable" type="number"></v-text-field>
                                 </v-col>
                             </template>
 
@@ -122,6 +127,7 @@
                                 <tr>
                                     <th>№</th>
                                     <th>Наименование спец. техники</th>
+                                    <th>Срок (дней)</th>
                                     <th>Кол-во</th>
                                     <th>Примечание</th>
                                     <th></th>
@@ -132,6 +138,7 @@
                                 <tr v-for="(item, index) in equipments" :key="item.id">
                                     <td>{{ item.id }}</td>
                                     <td>{{ item.equipment.name }}</td>
+                                    <td>{{ item.days }}</td>
                                     <td class="d-flex mt-3">
                                         <v-text-field v-model="equipments[index].quantity" type="number" variant="plain"
                                             density="compact">
@@ -187,6 +194,7 @@ export default {
                 quantity: null,
                 notes: null,
                 isAddNotes: false,
+                days: null,
             },
             options: [],
             categories: [],
@@ -283,6 +291,7 @@ export default {
                     equipment: this.current.equipment,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
+                    days: this.current.days,
                 });
 
                 // console.log(this.equipments);
@@ -296,7 +305,8 @@ export default {
                 category: null,
                 quantity: null,
                 notes: null,
-                isAddNotes: false
+                isAddNotes: false,
+                days: null,
             }
         },
 
