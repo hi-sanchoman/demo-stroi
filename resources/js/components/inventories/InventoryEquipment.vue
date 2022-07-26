@@ -69,12 +69,17 @@
                 <td>{{ stock.application_equipment.equipment.name }}</td>
                 <td>{{ stock.created_at }}</td>
                 <td>{{ stock.quantity }}</td>
-                <td>..</td>
                 <td>
-                  <!-- <v-btn color="info" size="small">+ запись</v-btn> -->
+                  {{ stock.application_equipment.notes.reduce((acc, n) => acc + n.hours, 0) }}
+                </td>
+                <td>
+                  <v-btn v-if="stock.application_equipment.status == 'draft'" color="info" size="small"
+                    @click="showAddNoteDialog(stock)">+ запись</v-btn>
+                  <v-btn v-if="stock.application_equipment.status == 'draft'" color="success ml-2" size="small"
+                    @click="complete(stock)">готово</v-btn>
                 </td>
               </tr>
-<!-- 
+              <!-- 
               <tr>
                 <td colspan="5">
                   <v-table>
@@ -101,12 +106,57 @@
           </td>
           </tr> -->
 
-          
-          </tbody>
+
+            </tbody>
           </v-table>
         </v-col>
       </v-row>
     </v-container>
+
+
+
+    <v-dialog v-model="addNoteDialog">
+      <v-card class="oks-dialog min-w-5xl w-7xl" style="">
+        <v-card-title>
+          <span class="text-h5">Добавить запись</span>
+        </v-card-title>
+
+        <v-card-text>
+          <v-container>
+            <v-row>
+              <v-col cols="12">
+
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <label for="date">Укажите день</label><br />
+                <input type="date" id="date" v-model="note.date" />
+
+                <v-text-field class="mt-2" v-model="note.hours" label="Количество часов" variant="underlined" required
+                  density="comfortable" type="number" @keyup.enter="addNote()"></v-text-field>
+
+                <v-textarea class="mt-2" v-model="note.notes" label="Примечание" variant="underlined" required
+                  density="comfortable"></v-textarea>
+
+              </v-col>
+            </v-row>
+          </v-container>
+          <!-- <small>* обязательные поля</small> -->
+        </v-card-text>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+
+          <v-btn color="default" text @click="addNoteDialog = false">
+            Отмена
+          </v-btn>
+
+          <v-btn color="success" text @click="addNote()">
+            Принять
+          </v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
 
 
 
@@ -143,6 +193,14 @@ export default {
       stocks: [],
       currentUser: null,
       incoming: [],
+
+      addNoteDialog: false,
+      note: {
+        item: null,
+        hours: null,
+        notes: null,
+        date: null,
+      },
     }
   },
 
@@ -174,8 +232,41 @@ export default {
         this.stocks = response.data.data;
       })
     },
-  
 
+    showAddNoteDialog(item) {
+      this.addNoteDialog = true;
+      this.note.item = item;
+    },
+
+    complete(item) {
+      let data = {
+        'status': 'completed',
+      };
+
+      axios.put('/api/v1/application-equipments/' + item.application_equipment_id, data).then((response) => {
+        this.getEquipments();
+      })
+    },
+
+    addNote() {
+      let data = {
+        note: this.note
+      };
+
+      axios.post('/api/v1/application-equipments/add-note', data).then((response) => {
+        this.getEquipments();
+
+        this.addNoteDialog = false;
+
+        this.note = {
+
+          item: null,
+          hours: null,
+          notes: null,
+          date: null,
+        }
+      });
+    }
   },
 
   mounted() {

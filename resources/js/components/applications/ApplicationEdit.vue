@@ -643,18 +643,6 @@
                                             <v-btn
                                                 v-if="
                                                     application.status ==
-                                                    'draft'
-                                                "
-                                                size="small"
-                                                color="error"
-                                                @click="deleteProduct(item)"
-                                            >
-                                                <v-icon>mdi-close</v-icon>
-                                            </v-btn>
-
-                                            <v-btn
-                                                v-if="
-                                                    application.status ==
                                                         'in_progress' &&
                                                     item.status == 'completed' &&
                                                     isSupplier()

@@ -50,7 +50,7 @@ class InventoryStockApiController extends Controller
         $inventories = InventoryStock::query()
             ->where('inventory_id', $inventoryId)
             ->where('application_product_id', null)
-            ->with(['inventory', 'inventory.construction', 'applicationEquipment', 'applicationEquipment.equipment'])
+            ->with(['inventory', 'inventory.construction', 'applicationEquipment', 'applicationEquipment.equipment', 'applicationEquipment.notes'])
             ->get();
 
         return ['data' => $inventories];

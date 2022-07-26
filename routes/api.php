@@ -31,6 +31,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
 
     Route::put('/application-equipments/{id}/prepare', 'ApplicationEquipmentsApiController@prepare');
+    Route::post('/application-equipments/add-note', 'ApplicationEquipmentsApiController@addNote');
     Route::apiResource('application-equipments', 'ApplicationEquipmentsApiController');
     Route::apiResource('equipment-offers', 'EquipmentOfferApiController');
 
