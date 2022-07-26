@@ -12,6 +12,7 @@ use App\Models\ApplicationProduct;
 use App\Models\ApplicationLog;
 use App\Models\ApplicationOpenedStatus;
 use App\Models\ApplicationPath;
+use App\Models\ApplicationService;
 use App\Models\ApplicationStatus;
 use Gate;
 use Illuminate\Http\Request;
@@ -191,6 +192,17 @@ class ApplicationApiController extends Controller
                     ]);
                 }
             } else if ($application->kind == 'service') {
+                foreach ($input['services'] as $item) {
+                    ApplicationService::create([
+                        'application_id' => $application->id,
+                        'service' => $item['service'],
+                        'category' => $item['category'],
+                        'unit' => $item['unit'],
+                        'quantity' => $item['quantity'],
+                        'notes' => $item['notes'],
+                        'is_delivered_by_us' => 0,
+                    ]);
+                }
             }
             // else -> throw error
 
@@ -237,7 +249,7 @@ class ApplicationApiController extends Controller
             ->where('user_id', $request->user()->id)
             ->update(['status' => 'read']);
 
-        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationEquipments', 'applicationEquipments.equipment', 'applicationEquipments.offers', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
+        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationServices', 'applicationEquipments', 'applicationEquipments.equipment', 'applicationEquipments.offers', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
     }
 
     public function update(Request $request, Application $application)
@@ -310,6 +322,23 @@ class ApplicationApiController extends Controller
                             'quantity' => $item['quantity'],
                             'notes' => $item['notes'],
                             'days' => $item['days'],
+                            'is_delivered_by_us' => 0,
+                        ]);
+                    }
+                } else if ($application->kind == 'service') {
+                    // dd($request->all());
+
+                    // application services
+                    ApplicationService::where('application_id', $application->id)->delete();
+
+                    foreach ($input['services'] as $item) {
+                        ApplicationService::create([
+                            'application_id' => $application->id,
+                            'service' => $item['service'],
+                            'category' => $item['category'],
+                            'unit' => $item['unit'],
+                            'quantity' => $item['quantity'],
+                            'notes' => $item['notes'],
                             'is_delivered_by_us' => 0,
                         ]);
                     }

@@ -65,6 +65,24 @@
                                 </v-col>
                             </template>
 
+                            <!-- Service -->
+                            <template v-else-if="form.kind == 'service'">
+                                <v-col cols="12" md="3">
+                                    <v-text-field v-model="current.category" label="Напишите категорию"
+                                        variant="underlined" required density="comfortable" type="text"></v-text-field>
+                                </v-col>
+
+                                <v-col cols="12" md="3">
+                                    <v-text-field v-model="current.service" label="Напишите услугу" variant="underlined"
+                                        required density="comfortable" type="text"></v-text-field>
+                                </v-col>
+
+                                <v-col cols="12" md="2">
+                                    <v-text-field v-model="current.unit" label="Ед. изм." variant="underlined" required
+                                        density="comfortable" type="text"></v-text-field>
+                                </v-col>
+                            </template>
+
                             <!-- common -->
                             <v-col cols="12" md="1">
                                 <v-text-field v-model="current.quantity" label="Количество" @keyup.enter="addProduct()"
@@ -154,7 +172,42 @@
                             </tbody>
                         </v-table>
 
-                        <v-btn v-if="form.construction != null && (products.length > 0 || equipments.length > 0)"
+                        <v-table v-else-if="form.kind == 'service'">
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Статья расходов</th>
+                                    <th>Наименование ресурсов</th>
+                                    <th>Ед. изм.</th>
+                                    <th>Кол-во</th>
+                                    <th>Примечание</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <tr v-for="(item, index) in services" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.category }}</td>
+                                    <td>{{ item.service }}</td>
+                                    <td>{{ item.unit }}</td>
+                                    <td class="d-flex mt-3">
+                                        <v-text-field v-model="services[index].quantity" type="number" variant="plain"
+                                            density="compact">
+                                        </v-text-field>
+                                    </td>
+                                    <td>{{ item.notes }}</td>
+                                    <td>
+                                        <v-btn size="small" color="error" @click="deleteProduct(item)">
+                                            <v-icon>mdi-close</v-icon>
+                                        </v-btn>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+
+                        <v-btn
+                            v-if="form.construction != null && (products.length > 0 || equipments.length > 0 || services.length > 0)"
                             class="mt-5" @click="saveApplication" color="primary">
                             Создать
                         </v-btn>
@@ -297,6 +350,19 @@ export default {
                 // console.log(this.equipments);
             }
 
+            else if (this.form.kind == 'service') {
+                this.services.push({
+                    id: this.services.length + 1,
+                    service: this.current.service,
+                    unit: this.current.unit,
+                    category: this.current.category,
+                    quantity: this.current.quantity,
+                    notes: this.current.notes,
+                });
+
+                // console.log(this.equipments);
+            }
+
             this.current = {
                 product: null,
                 service: null,
@@ -318,6 +384,10 @@ export default {
             else if (this.form.kind == 'equipment') {
                 this.equipments = this.equipments.filter(el => el.id != item.id);
             }
+
+            else if (this.form.kind == 'service') {
+                this.services = this.services.filter(el => el.id != item.id);
+            }
         },
 
         saveApplication() {
@@ -327,6 +397,8 @@ export default {
                 this.form.products = this.products
             } else if (this.form.kind == 'equipment') {
                 this.form.equipments = this.equipments;
+            } else if (this.form.kind == 'service') {
+                this.form.services = this.services;
             }
 
             // console.log(this.form)

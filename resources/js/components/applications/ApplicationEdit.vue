@@ -85,6 +85,24 @@
                                 </v-col>
                             </template>
 
+                            <!-- Service -->
+                            <template v-else-if="application.kind == 'service'">
+                                <v-col cols="12" md="3">
+                                    <v-text-field v-model="current.category" label="Напишите категорию"
+                                        variant="underlined" required density="comfortable" type="text"></v-text-field>
+                                </v-col>
+
+                                <v-col cols="12" md="3">
+                                    <v-text-field v-model="current.service" label="Напишите название"
+                                        variant="underlined" required density="comfortable" type="text"></v-text-field>
+                                </v-col>
+
+                                <v-col cols="12" md="2">
+                                    <v-text-field v-model="current.unit" label="Ед. изм." variant="underlined" required
+                                        density="comfortable" type="text"></v-text-field>
+                                </v-col>
+                            </template>
+
                             <!-- Common -->
                             <v-col cols="12" md="1">
                                 <v-text-field v-model="current.quantity" label="Количество" @keyup.enter="addProduct()"
@@ -382,6 +400,278 @@
 </tbody>
 </v-table>
 
+<v-table style="" v-else-if="application != null && application.kind == 'service'">
+    <thead>
+        <tr>
+            <th>№</th>
+            <th>Статья расходов</th>
+            <th>Наименование ресурсов</th>
+            <th>Ед. изм.</th>
+
+            <th v-if="!isWarehouseManager()">Кол-во</th>
+            <template v-else>
+                <th>заказано</th>
+                <th>фактически</th>
+                <th>остаток</th>
+            </template>
+
+            <th>Примечание</th>
+            <th></th>
+        </tr>
+    </thead>
+
+    <tbody>
+        <template v-for="(item, index) in services" :key="item.id">
+            <tr>
+                <td>{{ index + 1 }}</td>
+                <td>{{ item.category }}</td>
+                <td>{{ item.service }}</td>
+                <td>{{ item.unit }}</td>
+
+                <td v-if="!isWarehouseManager()" :class="
+                    application.status == 'draft'
+                        ? 'd-flex mt-3'
+                        : ''
+                ">
+                    <v-text-field v-model="
+                        services[index].quantity
+                    " type="number" variant="plain" density="compact" v-if="
+    application.status ==
+    'draft'
+">
+                    </v-text-field>
+
+                    <span v-if="!isPTDEngineer()">
+                        {{ services[index].prepared }} /
+                    </span>
+                    <span v-if="
+                        application.status !=
+                        'draft'
+                    ">
+                        {{ services[index].quantity }}
+                    </span>
+                </td>
+
+                <template v-else>
+                    <td>
+                        {{ services[index].quantity }}
+                    </td>
+                    <td>
+                        {{ services[index].prepared }}
+                    </td>
+                    <td>
+                        {{
+                                services[index].quantity -
+                                services[index].prepared
+                        }}
+                    </td>
+                </template>
+
+                <td>{{ item.notes }}</td>
+
+                <td>
+                    <v-btn v-if="
+                        application.status ==
+                        'draft'
+                    " size="small" color="error" @click="deleteProduct(item)">
+                        <v-icon>mdi-close</v-icon>
+                    </v-btn>
+
+                    <v-btn v-if="
+                        application.status ==
+                        'in_progress' &&
+                        isSupplier()
+                    " @click="addOffer(item.id)" color="info" size="small">
+                        + компания
+                    </v-btn>
+
+                    <v-btn v-if="
+                        isWarehouseManager() &&
+                        services[index].quantity !=
+                        services[index].prepared
+                    " @click="showAcceptProduct(item)" color="info" size="small">
+                        принять товар
+                    </v-btn>
+                </td>
+            </tr>
+
+            <tr v-if="
+                !isWarehouseManager() &&
+                item.offers != null &&
+                item.offers.length > 0 &&
+                (application.status ==
+                    'in_progress' ||
+                    application.status ==
+                    'in_review')
+            " class="bg-slate-100">
+                <td colspan="9" class="border-none">
+                    <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible">
+                        <thead>
+                            <tr>
+                                <th style="width: 25%">
+                                    Название компании
+                                </th>
+                                <th style="width: 10%">
+                                    Кол-во
+                                </th>
+                                <th style="width: 10%">
+                                    Цена за ед.
+                                </th>
+                                <th>Общая сумма</th>
+                                <th>Счет на оплату</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+    <tbody>
+        <tr v-for="offer in item.offers" :key="offer.id">
+            <td class="">
+                <!-- <v-text-field
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                v-model="offer.name"
+                                                                type="text"
+                                                                variant="underlined"
+                                                                required
+                                                            ></v-text-field> -->
+                <div class="flex">
+                    <multiselect v-if="
+                        offer.status ==
+                        'draft' &&
+                        isEditable()
+                    " v-model="
+    offer.company
+" :options="
+    companies
+" placeholder="Укажите компанию" label="name" track-by="id">
+                    </multiselect>
+
+                    <v-btn v-if="
+                        offer.status ==
+                        'draft' &&
+                        isEditable()
+                    " class="mt-1" color="primary" size="x-small" plain @click="
+    showAddCompanyDialog()
+">
+                        Добавить
+                        компанию
+                    </v-btn>
+                </div>
+
+                <span v-if="
+                    !isEditable() &&
+                    offer !=
+                    null &&
+                    offer.company !=
+                    null
+                ">{{
+        offer
+            .company
+            .name
+}}</span>
+            </td>
+            <td>
+                <v-text-field v-if="
+                    offer.status ==
+                    'draft' &&
+                    isEditable()
+                " @change="
+    offerHasChanged(
+        $event,
+        offer
+    )
+" v-model="
+    offer.quantity
+" label="" type="number" variant="underlined" required>
+                </v-text-field>
+                <span v-if="
+                    !isEditable()
+                ">{{
+        offer.quantity
+}}</span>
+            </td>
+            <td>
+                <v-text-field v-if="
+                    offer.status ==
+                    'draft' &&
+                    isEditable()
+                " v-model="
+    offer.price
+" label="" type="number" variant="underlined" required>
+                </v-text-field>
+                <span v-if="
+                    !isEditable()
+                ">{{
+        offer.price
+}}
+                    тг</span>
+            </td>
+            <td>
+                {{
+                        offer.price *
+                        offer.quantity
+                }}
+                тг
+            </td>
+
+            <td>
+                <span v-if="
+                    offer.file !=
+                    null
+                ">
+                    <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                        target="_blank" :href="
+                            '/uploads/' +
+                            offer.file
+                        ">Просмотр</a>
+                </span>
+
+                <input v-if="
+                    isEditable()
+                " type="file" id="file" v-on:change="
+    handleFileUpload(
+        offer,
+        $event
+    )
+" />
+            </td>
+
+            <td>
+                <v-btn v-if="
+                    offer.status ==
+                    'draft' &&
+                    isEditable()
+                " :id="
+    'offer_' +
+    offer.id
+" @click="
+    updateOffer(
+        offer
+    )
+" color="success" size="small" class="mr-2">
+                    Сохранить
+                </v-btn>
+
+                <v-btn @click="
+                    deleteOffer(
+                        offer.id,
+                        item.id
+                    )
+                " color="error" size="small" v-if="
+    offer.status ==
+    'draft' &&
+    isEditable()
+">
+                    Удалить
+                </v-btn>
+            </td>
+        </tr>
+    </tbody>
+</v-table>
+</td>
+</tr>
+</template>
+</tbody>
+</v-table>
+
 <v-table style="" v-else-if="
     application != null &&
     application.kind == 'equipment'
@@ -658,7 +948,8 @@
 <v-btn v-if="
     form.construction != null &&
     (products.length > 0 ||
-        equipments.length > 0) &&
+        equipments.length > 0 ||
+        services.length > 0) &&
     isPTDEngineer() &&
     application.status == 'draft'
 " class="mt-5" @click="updateApplication" color="primary">
@@ -1148,7 +1439,7 @@ export default {
                 .get("/api/v1/applications/" + this.$route.params.id)
                 .then((response) => {
                     this.application = response.data.data;
-                    console.log(this.application);
+                    // console.log(this.application);
 
                     this.products =
                         this.application.application_application_products;
@@ -1156,6 +1447,8 @@ export default {
 
                     this.equipments = this.application.application_equipments;
                     // console.log('loaded equipments', this.equipments);
+
+                    this.services = this.application.application_services;
 
                     this.form.construction = this.application.construction;
                     this.form.kind = this.application.kind;
@@ -1190,6 +1483,15 @@ export default {
                 });
 
                 // console.log(this.equipments);
+            } else if (this.application.kind == "service") {
+                this.services.push({
+                    id: this.services.length + 1,
+                    service: this.current.service,
+                    unit: this.current.unit,
+                    category: this.current.category,
+                    quantity: this.current.quantity,
+                    notes: this.current.notes,
+                });
             }
 
             this.current = {
@@ -1214,12 +1516,17 @@ export default {
                 this.equipments = this.equipments.filter(
                     (el) => el.id != item.id
                 );
+            } else if (this.form.kind == "service") {
+                this.services = this.services.filter(
+                    (el) => el.id != item.id
+                );
             }
         },
 
         updateApplication() {
             this.form.products = this.products;
             this.form.equipments = this.equipments;
+            this.form.services = this.services;
             this.form.construction_id = this.form.construction.id;
 
             // console.log(this.form);
