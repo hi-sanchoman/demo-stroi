@@ -36,6 +36,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::apiResource('equipment-offers', 'EquipmentOfferApiController');
 
 
+    Route::apiResource('service-offers', 'ServiceOfferApiController');
+
     // Inventories
     Route::get('/history-supplies/{productId}', 'SupplyApiController@history');
     Route::get('/supplies', 'SupplyApiController@index');

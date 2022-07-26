@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationOffer;
 use App\Models\EquipmentOffer;
+use App\Models\ServiceOffer;
 use Storage;
 
 class ApplicationController extends Controller
@@ -33,7 +34,8 @@ class ApplicationController extends Controller
     }
 
 
-    public function uploadFile(Request $request) {
+    public function uploadFile(Request $request)
+    {
         $file = request()->file('file');
 
         $path = time() . '.' . $file->getClientOriginalExtension();
@@ -44,13 +46,15 @@ class ApplicationController extends Controller
             $offer = ApplicationOffer::where('id', $request->offer_id)->firstOrFail();
             $offer->file = $path;
             $offer->save();
-        }
-
-        else if ($request->kind == 'equipment') {
+        } else if ($request->kind == 'service') {
+            $offer = ServiceOffer::where('id', $request->offer_id)->firstOrFail();
+            $offer->file = $path;
+            $offer->save();
+        } else if ($request->kind == 'equipment') {
             $offer = EquipmentOffer::where('id', $request->offer_id)->firstOrFail();
             $offer->file = $path;
             $offer->save();
-        }        
+        }
 
         return [
             'data' => [
@@ -58,5 +62,4 @@ class ApplicationController extends Controller
             ],
         ];
     }
-    
 }

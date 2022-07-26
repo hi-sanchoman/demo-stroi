@@ -1602,6 +1602,8 @@ export default {
             var data = {
                 status: "draft",
                 products: this.products,
+                services: this.services,
+                equipments: this.euipments,
                 construction_id: this.application.construction_id,
                 kind: this.application.kind,
             };
@@ -1735,6 +1737,7 @@ export default {
             var data = {
                 application_product_id: id,
                 application_equipment_id: id,
+                application_service_id: id,
                 name: "",
                 status: "draft",
                 price: 0,
@@ -1752,6 +1755,28 @@ export default {
                             // console.log(this.products[i]);
 
                             this.products[i].offers.push(response.data.data.offer);
+
+                            this.snackbar.text =
+                                "Предложение от новой компании успешно добавлено.";
+                            this.snackbar.status = true;
+                        }
+                    }
+                });
+
+                return;
+            }
+
+            if (this.application.kind == 'service') {
+                dd('asd');
+
+                axios.post("/api/v1/service-offers", data).then((response) => {
+                    // console.log(response);
+
+                    for (var i = 0; i < this.services.length; i++) {
+                        if (this.services[i].id == id) {
+                            // console.log(this.products[i]);
+
+                            this.services[i].offers.push(response.data.data.offer);
 
                             this.snackbar.text =
                                 "Предложение от новой компании успешно добавлено.";
@@ -1787,6 +1812,29 @@ export default {
                 if (this.application.kind == 'product') {
                     axios
                         .put(`/api/v1/application-offers/${offer.id}`, offer)
+                        .then((response) => {
+                            if (response.data.error) {
+                                this.snackbar.text = response.data.error;
+                                this.snackbar.status = true;
+
+                                return;
+                            }
+
+                            document.getElementById(
+                                "offer_" + offer.id
+                            ).style.visibility = "hidden";
+
+                            this.snackbar.text =
+                                "Предложение от компании сохранено.";
+                            this.snackbar.status = true;
+                        });
+
+                    return;
+                }
+
+                if (this.application.kind == 'service') {
+                    axios
+                        .put(`/api/v1/service-offers/${offer.id}`, offer)
                         .then((response) => {
                             if (response.data.error) {
                                 this.snackbar.text = response.data.error;
@@ -1853,6 +1901,23 @@ export default {
                         for (var i = 0; i < this.products.length; i++) {
                             if (this.products[i].id == id) {
                                 this.products[i].offers = this.products[
+                                    i
+                                ].offers.filter(function (el) {
+                                    return el.id != offerId;
+                                });
+                            }
+                        }
+                    });
+                return;
+            }
+
+            if (this.application.kind == 'service') {
+                axios
+                    .delete("/api/v1/service-offers/" + offerId)
+                    .then((response) => {
+                        for (var i = 0; i < this.services.length; i++) {
+                            if (this.services[i].id == id) {
+                                this.services[i].offers = this.services[
                                     i
                                 ].offers.filter(function (el) {
                                     return el.id != offerId;

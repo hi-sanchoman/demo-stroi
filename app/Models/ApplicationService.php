@@ -40,10 +40,10 @@ class ApplicationService extends Model
         return $this->belongsTo(Application::class, 'application_id');
     }
 
-    // public function offers()
-    // {
-    //     return $this->hasMany(ApplicationOffer::class);
-    // }
+    public function offers()
+    {
+        return $this->hasMany(ServiceOffer::class);
+    }
 
     // public function inventoryApplications()
     // {
