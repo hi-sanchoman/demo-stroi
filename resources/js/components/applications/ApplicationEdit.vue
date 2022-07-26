@@ -246,18 +246,16 @@
     offer.company
 " :options="
     companies
-" placeholder="Укажите компанию" label="name"
-                                                track-by="id">
+" placeholder="Укажите компанию" label="name" track-by="id">
                                             </multiselect>
 
                                             <v-btn v-if="
                                                 offer.status ==
                                                 'draft' &&
                                                 isEditable()
-                                            " class="mt-1" color="primary" size="x-small" plain
-                                                @click="
-                                                    showAddCompanyDialog()
-                                                ">
+                                            " class="mt-1" color="primary" size="x-small" plain @click="
+    showAddCompanyDialog()
+">
                                                 Добавить
                                                 компанию
                                             </v-btn>
@@ -517,18 +515,16 @@
     offer.company
 " :options="
     companies
-" placeholder="Укажите компанию" label="name"
-                        track-by="id">
+" placeholder="Укажите компанию" label="name" track-by="id">
                     </multiselect>
 
                     <v-btn v-if="
                         offer.status ==
                         'draft' &&
                         isEditable()
-                    " class="mt-1" color="primary" size="x-small" plain
-                        @click="
-                            showAddCompanyDialog()
-                        ">
+                    " class="mt-1" color="primary" size="x-small" plain @click="
+    showAddCompanyDialog()
+">
                         Добавить
                         компанию
                     </v-btn>
@@ -688,7 +684,7 @@
         </v-col>
     </v-row>
 
-    <v-row no-gutters v-if="!isWarehouseManager()">
+    <v-row no-gutters>
         <v-col no-gutters cols="12">
             <v-expansion-panels no-gutters v-model="showPanels">
                 <v-expansion-panel value="sign">
