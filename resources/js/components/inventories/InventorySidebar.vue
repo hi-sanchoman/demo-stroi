@@ -32,7 +32,7 @@
                 </v-list-item>
             </router-link>
 
-            <router-link :to="'/inventories/' + inventory.id + '/equipment/?status=accepted'"
+            <router-link v-if="isSectionManager()" :to="'/inventories/' + inventory.id + '/equipment/?status=accepted'"
                 class="text-decoration-none text-black">
                 <v-list-item key="equipment" value="equipment" active-color="primary">
                     <v-list-item-title v-text="'Спец. техника'"></v-list-item-title>
@@ -310,6 +310,10 @@ export default {
     },
 
     methods: {
+        isSectionManager() {
+            return this.currentUser != null && this.currentUser.roles[0].title == 'Section Manager';
+        },
+
         showMoveDialog() {
             this.moveDialog = true;
         },

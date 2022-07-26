@@ -64,113 +64,125 @@
                 <td colspan="5">Нет данных.</td>
               </tr> -->
 
-              <tr v-for="(stock, index) in stocks" :key="stock.id" class="hover:bg-slate-100">
-                <td>{{ (index + 1) }}</td>
-                <td>{{ stock.application_equipment.equipment.name }}</td>
-                <td>{{ stock.created_at }}</td>
-                <td>{{ stock.quantity }}</td>
-                <td>
-                  {{ stock.application_equipment.notes.reduce((acc, n) => acc + n.hours, 0) }}
-                </td>
-                <td>
-                  <v-btn v-if="stock.application_equipment.status == 'draft'" color="info" size="small"
-                    @click="showAddNoteDialog(stock)">+ запись</v-btn>
-                  <v-btn v-if="stock.application_equipment.status == 'draft'" color="success ml-2" size="small"
-                    @click="complete(stock)">готово</v-btn>
-                </td>
-              </tr>
-              <!-- 
-              <tr>
-                <td colspan="5">
-                  <v-table>
-                    <thead>
-                      <tr>
-                        <th>Дата</th>
-                        <th>Часов отработано</th>
-                        <th>Примечание</th>
-                        <th>Действие</th>
-                      </tr>
-                    </thead>
+              <template v-for="(stock, index) in stocks" :key="stock.id">
+                <tr class="hover:bg-slate-100">
+                  <td>{{ (index + 1) }}</td>
+                  <td>{{ stock.application_equipment.equipment.name }}</td>
+                  <td>{{ stock.created_at }}</td>
+                  <td>{{ stock.quantity }}</td>
+                  <td>
+                    {{ stock.application_equipment.notes.reduce((acc, n) => acc + n.hours, 0) }}
+                  </td>
+                  <td>
+                    <v-btn v-if="stock.application_equipment.status == 'draft'" color="info" size="small"
+                      @click="showAddNoteDialog(stock)">+ запись</v-btn>
+                    <v-btn v-if="stock.application_equipment.status == 'draft'" color="success ml-2" size="small"
+                      @click="complete(stock)">готово</v-btn>
+                  </td>
+                </tr>
+
+                <template
+                  v-if="stock.application_equipment.notes != null && stock.application_equipment.notes.length > 0">
+                  <tr>
+                    <td colspan="6">
+                      <v-table>
+                        <thead>
+                          <tr>
+                            <th>#</th>
+                            <th>Дата</th>
+                            <th>Часов отработано</th>
+                            <th>Примечание</th>
+                            <th></th>
+                          </tr>
+                        </thead>
             <tbody>
-              <tr >
-                <td>24 июль, 2022 г.</td>
-                <td>7</td>
-                <td>-</td>
+              <tr v-for="(note, n) in stock.application_equipment.notes" :key="note.id">
+                <td>{{ n + 1 }}</td>
+                <td>{{ note.created_at }}</td>
+                <td>{{ note.hours }}</td>
+                <td>{{ note.notes }}</td>
                 <td>
-                  <v-btn color="error" size="small">удалить</v-btn>
+                  <!-- <v-btn color="error" size="small">удалить</v-btn> -->
                 </td>
               </tr>
-              
+
             </tbody>
           </v-table>
           </td>
-          </tr> -->
+          </tr>
+</template>
 
-
-            </tbody>
-          </v-table>
-        </v-col>
-      </v-row>
-    </v-container>
+</template>
 
 
 
-    <v-dialog v-model="addNoteDialog">
-      <v-card class="oks-dialog min-w-5xl w-7xl" style="">
-        <v-card-title>
-          <span class="text-h5">Добавить запись</span>
-        </v-card-title>
-
-        <v-card-text>
-          <v-container>
-            <v-row>
-              <v-col cols="12">
-
-              </v-col>
-            </v-row>
-            <v-row>
-              <v-col cols="12">
-                <label for="date">Укажите день</label><br />
-                <input type="date" id="date" v-model="note.date" />
-
-                <v-text-field class="mt-2" v-model="note.hours" label="Количество часов" variant="underlined" required
-                  density="comfortable" type="number" @keyup.enter="addNote()"></v-text-field>
-
-                <v-textarea class="mt-2" v-model="note.notes" label="Примечание" variant="underlined" required
-                  density="comfortable"></v-textarea>
-
-              </v-col>
-            </v-row>
-          </v-container>
-          <!-- <small>* обязательные поля</small> -->
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-
-          <v-btn color="default" text @click="addNoteDialog = false">
-            Отмена
-          </v-btn>
-
-          <v-btn color="success" text @click="addNote()">
-            Принять
-          </v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
 
 
 
-    <!-- Snackbar -->
-    <v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
-      {{ snackbar.text }}
+</tbody>
+</v-table>
+</v-col>
+</v-row>
+</v-container>
 
-      <template v-slot:actions>
-        <v-btn color="blue" variant="text" @click="snackbar.status = false">
-          Закрыть
-        </v-btn>
-      </template>
-    </v-snackbar>
-  </div>
+
+
+<v-dialog v-model="addNoteDialog">
+  <v-card class="oks-dialog min-w-5xl w-7xl" style="">
+    <v-card-title>
+      <span class="text-h5">Добавить запись</span>
+    </v-card-title>
+
+    <v-card-text>
+      <v-container>
+        <v-row>
+          <v-col cols="12">
+
+          </v-col>
+        </v-row>
+        <v-row>
+          <v-col cols="12">
+            <label for="date">Укажите день</label><br />
+            <input type="date" id="date" v-model="note.date" />
+
+            <v-text-field class="mt-2" v-model="note.hours" label="Количество часов" variant="underlined" required
+              density="comfortable" type="number" @keyup.enter="addNote()"></v-text-field>
+
+            <v-textarea class="mt-2" v-model="note.notes" label="Примечание" variant="underlined" required
+              density="comfortable"></v-textarea>
+
+          </v-col>
+        </v-row>
+      </v-container>
+      <!-- <small>* обязательные поля</small> -->
+    </v-card-text>
+    <v-card-actions>
+      <v-spacer></v-spacer>
+
+      <v-btn color="default" text @click="addNoteDialog = false">
+        Отмена
+      </v-btn>
+
+      <v-btn color="success" text @click="addNote()">
+        Принять
+      </v-btn>
+    </v-card-actions>
+  </v-card>
+</v-dialog>
+
+
+
+<!-- Snackbar -->
+<v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
+  {{ snackbar.text }}
+
+  <template v-slot:actions>
+    <v-btn color="blue" variant="text" @click="snackbar.status = false">
+      Закрыть
+    </v-btn>
+  </template>
+</v-snackbar>
+</div>
 </template>
 
 <script>
