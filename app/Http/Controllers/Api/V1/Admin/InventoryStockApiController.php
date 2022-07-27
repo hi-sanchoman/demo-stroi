@@ -37,6 +37,7 @@ class InventoryStockApiController extends Controller
         $inventories = InventoryStock::query()
             ->where('inventory_id', $inventoryId)
             ->where('application_equipment_id', null)
+            ->where('application_service_id', null)
             ->with(['inventory', 'inventory.construction', 'applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])
             ->get();
 
@@ -50,7 +51,22 @@ class InventoryStockApiController extends Controller
         $inventories = InventoryStock::query()
             ->where('inventory_id', $inventoryId)
             ->where('application_product_id', null)
+            ->where('application_service_id', null)
             ->with(['inventory', 'inventory.construction', 'applicationEquipment', 'applicationEquipment.equipment', 'applicationEquipment.notes'])
+            ->get();
+
+        return ['data' => $inventories];
+    }
+
+    public function services(Request $request, $inventoryId)
+    {
+        $collection = [];
+
+        $inventories = InventoryStock::query()
+            ->where('inventory_id', $inventoryId)
+            ->where('application_product_id', null)
+            ->where('application_equipment_id', null)
+            ->with(['inventory', 'inventory.construction', 'applicationService'])
             ->get();
 
         return ['data' => $inventories];

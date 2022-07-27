@@ -752,6 +752,15 @@
                     </v-btn>
 
                     <v-btn v-if="
+                        application.status ==
+                        'in_progress' &&
+                        item.status == 'completed' &&
+                        isSupplier()
+                    " @click="showEquipmentNotes(item)" class="ml-2" color="warning" size="small">
+                        дневник
+                    </v-btn>
+
+                    <v-btn v-if="
                         isWarehouseManager() &&
                         application.status == 'in_progress' &&
                         equipments[index].quantity !=
@@ -1243,11 +1252,11 @@
                 </v-row>
                 <v-row>
                     <v-col cols="12">
-                        <v-textarea class="mt-2" v-model="priemka.notes" label="Примечание" variant="underlined"
-                            required density="comfortable"></v-textarea>
-
                         <v-text-field class="mt-2" v-model="priemka.quantity" label="Количество" variant="underlined"
                             required density="comfortable" type="number" @keyup.enter="acceptProduct()"></v-text-field>
+
+                        <v-textarea class="mt-2" v-model="priemka.notes" label="Примечание" variant="underlined"
+                            required density="comfortable"></v-textarea>
 
                         <span class="mt-2">Ед. изм.: {{ priemka.unit }}</span>
                     </v-col>
@@ -1266,6 +1275,49 @@
                 Принять
             </v-btn>
         </v-card-actions>
+    </v-card>
+</v-dialog>
+
+
+
+<!-- equipment notes dialog -->
+<v-dialog v-model="equipmentHistoryDialog">
+    <v-card>
+        <v-card-title>
+            <span class="text-h5">История спец. техники</span>
+        </v-card-title>
+
+        <v-card-text>
+            <v-container>
+                <v-row no-gutters class="">
+                    Полных рабочих дней: {{ getWorkingDays() }}
+                    <v-col cols="12" class="">
+                        <v-table>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Дата</th>
+                                    <th>Часов отработано</th>
+                                    <th>Примечание</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="(note, n) in equipmentNotes" :key="note.id">
+                                    <td>{{ n + 1 }}</td>
+                                    <td>{{ note.created_at }}</td>
+                                    <td>{{ note.hours }}</td>
+                                    <td>{{ note.notes }}</td>
+                                    <td>
+                                        <!-- <v-btn color="error" size="small">удалить</v-btn> -->
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </v-table>
+                    </v-col>
+                </v-row>
+            </v-container>
+        </v-card-text>
     </v-card>
 </v-dialog>
 </div>
@@ -1355,12 +1407,17 @@ export default {
                 applicationEquipmentId: null,
                 product: null,
                 equipment: null,
+                service: null,
                 name: null,
                 unit: null,
                 quantity: null,
                 notes: null,
             },
             acceptProductDialog: false,
+
+            selectedEquipment: null,
+            equipmentNotes: [],
+            equipmentHistoryDialog: false,
         };
     },
 
@@ -2008,6 +2065,12 @@ export default {
                 this.priemka.unit = item.unit.name;
             }
 
+            else if (this.application.kind == 'service') {
+                this.priemka.service = item;
+                this.priemka.name = item.service;
+                this.priemka.unit = item.unit;
+            }
+
             else if (this.application.kind == 'equipment') {
                 this.priemka.equipment = item;
                 this.priemka.name = item.equipment.name;
@@ -2015,6 +2078,39 @@ export default {
             }
 
             this.acceptProductDialog = true;
+        },
+
+        acceptInventory(inventoryId) {
+            // accept application
+            var data = {
+                mode: "accept",
+                kind: this.application.kind,
+            };
+
+            axios
+                .put(
+                    "/api/v1/inventory-applications/" +
+                    inventoryId,
+                    data
+                )
+                .then((response) => {
+                    this.getApplication();
+
+                    this.snackbar.text = "Приход товара/техники/услуги принят";
+                    this.snackbar.status = true;
+
+                    this.priemka = {
+                        product: null,
+                        equipment: null,
+                        service: null,
+
+                        name: null,
+                        notes: null,
+                        quantity: null,
+                    };
+
+                    this.acceptProductDialog = false;
+                });
         },
 
         acceptProduct() {
@@ -2038,35 +2134,31 @@ export default {
                         this.priemka.product.prepared = response.data.prepared;
                         this.priemka.product.toBePrepared = null;
 
-                        // accept application
-                        var data = {
-                            mode: "accept",
-                            kind: this.application.kind,
-                        };
+                        this.acceptInventory(response.data.inventory.id);
+                    });
+            }
 
-                        axios
-                            .put(
-                                "/api/v1/inventory-applications/" +
-                                response.data.inventory.id,
-                                data
-                            )
-                            .then((response) => {
-                                this.getApplication();
+            else if (this.application.kind == 'service') {
+                this.priemka.service.toBePrepared = this.priemka.quantity;
 
-                                this.snackbar.text = "Приход товара принят";
-                                this.snackbar.status = true;
+                // create inventory application
+                var data = {
+                    service: this.priemka.service,
+                    notes: this.priemka.notes,
+                };
 
-                                this.priemka = {
-                                    product: null,
-                                    equipment: null,
+                axios
+                    .put(
+                        "/api/v1/application-services/" +
+                        this.priemka.service.id +
+                        "/prepare",
+                        data
+                    )
+                    .then((response) => {
+                        this.priemka.service.prepared = response.data.prepared;
+                        this.priemka.service.toBePrepared = null;
 
-                                    name: null,
-                                    notes: null,
-                                    quantity: null,
-                                };
-
-                                this.acceptProductDialog = false;
-                            });
+                        this.acceptInventory(response.data.inventory.id);
                     });
             }
 
@@ -2090,35 +2182,7 @@ export default {
                         this.priemka.equipment.prepared = response.data.prepared;
                         this.priemka.equipment.toBePrepared = null;
 
-                        // accept application
-                        var data = {
-                            mode: "accept",
-                            kind: this.application.kind,
-                        };
-
-                        axios
-                            .put(
-                                "/api/v1/inventory-applications/" +
-                                response.data.inventory.id,
-                                data
-                            )
-                            .then((response) => {
-                                this.getApplication();
-
-                                this.snackbar.text = "Приход товара/техники/услуги принят";
-                                this.snackbar.status = true;
-
-                                this.priemka = {
-                                    product: null,
-                                    equipment: null,
-
-                                    name: null,
-                                    notes: null,
-                                    quantity: null,
-                                };
-
-                                this.acceptProductDialog = false;
-                            });
+                        this.acceptInventory(response.data.inventory.id);
                     });
             }
         },
@@ -2188,7 +2252,22 @@ export default {
             }
 
             return res;
-        }
+        },
+
+        showEquipmentNotes(item) {
+            console.log(item);
+
+            this.equipmentNotes = item.history;
+            this.equipmentHistoryDialog = true;
+        },
+
+        getNotes() {
+            // axios.get('/application')
+        },
+
+        getWorkingDays() {
+            return parseInt(this.equipmentNotes.reduce((acc, n) => acc + n.hours, 0) / 8);
+        },
     },
 
     watch: {

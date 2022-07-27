@@ -15,6 +15,7 @@ import InventoryHistory from './components/inventories/InventoryHistory.vue'
 import InventoryList from './components/inventories/InventoryList.vue'
 import InventoryShow from './components/inventories/InventoryShow.vue'
 import InventoryEquipment from './components/inventories/InventoryEquipment.vue'
+import InventoryService from './components/inventories/InventoryService.vue'
 import PaymentList from './components/payments/PaymentList.vue'
 import ToPayList from './components/payments/ToPayList.vue'
 import SupplyList from './components/supplies/SupplyList.vue'
@@ -47,6 +48,7 @@ const routes = [
   { path: '/inventories', name: 'inventories.index', component: InventoryList },
   { path: '/inventories/:id/products', name: 'inventories.show', component: InventoryShow },
   { path: '/inventories/:id/equipment', name: 'inventories.equipment', component: InventoryEquipment },
+  { path: '/inventories/:id/services', name: 'inventories.services', component: InventoryService },
   { path: '/inventories/:id/history', name: 'inventories.history', component: InventoryHistory },
 
   { path: '/supplies', name: 'supplies.index', component: SupplyList },

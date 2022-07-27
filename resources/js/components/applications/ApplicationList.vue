@@ -13,6 +13,11 @@
                 </v-col>
 
                 <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                    <!-- <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :columnDefs="columnDefs.value"
+                        :rowData="rowData.value" :defaultColDef="defaultColDef" rowSelection="multiple"
+                        animateRows="true" @cell-clicked="cellWasClicked" @grid-ready="onGridReady">
+                    </ag-grid-vue> -->
+
                     <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
@@ -78,7 +83,7 @@
 
                                 <td>
                                     <v-btn @click="deleteApplication(application.id)" color="error" size="small"
-                                        v-if="application.status == 'draft'">
+                                        v-if="application.status == 'draft' && isPTDEngineer()">
                                         Удалить
                                     </v-btn>
                                 </td>
@@ -97,10 +102,17 @@ import useApplications from "../../composables/applications"
 import ApplicationSidebar from "./ApplicationSidebar.vue"
 import axios from 'axios'
 import { store } from '../../store.js'
+import { AgGridVue } from "ag-grid-vue3";
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
+import { reactive, ref } from "vue";
+import DeleteBtnRenderer from '../grid/DeleteBtnRenderer.js';
 
 export default {
     components: {
         ApplicationSidebar,
+        AgGridVue,
+        deleteBtnRenderer: DeleteBtnRenderer,
     },
 
     data() {
@@ -108,10 +120,27 @@ export default {
             applications: [],
             currentUser: null,
             store,
+
+            gridApi: ref(null),
+            columnDefs: reactive({}),
+            rowData: reactive({}),
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                flex: 1,
+                floatingFilter: true,
+                resizable: true,
+            },
+
+
         }
     },
 
     methods: {
+        isPTDEngineer() {
+            return this.currentUser != null && this.currentUser.roles[0].title == 'PTD Engineer';
+        },
+
         readApplicationsBadge() {
             axios.put('/api/v1/read-badge', { type: 'applications' }).then((response) => {
                 this.store.badgeNew = 0;
@@ -121,6 +150,37 @@ export default {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
+
+                // columns
+                this.columnDefs.value = [
+                    { field: "id", headerName: '№ заявки', filter: 'agNumberColumnFilter' },
+                    { field: "construction.name", headerName: 'Объект' },
+                    { field: "kind", headerName: 'Тип заявки', valueGetter: this.getKind },
+                    { field: "issued_at", headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter' },
+                    { field: "status", headerName: 'Статус', valueGetter: this.getStatus },
+                    // { field: "signs", headerName: 'Подписи' },
+                    {
+                        field: "action",
+                        headerName: 'Действие',
+                        cellRendererSelector: (params) => {
+                            // console.log('cell', params);
+
+                            return {
+                                component: 'deleteBtnRenderer',
+                                params: {
+                                    can: params.data.status == 'draft' && this.isPTDEngineer(),
+                                    clicked: this.deleteApplication,
+                                }
+                            }
+                        },
+                        // cellRenderer: this.deleteBtnRenderer,
+                        // cellRendererParams: {
+                        //     clicked: function (field) {
+                        //         alert(`${field} was clicked`);
+                        //     },
+                        // },
+                    },
+                ];
 
                 if (this.$route.query.status == 'redirect') {
                     console.log('redirect')
@@ -158,8 +218,9 @@ export default {
 
             // get applications 
             axios.get('/api/v1/applications?status=' + status).then((response) => {
-                this.applications = response.data.data
-                console.log(this.applications);
+                this.applications = response.data.data;
+
+                this.rowData.value = response.data.data;
             })
         },
 
@@ -169,7 +230,7 @@ export default {
             }
 
             axios.delete('/api/v1/applications/' + id).then((response) => {
-                this.getApplications()
+                this.getApplications('all')
             })
         },
 
@@ -183,22 +244,55 @@ export default {
             return item.application_path.responsible.name
         },
 
-        getKind: function getKind(kind) {
-            var _kinds$kind;
-
+        getKind(params) {
             var kinds = {
                 'product': 'заявка на товар',
                 'equipment': 'заявка на спец. технику',
                 'service': 'заявка на услугу'
             };
-            return (_kinds$kind = kinds[kind]) !== null && _kinds$kind !== void 0 ? _kinds$kind : '';
+
+            return kinds[params?.data?.kind];
+        },
+
+        getStatus(params) {
+            var statuses = {
+                'draft': 'черновик',
+                'in_progress': 'в процессе',
+                'in_review': 'на рассмотрении',
+                'declined': 'отклонена',
+                'completed': 'закрыта',
+            };
+
+            return statuses[params.data.status];
+        },
+
+        getActions(params) {
+
+        },
+
+        onGridReady: (params) => {
+            // console.log(params);
+            this.gridApi.value = params.api;
+        },
+
+        cellWasClicked: (event) => { // Example of consuming Grid Event
+            console.log("cell was clicked", event);
+        },
+
+        deselectRows: () => {
+            this.gridApi.value.deselectAll()
         }
+
 
     },
 
     mounted() {
         // this.getApplications('draft')
         this.getCurrentUser()
+
+        // fetch("https://www.ag-grid.com/example-assets/row-data.json")
+        //     .then((result) => result.json())
+        //     .then((remoteRowData) => (this.rowData.value = remoteRowData));
     },
 
     watch: {

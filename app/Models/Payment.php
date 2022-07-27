@@ -32,8 +32,18 @@ class Payment extends Model
         return $this->belongsTo(Application::class);
     }
 
-    public function offers()
+    public function productOffers()
     {
         return $this->hasMany(ApplicationOffer::class);
+    }
+
+    public function equipmentOffers()
+    {
+        return $this->hasMany(EquipmentOffer::class);
+    }
+
+    public function serviceOffers()
+    {
+        return $this->hasMany(ServiceOffer::class);
     }
 }

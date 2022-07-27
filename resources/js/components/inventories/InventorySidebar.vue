@@ -39,12 +39,12 @@
                 </v-list-item>
             </router-link>
 
-            <!-- <router-link :to="'/inventories/' + inventory.id + '/services/?status=accepted'"
+            <router-link :to="'/inventories/' + inventory.id + '/services/?status=accepted'"
                 class="text-decoration-none text-black">
                 <v-list-item key="services" value="services" active-color="primary">
                     <v-list-item-title v-text="'Услуги'"></v-list-item-title>
                 </v-list-item>
-            </router-link> -->
+            </router-link>
 
             <v-list-item>
                 <v-list-item-title>&nbsp;</v-list-item-title>

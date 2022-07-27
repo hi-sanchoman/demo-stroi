@@ -94,9 +94,11 @@ class ApplicationStatusApiController extends Controller
             if ($request->user()->email == 'kurtayev.meirzhan@mail.ru') {
                 $applicationStatus->application->status = 'in_progress';
                 // final responsible
-            } else if ($nextStep == count($totalSteps) + 1) {
+            } else if ($nextStep == 0) {
                 $applicationStatus->application->status = 'in_progress';
                 // $applicationStatus->application->status = 'signed';
+
+                $this->_signAllPayments($applicationStatus->application);
             } else {
                 // set application's status to 'in_review'
                 $applicationStatus->application->status = 'in_review';
@@ -121,14 +123,14 @@ class ApplicationStatusApiController extends Controller
                 $openedStatus->save();
 
                 // notify next via email
-                Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                // TURN Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
 
                 // notify via push
                 if ($nextUserNote->responsible->device_token != null) {
                     $message = CloudMessage::withTarget('token', $nextUserNote->responsible->device_token)
                         ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
                         ->withData(['key' => 'value']);
-                    $messaging->send($message);
+                    // TURN $messaging->send($message);
                 }
             }
 
@@ -232,5 +234,15 @@ class ApplicationStatusApiController extends Controller
         }
 
         return $prev;
+    }
+
+    private function _signAllPayments($application)
+    {
+        // dd($application);
+
+        foreach ($application->payments()->get() as $payment) {
+            $payment->status = 'completed';
+            $payment->save();
+        }
     }
 }

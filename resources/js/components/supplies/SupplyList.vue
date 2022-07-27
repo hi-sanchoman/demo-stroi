@@ -13,7 +13,13 @@
                 </v-col>
 
                 <v-col cols="12" class="">
-                    <v-table transition="slide-x-transition" style="overflow-x:auto;">
+                    <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
+                        :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
+                        rowSelection="multiple" animateRows="true" @row-clicked="showPosition"
+                        @grid-ready="onGridReady">
+                    </ag-grid-vue>
+
+                    <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
                         <thead>
                             <tr>
                                 <th class="text-left">
@@ -55,6 +61,9 @@
                                     <span v-else-if="inventory.item.application_equipment">
                                         {{ inventory.item.application_equipment.equipment.name }}
                                     </span>
+                                    <span v-else-if="inventory.item.application_service">
+                                        {{ inventory.item.application_service.service }}
+                                    </span>
                                 </td>
                                 <td>
                                     <span v-if="inventory.item.application_product">
@@ -63,10 +72,16 @@
                                     <span v-else-if="inventory.item.application_equipment">
                                         -
                                     </span>
+                                    <span v-else-if="inventory.item.application_service">
+                                        {{ inventory.item.application_service.category }}
+                                    </span>
                                 </td>
                                 <td>
                                     <span v-if="inventory.item.application_product">
                                         {{ inventory.item.application_product.unit.name }}
+                                    </span>
+                                    <span v-else-if="inventory.item.application_service">
+                                        {{ inventory.item.application_service.unit }}
                                     </span>
                                     <span v-else-if="inventory.item.application_equipment">
                                         шт
@@ -76,7 +91,7 @@
                                 <td></td>
                             </tr>
                         </tbody>
-                    </v-table>
+                    </v-table> -->
                 </v-col>
             </v-row>
         </v-container>
@@ -86,7 +101,7 @@
         <v-dialog v-model="historyDialog">
             <v-card>
                 <v-card-title>
-                    <span class="text-h5">История "{{ history.item.application_product.product.name }}"</span>
+                    <span class="text-h5">История "{{ historyName }}"</span>
                 </v-card-title>
 
                 <v-card-text>
@@ -124,9 +139,39 @@
 
                                         <tr v-for="(inventory, index) in historyInventories" :key="inventory.id">
                                             <td>{{ index + 1 }}</td>
-                                            <td>{{ inventory.application_product.product.name }}</td>
-                                            <td>{{ inventory.application_product.category.name }}</td>
-                                            <td>{{ inventory.application_product.unit.name }}</td>
+                                            <td>
+                                                <template v-if="inventory.application_product">
+                                                    {{ inventory.application_product.product.name }}
+                                                </template>
+                                                <template v-else-if="inventory.application_equipment">
+                                                    {{ inventory.application_equipment.equipment.name }}
+                                                </template>
+                                                <template v-else-if="inventory.application_service">
+                                                    {{ inventory.application_service.service }}
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <template v-if="inventory.application_product">
+                                                    {{ inventory.application_product.category.name }}
+                                                </template>
+                                                <template v-else-if="inventory.application_equipment">
+                                                    -
+                                                </template>
+                                                <template v-else-if="inventory.application_service">
+                                                    {{ inventory.application_service.category }}
+                                                </template>
+                                            </td>
+                                            <td>
+                                                <template v-if="inventory.application_product">
+                                                    {{ inventory.application_product.unit.name }}
+                                                </template>
+                                                <template v-else-if="inventory.application_equipment">
+                                                    шт
+                                                </template>
+                                                <template v-else-if="inventory.application_service">
+                                                    {{ inventory.application_service.unit }}
+                                                </template>
+                                            </td>
                                             <td>{{ inventory.quantity }}</td>
                                             <td>{{ inventory.created_at }}</td>
                                         </tr>
@@ -145,9 +190,14 @@
 
 <script>
 import axios from 'axios'
+import { AgGridVue } from "ag-grid-vue3";
+import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
+import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
+import { reactive, ref } from "vue";
 
 export default {
     components: {
+        AgGridVue
     },
 
     data() {
@@ -156,7 +206,19 @@ export default {
             currentUser: null,
             historyDialog: false,
             history: null,
+            historyName: null,
             historyInventories: [],
+
+            gridApi: ref(null),
+            columnDefs: reactive({}),
+            rowData: reactive({}),
+            defaultColDef: {
+                sortable: true,
+                filter: true,
+                flex: 1,
+                floatingFilter: true,
+                resizable: true,
+            },
         }
     },
 
@@ -165,15 +227,43 @@ export default {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
                 // console.log(this.currentUser)
+
+                // columns
+                this.columnDefs.value = [
+                    { field: 'item.id', headerName: '№', filter: 'agNumberColumnFilter', valueGetter: this.getIndex },
+                    { field: 'item.id', headerName: 'Наименование ресурса', valueGetter: this.getName },
+                    { field: 'item.id', headerName: 'Статья расходов', valueGetter: this.getCategory },
+                    { field: 'item.id', headerName: 'Ед. изм.', valueGetter: this.getUnit },
+                    { field: "item.quantity", headerName: 'Количество' },
+                    { field: "item.created_at", headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter' },
+                    // { field: "status", headerName: 'Статус', valueGetter: this.getStatus },
+                    // { field: "signs", headerName: 'Подписи' },
+                    // {
+                    //     field: "action",
+                    //     headerName: 'Действие',
+                    //     cellRendererSelector: (params) => {
+                    //         // console.log('cell', params);
+
+                    //         return {
+                    //             component: 'deleteBtnRenderer',
+                    //             params: {
+                    //                 can: params.data.status == 'draft' && this.isPTDEngineer(),
+                    //                 clicked: this.deleteApplication,
+                    //             }
+                    //         }
+                    //     },
+                    // },
+                ];
             })
         },
 
-        showPosition(item) {
-            if (!item.item.application_product) return;
+        showPosition(params) {
+            console.log('show history', params.data.item);
 
-            this.historyDialog = true
-            this.history = item
-            this.historyInventories = []
+            this.history = params.data;
+            this.historyName = this.getHistoryName();
+            this.historyDialog = true;
+            this.historyInventories = [];
 
             this.getHistoryInventories()
         },
@@ -181,24 +271,111 @@ export default {
         getSupplies() {
             // get applications 
             axios.get('/api/v1/supplies').then((response) => {
-                console.log(response);
-                this.inventories = response.data.data;
+                console.log('resp', response);
+                // this.inventories = response.data.data;
+                this.rowData.value = response.data.data;
             })
         },
 
         getHistoryInventories() {
-            console.log(this.history)
+            // console.log(this.history)
+            let id = null;
+            let kind = null;
 
-            axios.get('/api/v1/history-supplies/' + this.history.item.application_product.product.id).then((response) => {
+            if (this.history.item.application_product) {
+                id = this.history.item.application_product.product.id;
+                kind = 'product';
+            } else if (this.history.item.application_service) {
+                id = this.history.item.application_service.id;
+                kind = 'service';
+            } else if (this.history.item.application_equipment) {
+                id = this.history.item.application_equipment.equipment.id;
+                kind = 'equipment';
+            }
+
+            axios.get('/api/v1/history-supplies/' + id + '/' + kind).then((response) => {
                 this.historyInventories = response.data
             })
-        }
+        },
+
+        getHistoryName() {
+            if (this.history.item.application_product)
+                return this.history.item.application_product.product.name;
+
+            if (this.history.item.application_service)
+                return this.history.item.application_service.service;
+
+            if (this.history.item.application_equipment)
+                return this.history.item.application_equipment.equipment.name;
+        },
+
+        onGridReady: (params) => {
+            console.log('grid ready', params);
+            // this.gridApi.value = params.api;
+        },
+
+        cellWasClicked: (event) => { // Example of consuming Grid Event
+            console.log("cell was clicked", event);
+            // this.showPosition(event.data);
+        },
+
+        deselectRows: () => {
+            this.gridApi.value.deselectAll()
+        },
+
+        getIndex: (params) => {
+            // console.log(params);
+            return params.node.rowIndex + 1;
+        },
+
+        getName: (params) => {
+            if (params.data.item.application_product) {
+                return params.data.item.application_product.product.name;
+            }
+
+            else if (params.data.item.application_equipment) {
+                return params.data.item.application_equipment.equipment.name;
+            }
+
+            else if (params.data.item.application_service) {
+                return params.data.item.application_service.service;
+            }
+        },
+
+        getCategory: (params) => {
+            if (params.data.item.application_product) {
+                return params.data.item.application_product.category.name;
+            }
+
+            else if (params.data.item.application_equipment) {
+                return '-';
+            }
+
+            else if (params.data.item.application_service) {
+                return params.data.item.application_service.category;
+            }
+        },
+
+        getUnit: (params) => {
+            if (params.data.item.application_product) {
+                return params.data.item.application_product.unit.name;
+            }
+
+            else if (params.data.item.application_equipment) {
+                return 'шт';
+            }
+
+            else if (params.data.item.application_service) {
+                return params.data.item.application_service.unit;
+            }
+        },
 
     },
 
     mounted() {
         // this.getApplications('draft')
-        this.getSupplies()
+        this.getCurrentUser();
+        this.getSupplies();
     },
 
     watch: {

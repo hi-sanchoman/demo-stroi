@@ -15,7 +15,16 @@ class PaymentApiController extends Controller
 {
     public function payments()
     {
-        $payments = Payment::with(['application', 'application.construction', 'company', 'offers', 'offers.applicationProduct', 'offers.applicationProduct.product', 'offers.applicationProduct.category', 'offers.applicationProduct.unit', 'offers.applicationEquipment', 'offers.applicationEquipment.equipment',])->get();
+        $payments = Payment::query()
+            ->with([
+                'application', 'application.construction',
+                'company',
+                'productOffers', 'productOffers.applicationProduct', 'productOffers.applicationProduct.product', 'productOffers.applicationProduct.category', 'productOffers.applicationProduct.unit',
+                'equipmentOffers', 'equipmentOffers.applicationEquipment', 'equipmentOffers.applicationEquipment.equipment',
+                'serviceOffers', 'serviceOffers.applicationService',
+            ])
+            ->where('status', 'completed')
+            ->get();
         // dd($payments->toArray());
 
         $data = [];
@@ -45,6 +54,7 @@ class PaymentApiController extends Controller
         // update payments
         foreach ($request->data as $payment) {
             if (!isset($payment['to_be_paid'])) continue;
+            if ($payment['to_be_paid'] < 0) continue;
 
             Payment::where('id', $payment['id'])->update([
                 'to_be_paid' => $payment['to_be_paid'],
@@ -53,7 +63,7 @@ class PaymentApiController extends Controller
 
         // notify accountant
         // TODO: hard-coded accountant email!
-        Mail::to('aijanim_89@mail.ru')->send(new PaymentOrdered());
+        // Mail::to('aijanim_89@mail.ru')->send(new PaymentOrdered());
         // Mail::to('noreply.oks@yandex.kz')->send(new PaymentOrdered());
 
 
@@ -64,7 +74,7 @@ class PaymentApiController extends Controller
 
     public function paymentsToPay()
     {
-        $payments = Payment::with(['application', 'application.construction', 'company', 'offers'])->get();
+        $payments = Payment::with(['application', 'application.construction', 'company', 'productOffers', 'equipmentOffers', 'serviceOffers'])->get();
         // dd($applications->toArray());
 
         $data = [];
@@ -99,7 +109,7 @@ class PaymentApiController extends Controller
 
         // notify CEO
         // TODO: hard-coded CEO email!
-        Mail::to('kurtayev.meirzhan@gmail.com')->send(new PaymentCompleted($payment, $toBePaid));
+        // Mail::to('kurtayev.meirzhan@gmail.com')->send(new PaymentCompleted($payment, $toBePaid));
         // Mail::to('noreply.oks@yandex.kz')->send(new PaymentCompleted($applicationOffer, $toBePaid));
 
         return 1;

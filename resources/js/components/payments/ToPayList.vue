@@ -18,10 +18,10 @@
                             <tr>
                                 <th class="text-left">
                                     Объект
-                                </th> 
+                                </th>
                                 <th class="text-left">
                                     № заявки
-                                </th> 
+                                </th>
                                 <!-- <th class="text-left">
                                     Наименование ресурса
                                 </th> -->
@@ -44,22 +44,21 @@
                                 <td colspan="5">Нет данных.</td>
                             </tr>
 
-                            <tr
-                                v-for="payment in payments"
-                                :key="payment.id"
-                            >
+                            <tr v-for="payment in payments" :key="payment.id">
                                 <td>{{ payment.application.construction.name }}</td>
-                                <td>{{ payment.application.id }}</td>
+                                <td @click="goToApplication(payment.application.id)" style="cursor:pointer">
+                                    <span class="">{{ payment.application.id
+                                    }}</span>
+                                    <br />
+                                    {{ getKind(payment.application.kind) }}
+                                </td>
                                 <td width="30%">{{ payment.company.name }}</td>
                                 <td>{{ payment.to_be_paid }} тг</td>
                                 <!-- <td>
 
                                 </td> -->
                                 <td>
-                                    <v-btn
-                                        color="success"
-                                        @click="setPaid(payment)"
-                                    >
+                                    <v-btn color="success" @click="setPaid(payment)">
                                         Оплачено
                                     </v-btn>
                                 </td>
@@ -67,23 +66,16 @@
                         </tbody>
                     </v-table>
                 </v-col>
-            </v-row>    
+            </v-row>
         </v-container>
 
 
         <!-- Snackbar -->
-        <v-snackbar
-            v-model="snackbar.status"
-            :timeout="snackbar.timeout"
-        >
+        <v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
             {{ snackbar.text }}
 
             <template v-slot:actions>
-                <v-btn
-                    color="blue"
-                    variant="text"
-                    @click="snackbar.status = false"
-                >
+                <v-btn color="blue" variant="text" @click="snackbar.status = false">
                     Закрыть
                 </v-btn>
             </template>
@@ -109,9 +101,9 @@ export default {
             },
             payments: [],
             currentUser: null,
-        } 
+        }
     },
-    
+
     methods: {
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
@@ -138,6 +130,20 @@ export default {
                 this.snackbar.status = true;
             });
         },
+
+        goToApplication(id) {
+            this.$router.push(`/applications/${id}/edit`);
+        },
+
+        getKind(kind) {
+            let kinds = {
+                'product': 'заявка на товар',
+                'equipment': 'заявка на спец. технику',
+                'service': 'заявка на услугу',
+            }
+
+            return kinds[kind] ?? '';
+        }
 
     },
 

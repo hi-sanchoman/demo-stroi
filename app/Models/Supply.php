@@ -17,6 +17,7 @@ class Supply extends Model
         'construction_id',
         'application_product_id',
         'application_equipment_id',
+        'application_service_id',
         'quantity',
         'created_at',
         'updated_at',
@@ -44,8 +45,18 @@ class Supply extends Model
         return $this->belongsTo(ApplicationEquipment::class);
     }
 
+    public function applicationService()
+    {
+        return $this->belongsTo(ApplicationService::class);
+    }
+
     // public function getCreatedAtAttribute($value)
     // {
     //     return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format('Y-m-d H:i:s') : null;
     // }
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('d.m.Y H:i:s');
+    }
 }

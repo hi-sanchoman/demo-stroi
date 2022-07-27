@@ -23,22 +23,30 @@ class InventoryStock extends Model
         'inventory_id',
         'application_product_id',
         'application_equipment_id',
+        'application_service_id',
         'quantity',
         'created_at',
         'updated_at',
         'deleted_at',
     ];
 
-    public function inventory() {
+    public function inventory()
+    {
         return $this->belongsTo(Inventory::class);
     }
 
-    public function applicationProduct() {
+    public function applicationProduct()
+    {
         return $this->belongsTo(ApplicationProduct::class);
     }
-    
+
     public function applicationEquipment()
     {
         return $this->belongsTo(ApplicationEquipment::class);
+    }
+
+    public function applicationService()
+    {
+        return $this->belongsTo(applicationService::class);
     }
 }

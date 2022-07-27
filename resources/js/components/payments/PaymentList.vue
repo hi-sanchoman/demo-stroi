@@ -67,8 +67,9 @@
                                     <td width="30%">
                                         {{ payment.company.name }}<br>
 
-                                        <v-btn v-if="payment.offers.length > 0" class="mt-2" size="small"
-                                            @click="showOffers(payment)">
+                                        <v-btn
+                                            v-if="payment.product_offers?.length > 0 || payment.equipment_offers?.length > 0 || payment.service_offers?.length > 0"
+                                            class="mt-2" size="small" @click="showOffers(payment)">
                                             Показать позиции
                                         </v-btn>
                                     </td>
@@ -85,57 +86,72 @@
                                     </td>
                                 </tr>
 
-                                <template v-if="payment.offers.length > 0">
+                                <template
+                                    v-if="payment.product_offers?.length > 0 || payment.equipment_offers?.length > 0 || payment.service_offers?.length > 0">
                                     <tr :id="'offers_' + payment.id" style="display: none;">
                                         <td colspan="8" class="border-none">
                                             <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible;">
                                                 <thead>
                                                     <tr>
                                                         <th style="width: 25%">Статья расходов</th>
-                                                        <th style="width: 25%">Название товара</th>
+                                                        <th style="width: 25%">Название позиции</th>
                                                         <th style="width: 10%">Кол-во</th>
                                                         <th style="width: 10%">Цена за ед.</th>
                                                         <th>Общая сумма</th>
                                                     </tr>
                                                 </thead>
                         <tbody>
-                            <tr v-for="offer in payment.offers" :key="offer.id">
-                                <template v-if="offer.application_product">
-                                    <td class="">
-                                        {{ offer.application_product.category.name }}
-                                    </td>
-                                    <td class="">
-                                        {{ offer.application_product.product.name }}
-                                    </td>
-                                    <td>
-                                        {{ offer.quantity }} {{ offer.application_product.unit.name
-                                        }}
-                                    </td>
-                                    <td>
-                                        {{ offer.price }} ₸
-                                    </td>
-                                    <td>
-                                        {{ offer.price * offer.quantity }} ₸
-                                    </td>
-                                </template>
-
-                                <template v-else-if="offer.application_equipemnt">
-                                    <td class="">
-                                        -
-                                    </td>
-                                    <td class="">
-                                        {{ offer.application_equipemnt.equipment.name }}, шт
-                                    </td>
-                                    <td>
-                                        {{ offer.quantity }}
-                                    </td>
-                                    <td>
-                                        {{ offer.price }} ₸
-                                    </td>
-                                    <td>
-                                        {{ offer.price * offer.quantity }} ₸
-                                    </td>
-                                </template>
+                            <tr v-for="offer in payment.product_offers" :key="offer.id">
+                                <td class="">
+                                    {{ offer.application_product.category.name }}
+                                </td>
+                                <td class="">
+                                    {{ offer.application_product.product.name }}
+                                </td>
+                                <td>
+                                    {{ offer.quantity }} {{ offer.application_product.unit.name
+                                    }}
+                                </td>
+                                <td>
+                                    {{ offer.price }} ₸
+                                </td>
+                                <td>
+                                    {{ offer.price * offer.quantity }} ₸
+                                </td>
+                            </tr>
+                            <tr v-for="offer in payment.equipment_offers" :key="offer.id">
+                                <td class="">
+                                    -
+                                </td>
+                                <td class="">
+                                    {{ offer.application_equipment.equipment.name }}
+                                </td>
+                                <td>
+                                    {{ offer.quantity }} шт
+                                </td>
+                                <td>
+                                    {{ offer.price }} ₸
+                                </td>
+                                <td>
+                                    {{ offer.price * offer.quantity }} ₸
+                                </td>
+                            </tr>
+                            <tr v-for="offer in payment.service_offers" :key="offer.id">
+                                <td class="">
+                                    {{ offer.application_service.category }}
+                                </td>
+                                <td class="">
+                                    {{ offer.application_service.service }}
+                                </td>
+                                <td>
+                                    {{ offer.quantity }} {{ offer.application_service.unit }}
+                                </td>
+                                <td>
+                                    {{ offer.price }} ₸
+                                </td>
+                                <td>
+                                    {{ offer.price * offer.quantity }} ₸
+                                </td>
                             </tr>
 
                         </tbody>
@@ -149,7 +165,9 @@
 <tr v-if="payments.length > 0">
     <td colspan="3" class="text-right">ИТОГ</td>
     <td>{{ payments.reduce((acc, i) => acc + i.amount, 0) }} ₸</td>
-    <td colspan="4"></td>
+    <td>{{ payments.reduce((acc, i) => acc + i.paid, 0) }} ₸</td>
+    <td>{{ payments.reduce((acc, i) => acc + i.amount - i.paid, 0) }} ₸</td>
+    <td colspan="2"></td>
 </tr>
 </tbody>
 </v-table>
@@ -206,12 +224,12 @@ export default {
         },
 
         getPayments() {
-            console.log('get payments')
+            // console.log('get payments')
 
             // get applications 
             axios.get('/api/v1/payments').then((response) => {
                 this.payments = response.data.data
-                // console.log(this.payments)
+                console.log('payments', this.payments)
             });
         },
 

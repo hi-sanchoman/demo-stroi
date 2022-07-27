@@ -81,6 +81,7 @@ class Application extends Model
 
     public function getIssuedAtAttribute($value)
     {
+        // return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
         return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
     }
 
@@ -97,5 +98,10 @@ class Application extends Model
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+    public function payments()
+    {
+        return $this->hasMany(Payment::class);
     }
 }

@@ -36,10 +36,11 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::apiResource('equipment-offers', 'EquipmentOfferApiController');
 
 
+    Route::put('/application-services/{id}/prepare', 'ApplicationServicesApiController@prepare');
     Route::apiResource('service-offers', 'ServiceOfferApiController');
 
     // Inventories
-    Route::get('/history-supplies/{productId}', 'SupplyApiController@history');
+    Route::get('/history-supplies/{productId}/{kind}', 'SupplyApiController@history');
     Route::get('/supplies', 'SupplyApiController@index');
 
     Route::get('inventories/dropdown', 'InventoryApiController@dropdown');
@@ -48,6 +49,7 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
     Route::get('/inventories/{id}/products', 'InventoryStockApiController@products');
     Route::get('/inventories/{id}/equipments', 'InventoryStockApiController@equipments');
+    Route::get('/inventories/{id}/services', 'InventoryStockApiController@services');
 
 
     Route::get('/inventories/{id}/incoming', 'InventoryStockApiController@incoming');

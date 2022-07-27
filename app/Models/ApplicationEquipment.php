@@ -50,6 +50,11 @@ class ApplicationEquipment extends Model
         return $this->hasMany(EquipmentNote::class);
     }
 
+    public function history()
+    {
+        return $this->hasMany(EquipmentNote::class);
+    }
+
     public function offers()
     {
         return $this->hasMany(EquipmentOffer::class);

@@ -12,6 +12,8 @@
   "dependencies": {
     "@mdi/font": "5.9.55",
     "@onesignal/onesignal-vue3": "^1.0.2",
+    "ag-grid-community": "^28.0.2",
+    "ag-grid-vue3": "^28.0.0",
     "firebase": "^9.9.0",
     "laravel-echo": "^1.12.0",
     "pusher-js": "^7.1.1-beta",

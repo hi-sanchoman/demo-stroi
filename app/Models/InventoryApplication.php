@@ -24,6 +24,7 @@ class InventoryApplication extends Model
         'inventory_id',
         'application_product_id',
         'application_equipment_id',
+        'application_service_id',
         'prepared',
         'accepted',
         'declined',
@@ -39,16 +40,23 @@ class InventoryApplication extends Model
         return $date->format('Y-m-d H:i:s');
     }
 
-    public function inventory() {
+    public function inventory()
+    {
         return $this->belongsTo(Inventory::class);
     }
 
-    public function applicationProduct() {
+    public function applicationProduct()
+    {
         return $this->belongsTo(ApplicationProduct::class);
     }
-    
+
     public function applicationEquipment()
     {
         return $this->belongsTo(ApplicationEquipment::class);
+    }
+
+    public function applicationService()
+    {
+        return $this->belongsTo(ApplicationService::class);
     }
 }

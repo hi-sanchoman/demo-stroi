@@ -2026,6 +2026,19 @@
   "resolved" "https://registry.npmjs.org/acorn/-/acorn-8.7.1.tgz"
   "version" "8.7.1"
 
+"ag-grid-community@^28.0.2", "ag-grid-community@~28.0.0":
+  "integrity" "sha512-yMcDf6QhoKsuUBNklVOS2pAPzG697aNwffaCYr6HKCqEDBqhW7fTtX2iQPD4SZ7/fk/sNX8RSFAI+nTrrjDKFw=="
+  "resolved" "https://registry.npmjs.org/ag-grid-community/-/ag-grid-community-28.0.2.tgz"
+  "version" "28.0.2"
+
+"ag-grid-vue3@^28.0.0":
+  "integrity" "sha512-qQQEuOiiJLkK1l4aHIo7PMG6iU7QHZHOMvYPnKDHjdEKvEU3NKuw6pJB4Ot7EdUnnqSBJOKx7/FMibHelerijw=="
+  "resolved" "https://registry.npmjs.org/ag-grid-vue3/-/ag-grid-vue3-28.0.0.tgz"
+  "version" "28.0.0"
+  dependencies:
+    "ag-grid-community" "~28.0.0"
+    "vue" "^3.0.0"
+
 "ajv-formats@^2.1.1":
   "integrity" "sha512-Wx0Kx52hxE7C18hkMEggYlEifqWZtYaRgouJor+WMdPnQyEK13vgEWyVNup7SoeeoLMsr4kf5h6dOW11I15MUA=="
   "resolved" "https://registry.npmjs.org/ajv-formats/-/ajv-formats-2.1.1.tgz"
@@ -5901,7 +5914,7 @@
     "de-indent" "^1.0.2"
     "he" "^1.2.0"
 
-"vue@^3.2.0", "vue@^3.2.31", "vue@^3.2.33", "vue@3.2.33":
+"vue@^3.0.0", "vue@^3.2.0", "vue@^3.2.31", "vue@^3.2.33", "vue@3.2.33":
   "integrity" "sha512-si1ExAlDUrLSIg/V7D/GgA4twJwfsfgG+t9w10z38HhL/HA07132pUQ2KuwAo8qbCyMJ9e6OqrmWrOCr+jW7ZQ=="
   "resolved" "https://registry.npmjs.org/vue/-/vue-3.2.33.tgz"
   "version" "3.2.33"

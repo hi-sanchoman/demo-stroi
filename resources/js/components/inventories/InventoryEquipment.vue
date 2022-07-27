@@ -60,9 +60,9 @@
               </tr>
             </thead>
             <tbody>
-              <!-- <tr v-if="stocks.length <= 0">
-                <td colspan="5">Нет данных.</td>
-              </tr> -->
+              <tr v-if="stocks.length <= 0">
+                <td colspan="6">Нет данных.</td>
+              </tr>
 
               <template v-for="(stock, index) in stocks" :key="stock.id">
                 <tr class="hover:bg-slate-100">

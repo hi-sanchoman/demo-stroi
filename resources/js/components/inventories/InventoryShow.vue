@@ -54,7 +54,7 @@
                                     Количество
                                 </th>
                                 <th>
-
+                                    Действие
                                 </th>
                             </tr>
                         </thead>
@@ -68,7 +68,7 @@
                                 <td>
                                     <span v-if="stock.application_product">
                                         {{ stock.application_product.product.name }}
-                                    </span>    
+                                    </span>
 
                                     <span v-else-if="stock.application_equipment">
                                         {{ stock.application_equipment.equipment.name }}
@@ -77,8 +77,8 @@
                                 <td>
                                     <span v-if="stock.application_product">
                                         {{ stock.application_product.unit.name }}
-                                    </span> 
-                                    
+                                    </span>
+
                                     <span v-else-if="stock.application_equipment">
                                         шт
                                     </span>
@@ -167,7 +167,7 @@ export default {
             })
         },
 
-        
+
 
 
 
@@ -192,6 +192,8 @@ export default {
                 // this.getIncoming();
                 this.getProducts();
                 this.getIncoming();
+
+                location.reload();
             })
         },
 
@@ -204,6 +206,8 @@ export default {
                 // this.getIncoming();
                 this.getProducts();
                 this.getIncoming();
+
+                location.reload();
             })
         }
 
