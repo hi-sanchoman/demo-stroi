@@ -13,12 +13,12 @@
                 </v-col>
 
                 <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                    <!-- <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :columnDefs="columnDefs.value"
+                    <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :columnDefs="columnDefs.value"
                         :rowData="rowData.value" :defaultColDef="defaultColDef" rowSelection="multiple"
                         animateRows="true" @cell-clicked="cellWasClicked" @grid-ready="onGridReady">
-                    </ag-grid-vue> -->
+                    </ag-grid-vue>
 
-                    <v-table transition="slide-x-transition">
+                    <!-- <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
                                 <th class="text-left">
@@ -89,7 +89,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </v-table>
+                    </v-table> -->
                 </v-col>
             </v-row>
 
