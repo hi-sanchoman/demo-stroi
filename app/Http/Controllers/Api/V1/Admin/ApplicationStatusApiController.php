@@ -123,14 +123,14 @@ class ApplicationStatusApiController extends Controller
                 $openedStatus->save();
 
                 // notify next via email
-                // TURN Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
 
                 // notify via push
                 if ($nextUserNote->responsible->device_token != null) {
                     $message = CloudMessage::withTarget('token', $nextUserNote->responsible->device_token)
                         ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
                         ->withData(['key' => 'value']);
-                    // TURN $messaging->send($message);
+                    $messaging->send($message);
                 }
             }
 
