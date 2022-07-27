@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationOffer;
 use App\Models\EquipmentOffer;
+use App\Models\Product;
 use App\Models\ServiceOffer;
 use Storage;
 
@@ -61,5 +62,38 @@ class ApplicationController extends Controller
                 'file' => $path,
             ],
         ];
+    }
+
+
+    public function parse()
+    {
+        return;
+        $file = public_path('goods.tsv');
+        $lines = collect([]);
+
+        $handle = fopen($file, "r");
+        if ($handle) {
+            while (($line = fgets($handle)) !== false) {
+                $lines->push(trim(preg_replace('/\s\s+/', ' ', $line)));
+            }
+
+            fclose($handle);
+        }
+
+        // dd($lines->unique());
+        // Product::truncate();
+
+        $data = [];
+
+        foreach ($lines->unique() as $line) {
+            $data[] = [
+                'name' => $line,
+                'price' => 1,
+            ];
+        }
+
+        Product::insert($data);
+
+        return 'done';
     }
 }

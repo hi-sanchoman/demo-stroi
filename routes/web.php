@@ -38,6 +38,8 @@ Auth::routes(['register' => false]);
 
 Route::post('/upload-file', 'ApplicationController@uploadFile');
 
+Route::get('/parse', 'ApplicationController@parse');
+
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'namespace' => 'Admin', 'middleware' => ['auth']], function () {
     Route::get('/', 'HomeController@index')->name('home');
