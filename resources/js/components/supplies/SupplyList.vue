@@ -16,7 +16,7 @@
                     <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
                         :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
                         rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
-                        @grid-ready="onGridReady">
+                        @grid-ready="onGridReady" @first-data-rendered="onFirstDataRendered">
                     </ag-grid-vue>
 
                     <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
@@ -99,13 +99,13 @@
 
         <!-- inventory history dialog -->
         <v-dialog v-model="historyDialog">
-            <v-card>
+            <v-card class="oks-dialog min-w-5xl w-7xl">
                 <v-card-title>
                     <span class="text-h5">История "{{ historyName }}"</span>
                 </v-card-title>
 
                 <v-card-text>
-                    <v-container>
+                    <v-container class="oks-container">
                         <v-row no-gutters class="">
 
                             <v-col cols="12" class="">
@@ -252,7 +252,10 @@ export default {
 
                 // Date Filter
                 dateFormatOoo: 'dd-mm-YYYY',
-            }
+            },
+            defaultColDef: {
+                resizable: true,
+            },
         }
     },
 
@@ -270,13 +273,13 @@ export default {
 
                 // columns
                 this.columnDefs.value = [
-                    { field: 'item.id', headerName: '№', filter: 'agNumberColumnFilter', valueGetter: this.getIndex },
-                    { field: 'item.id', headerName: 'Наименование ресурса', valueGetter: this.getName },
-                    { field: 'item.id', headerName: 'Статья расходов', valueGetter: this.getCategory },
-                    { field: 'item.id', headerName: 'Ед. изм.', valueGetter: this.getUnit },
-                    { field: "item.quantity", headerName: 'Количество', filter: 'agNumberColumnFilter' },
+                    { field: 'item.id', minWidth: 50, headerName: '№', filter: 'agNumberColumnFilter', valueGetter: this.getIndex },
+                    { field: 'item.id', minWidth: 150, headerName: 'Наименование ресурса', valueGetter: this.getName },
+                    { field: 'item.id', minWidth: 150, headerName: 'Статья расходов', valueGetter: this.getCategory },
+                    { field: 'item.id', minWidth: 50, headerName: 'Ед. изм.', valueGetter: this.getUnit },
+                    { field: "item.quantity", minWidth: 120, headerName: 'Количество', filter: 'agNumberColumnFilter' },
                     {
-                        field: "item.created_at", headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
+                        field: "item.created_at", minWidth: 100, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
                             debounceMs: 500,
                             suppressAndOrCondition: true,
                             comparator: function (filterLocalDateAtMidnight, cellValue) {
@@ -375,6 +378,7 @@ export default {
         },
 
         onGridReady: (params) => {
+            this.onFirstDataRendered(params);
             console.log('grid ready', params);
             // this.gridApi.value = params.api;
         },
@@ -435,6 +439,43 @@ export default {
             }
         },
 
+        onFirstDataRendered(params) {
+            console.log('fit size');
+            params.api.sizeColumnsToFit();
+        },
+
+        onGridSizeChanged(params) {
+            // get the current grids width
+            var gridWidth = document.getElementById('grid-wrapper').offsetWidth;
+
+            // keep track of which columns to hide/show
+            var columnsToShow = [];
+            var columnsToHide = [];
+
+            // iterate over all columns (visible or not) and work out
+            // now many columns can fit (based on their minWidth)
+            var totalColsWidth = 0;
+            var allColumns = params.columnApi.getColumns();
+            if (allColumns && allColumns.length > 0) {
+                for (var i = 0; i < allColumns.length; i++) {
+                    var column = allColumns[i];
+                    totalColsWidth += column.getMinWidth() || 0;
+                    if (totalColsWidth > gridWidth) {
+                        columnsToHide.push(column.getColId());
+                    } else {
+                        columnsToShow.push(column.getColId());
+                    }
+                }
+            }
+
+            // show/hide columns based on current grid width
+            params.columnApi.setColumnsVisible(columnsToShow, true);
+            params.columnApi.setColumnsVisible(columnsToHide, false);
+
+            // fill out any available space to ensure there are no gaps
+            params.api.sizeColumnsToFit();
+        }
+
     },
 
     mounted() {
@@ -455,3 +496,60 @@ export default {
     }
 }
 </script>
+
+
+<style>
+.oks-dialog {
+    width: 300px;
+}
+
+.oks-dialog .v-card-text {
+    padding: 8px !important;
+}
+
+.oks-dialog .v-container {
+    padding: 3px;
+}
+
+@media only screen and (min-width: 768px) {
+    .oks-dialog .v-card-text {
+        padding: 16px 24px 10px;
+    }
+
+    .oks-dialog {
+        min-width: 500px;
+        width: auto;
+    }
+
+
+    .v-table__wrapper {
+        overflow: visible !important;
+    }
+
+    .v-table__wrapper table {
+        overflow: visible !important;
+    }
+}
+
+html,
+body {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    box-sizing: border-box;
+    -webkit-overflow-scrolling: touch;
+}
+
+html {
+    position: absolute;
+    top: 0;
+    left: 0;
+    padding: 0;
+    overflow: auto;
+}
+
+body {
+    padding: 1rem;
+    overflow: auto;
+}
+</style>
