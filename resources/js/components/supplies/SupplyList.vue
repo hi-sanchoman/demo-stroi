@@ -498,7 +498,7 @@ export default {
 </script>
 
 
-<style>
+<style scoped>
 .oks-dialog {
     width: 300px;
 }
@@ -549,7 +549,7 @@ html {
 }
 
 body {
-    padding: 1rem;
+    /* padding: 1rem; */
     overflow: auto;
 }
 </style>
