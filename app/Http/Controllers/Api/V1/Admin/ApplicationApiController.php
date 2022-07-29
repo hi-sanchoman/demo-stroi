@@ -187,7 +187,7 @@ class ApplicationApiController extends Controller
                         'equipment_id' => $equipment['equipment']['id'],
                         'quantity' => $equipment['quantity'],
                         'notes' => $equipment['notes'],
-                        'days' => $equipment['days'],
+                        'unit_id' => $equipment['unit']['id'],
                         'is_delivered_by_us' => 0,
                     ]);
                 }
@@ -249,7 +249,7 @@ class ApplicationApiController extends Controller
             ->where('user_id', $request->user()->id)
             ->update(['status' => 'read']);
 
-        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationServices', 'applicationServices.offers', 'applicationServices.offers.company', 'applicationEquipments', 'applicationEquipments.history', 'applicationEquipments.equipment', 'applicationEquipments.offers', 'applicationEquipments.offers.company', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
+        return new ApplicationResource($application->load(['construction', 'applicationApplicationProducts', 'applicationServices', 'applicationServices.offers', 'applicationServices.offers.company', 'applicationEquipments', 'applicationEquipments.history', 'applicationEquipments.equipment', 'applicationEquipments.offers', 'applicationEquipments.offers.company', 'applicationEquipments.unit', 'applicationApplicationProducts.category', 'applicationApplicationProducts.unit', 'applicationApplicationProducts.offers', 'applicationApplicationProducts.inventoryApplications', 'applicationApplicationProducts.inventoryApplications.applicationProduct', 'applicationApplicationProducts.inventoryApplications.applicationProduct.product', 'applicationApplicationProducts.inventoryApplications.applicationProduct.category', 'applicationApplicationProducts.offers.company', 'applicationApplicationProducts.product.categories', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path', 'applicationApplicationStatuses.application_path.responsible']));
     }
 
     public function update(Request $request, Application $application)
@@ -321,7 +321,7 @@ class ApplicationApiController extends Controller
                             'equipment_id' => $item['equipment']['id'],
                             'quantity' => $item['quantity'],
                             'notes' => $item['notes'],
-                            'days' => $item['days'],
+                            'unit_id' => $item['unit']['id'],
                             'is_delivered_by_us' => 0,
                         ]);
                     }

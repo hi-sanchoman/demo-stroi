@@ -33,6 +33,7 @@ class ApplicationEquipment extends Model
         'deleted_at',
         'status',
         'days',
+        'unit_id',
     ];
 
     public function application()
@@ -68,5 +69,10 @@ class ApplicationEquipment extends Model
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+    public function unit()
+    {
+        return $this->belongsTo(Unit::class, 'unit_id');
     }
 }

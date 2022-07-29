@@ -15,7 +15,7 @@ use App\Models\ApplicationProduct;
 class ProductApiController extends Controller 
 {
     public function index(Request $request) {
-        $collection = Product::with(['categories'])->get();
+        $collection = Product::with(['categories'])->limit(100)->get();
         
         return new ProductResource($collection);
     }

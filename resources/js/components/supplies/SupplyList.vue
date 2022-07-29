@@ -15,7 +15,7 @@
                 <v-col cols="12" class="">
                     <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
                         :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
-                        rowSelection="multiple" animateRows="true" @row-clicked="showPosition"
+                        rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
                         @grid-ready="onGridReady">
                     </ag-grid-vue>
 
@@ -155,7 +155,7 @@
                                                     {{ inventory.application_product.category.name }}
                                                 </template>
                                                 <template v-else-if="inventory.application_equipment">
-                                                    -
+                                                    спец. техника
                                                 </template>
                                                 <template v-else-if="inventory.application_service">
                                                     {{ inventory.application_service.category }}
@@ -166,7 +166,7 @@
                                                     {{ inventory.application_product.unit.name }}
                                                 </template>
                                                 <template v-else-if="inventory.application_equipment">
-                                                    шт
+                                                    {{ inventory.application_equipment.unit.name }}
                                                 </template>
                                                 <template v-else-if="inventory.application_service">
                                                     {{ inventory.application_service.unit }}
@@ -194,6 +194,7 @@ import { AgGridVue } from "ag-grid-vue3";
 import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { reactive, ref } from "vue";
+import AG_GRID_LOCALE_EN from '../../assets/gridlocale.js';
 
 export default {
     components: {
@@ -219,10 +220,49 @@ export default {
                 floatingFilter: true,
                 resizable: true,
             },
+            localeText: {
+                selectAll: '(Выбрать все)',
+                selectAllSearchResults: '(Выбрать все результаты)',
+                searchOoo: 'Поиск...',
+                blanks: '(Пусто)',
+                noMatches: 'Нет совпадений',
+
+                // Number Filter & Text Filter
+                filterOoo: 'Фильтр...',
+                equals: 'Равно',
+                notEqual: 'Не равно',
+                blank: 'Пусто',
+                notBlank: 'Не пусто',
+                empty: 'Выберите одно',
+
+                // Number Filter
+                lessThan: 'Меньше чем',
+                greaterThan: 'Больше чем',
+                lessThanOrEqual: 'Меньше чем или равно',
+                greaterThanOrEqual: 'Больше чем или равно',
+                inRange: 'В диапазоне',
+                inRangeStart: 'от',
+                inRangeEnd: 'до',
+
+                // Text Filter
+                contains: 'Содержит',
+                notContains: 'Не содержит',
+                startsWith: 'Начинается с ',
+                endsWith: 'Заканчивается на',
+
+                // Date Filter
+                dateFormatOoo: 'dd-mm-YYYY',
+            }
         }
     },
 
     methods: {
+        dateFormatter(params) {
+            var dateAsString = params.data.item.created_at;
+            var dateParts = dateAsString.split('/');
+            return `${dateParts[0]} - ${dateParts[1]} - ${dateParts[2]}`;
+        },
+
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
@@ -234,8 +274,33 @@ export default {
                     { field: 'item.id', headerName: 'Наименование ресурса', valueGetter: this.getName },
                     { field: 'item.id', headerName: 'Статья расходов', valueGetter: this.getCategory },
                     { field: 'item.id', headerName: 'Ед. изм.', valueGetter: this.getUnit },
-                    { field: "item.quantity", headerName: 'Количество' },
-                    { field: "item.created_at", headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter' },
+                    { field: "item.quantity", headerName: 'Количество', filter: 'agNumberColumnFilter' },
+                    {
+                        field: "item.created_at", headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
+                            debounceMs: 500,
+                            suppressAndOrCondition: true,
+                            comparator: function (filterLocalDateAtMidnight, cellValue) {
+                                if (cellValue == null) {
+                                    return 0;
+                                }
+                                var dateParts = cellValue.split('/');
+                                var year = Number(dateParts[2]);
+                                var month = Number(dateParts[1]) - 1;
+                                var day = Number(dateParts[0]);
+                                var cellDate = new Date(year, month, day);
+
+                                // console.log([cellValue, dateParts, year, month, day]);
+
+                                if (cellDate < filterLocalDateAtMidnight) {
+                                    return -1;
+                                } else if (cellDate > filterLocalDateAtMidnight) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            },
+                        },
+                    },
                     // { field: "status", headerName: 'Статус', valueGetter: this.getStatus },
                     // { field: "signs", headerName: 'Подписи' },
                     // {
@@ -348,7 +413,7 @@ export default {
             }
 
             else if (params.data.item.application_equipment) {
-                return '-';
+                return 'спец. техника';
             }
 
             else if (params.data.item.application_service) {
@@ -362,7 +427,7 @@ export default {
             }
 
             else if (params.data.item.application_equipment) {
-                return 'шт';
+                return params.data.item.application_equipment.unit.name;
             }
 
             else if (params.data.item.application_service) {

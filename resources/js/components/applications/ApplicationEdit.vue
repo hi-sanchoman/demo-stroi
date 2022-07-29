@@ -79,17 +79,26 @@
                                         placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
                                 </v-col>
 
-                                <v-col cols="12" md="2">
+                                <!-- <v-col cols="12" md="2">
                                     <v-text-field v-model="current.days" label="Срок (дней)" variant="underlined"
                                         required density="comfortable" type="number"></v-text-field>
+                                </v-col> -->
+
+                                <v-col cols="12" md="2">
+                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
+                                        label="name" track-by="name"></multiselect>
                                 </v-col>
                             </template>
 
                             <!-- Service -->
                             <template v-else-if="application.kind == 'service'">
-                                <v-col cols="12" md="3">
+                                <!-- <v-col cols="12" md="3">
                                     <v-text-field v-model="current.category" label="Напишите категорию"
                                         variant="underlined" required density="comfortable" type="text"></v-text-field>
+                                </v-col> -->
+                                <v-col cols="12" md="3">
+                                    <multiselect v-model="current.category" :options="categories"
+                                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
                                 </v-col>
 
                                 <v-col cols="12" md="3">
@@ -97,9 +106,13 @@
                                         variant="underlined" required density="comfortable" type="text"></v-text-field>
                                 </v-col>
 
-                                <v-col cols="12" md="2">
+                                <!-- <v-col cols="12" md="2">
                                     <v-text-field v-model="current.unit" label="Ед. изм." variant="underlined" required
                                         density="comfortable" type="text"></v-text-field>
+                                </v-col> -->
+                                <v-col cols="12" md="2">
+                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
+                                        label="name" track-by="name"></multiselect>
                                 </v-col>
                             </template>
 
@@ -136,7 +149,7 @@
                                     <th>Наименование ресурсов</th>
                                     <th>Ед. изм.</th>
 
-                                    <th v-if="!isWarehouseManager()">Кол-во</th>
+                                    <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
                                     <template v-else>
                                         <th>заказано</th>
                                         <th>фактически</th>
@@ -156,7 +169,7 @@
                                         <td>{{ item.product.name }}</td>
                                         <td>{{ item.unit.name }}</td>
 
-                                        <td v-if="!isWarehouseManager()" :class="
+                                        <td v-if="!isWarehouseManager() && !isSupplier()" :class="
                                             application.status == 'draft'
                                                 ? 'd-flex mt-3'
                                                 : ''
@@ -169,9 +182,10 @@
 ">
                                             </v-text-field>
 
-                                            <span v-if="!isPTDEngineer()">
+                                            <!-- <span v-if="!isPTDEngineer()">
                                                 {{ products[index].prepared }} /
-                                            </span>
+                                            </span> -->
+
                                             <span v-if="
                                                 application.status !=
                                                 'draft'
@@ -408,7 +422,7 @@
             <th>Наименование ресурсов</th>
             <th>Ед. изм.</th>
 
-            <th v-if="!isWarehouseManager()">Кол-во</th>
+            <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
             <template v-else>
                 <th>заказано</th>
                 <th>фактически</th>
@@ -428,7 +442,7 @@
                 <td>{{ item.service }}</td>
                 <td>{{ item.unit }}</td>
 
-                <td v-if="!isWarehouseManager()" :class="
+                <td v-if="!isWarehouseManager() && !isSupplier()" :class="
                     application.status == 'draft'
                         ? 'd-flex mt-3'
                         : ''
@@ -441,9 +455,9 @@
 ">
                     </v-text-field>
 
-                    <span v-if="!isPTDEngineer()">
+                    <!-- <span v-if="!isPTDEngineer()">
                         {{ services[index].prepared }} /
-                    </span>
+                    </span> -->
                     <span v-if="
                         application.status !=
                         'draft'
@@ -680,9 +694,9 @@
         <tr>
             <th>№</th>
             <th>Наименование спец. техники</th>
-            <th>Срок (дней)</th>
+            <th>Ед. изм.</th>
 
-            <th v-if="!isWarehouseManager()">Кол-во</th>
+            <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
             <template v-else>
                 <th>заказано</th>
                 <th>фактически</th>
@@ -699,8 +713,8 @@
             <tr>
                 <td>{{ item.id }}</td>
                 <td>{{ item.equipment.name }}</td>
-                <td>{{ item.days }}</td>
-                <td v-if="!isWarehouseManager()" :class="
+                <td>{{ item.unit.name }}</td>
+                <td v-if="!isWarehouseManager() && !isSupplier()" :class="
                     application.status == 'draft'
                         ? 'd-flex mt-3'
                         : ''
@@ -713,9 +727,9 @@
 ">
                     </v-text-field>
 
-                    <span v-if="!isPTDEngineer()">
+                    <!-- <span v-if="!isPTDEngineer()">
                         {{ equipments[index].prepared }} /
-                    </span>
+                    </span> -->
                     <span v-if="
                         application.status !=
                         'draft'
@@ -1536,7 +1550,7 @@ export default {
                     equipment: this.current.equipment,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
-                    days: this.current.days,
+                    unit: this.current.unit,
                 });
 
                 // console.log(this.equipments);
@@ -1544,11 +1558,14 @@ export default {
                 this.services.push({
                     id: this.services.length + 1,
                     service: this.current.service,
-                    unit: this.current.unit,
-                    category: this.current.category,
+                    // unit: this.current.unit,
+                    unit: this.current.unit.name,
+                    // category: this.current.category,
+                    category: this.current.category.name,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
                 });
+
             }
 
             this.current = {
@@ -2074,7 +2091,7 @@ export default {
             else if (this.application.kind == 'equipment') {
                 this.priemka.equipment = item;
                 this.priemka.name = item.equipment.name;
-                this.priemka.unit = 'шт';
+                this.priemka.unit = item.unit.name;
             }
 
             this.acceptProductDialog = true;

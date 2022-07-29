@@ -90,7 +90,7 @@
                           <tr>
                             <th>#</th>
                             <th>Дата</th>
-                            <th>Часов отработано</th>
+                            <th>Отработано</th>
                             <th>Примечание</th>
                             <th></th>
                           </tr>
@@ -145,8 +145,8 @@
             <label for="date">Укажите день</label><br />
             <input type="date" id="date" v-model="note.date" />
 
-            <v-text-field class="mt-2" v-model="note.hours" label="Количество часов" variant="underlined" required
-              density="comfortable" type="number" @keyup.enter="addNote()"></v-text-field>
+            <v-text-field class="mt-2" v-model="note.hours" label="Количество часов / Отработано" variant="underlined"
+              required density="comfortable" type="number" @keyup.enter="addNote()"></v-text-field>
 
             <v-textarea class="mt-2" v-model="note.notes" label="Примечание" variant="underlined" required
               density="comfortable"></v-textarea>

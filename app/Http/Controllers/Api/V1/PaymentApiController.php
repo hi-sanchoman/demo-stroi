@@ -20,7 +20,7 @@ class PaymentApiController extends Controller
                 'application', 'application.construction',
                 'company',
                 'productOffers', 'productOffers.applicationProduct', 'productOffers.applicationProduct.product', 'productOffers.applicationProduct.category', 'productOffers.applicationProduct.unit',
-                'equipmentOffers', 'equipmentOffers.applicationEquipment', 'equipmentOffers.applicationEquipment.equipment',
+                'equipmentOffers', 'equipmentOffers.applicationEquipment', 'equipmentOffers.applicationEquipment.unit', 'equipmentOffers.applicationEquipment.equipment',
                 'serviceOffers', 'serviceOffers.applicationService',
             ])
             ->where('status', 'completed')

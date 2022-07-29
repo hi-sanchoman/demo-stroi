@@ -8,9 +8,7 @@ import HelloWorld from './components/HelloWorld.vue'
 import Login from './components/auth/Login.vue'
 import ApplicationList from './components/applications/ApplicationList.vue'
 import ApplicationCreate from './components/applications/ApplicationCreate.vue'
-import ApplicationSidebar from './components/applications/ApplicationSidebar.vue'
 import ApplicationEdit from './components/applications/ApplicationEdit.vue'
-import InventorySidebar from './components/inventories/InventorySidebar.vue'
 import InventoryHistory from './components/inventories/InventoryHistory.vue'
 import InventoryList from './components/inventories/InventoryList.vue'
 import InventoryShow from './components/inventories/InventoryShow.vue'
@@ -20,6 +18,9 @@ import PaymentList from './components/payments/PaymentList.vue'
 import ToPayList from './components/payments/ToPayList.vue'
 import SupplyList from './components/supplies/SupplyList.vue'
 import ProfileEdit from './components/profile/ProfileEdit.vue'
+import ContractList from './components/contracts/ContractList.vue'
+import ContractCreate from './components/contracts/ContractCreate.vue'
+import ContractEdit from './components/contracts/ContractEdit.vue'
 
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -44,6 +45,10 @@ const routes = [
   { path: '/applications/create', name: 'applications.create', component: ApplicationCreate },
   { path: '/applications/:id/edit', name: 'applications.edit', component: ApplicationEdit },
   { path: '/applications/', name: 'applications.index', component: ApplicationList },
+
+  { path: '/contracts/create', name: 'contracts.create', component: ContractCreate },
+  { path: '/contracts/:id/edit', name: 'contracts.edit', component: ContractEdit },
+  { path: '/contracts/', name: 'contracts.index', component: ContractList },
 
   { path: '/inventories', name: 'inventories.index', component: InventoryList },
   { path: '/inventories/:id/products', name: 'inventories.show', component: InventoryShow },

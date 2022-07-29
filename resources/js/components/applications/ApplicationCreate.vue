@@ -59,27 +59,41 @@
                                         placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
                                 </v-col>
 
-                                <v-col cols="12" md="2">
+                                <!-- <v-col cols="12" md="2">
                                     <v-text-field v-model="current.days" label="Срок (дней)" variant="underlined"
                                         required density="comfortable" type="number"></v-text-field>
+                                </v-col> -->
+
+                                <v-col cols="12" md="2">
+                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
+                                        label="name" track-by="name"></multiselect>
                                 </v-col>
                             </template>
 
                             <!-- Service -->
                             <template v-else-if="form.kind == 'service'">
                                 <v-col cols="12" md="3">
+                                    <multiselect v-model="current.category" :options="categories"
+                                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                                </v-col>
+
+                                <!-- <v-col cols="12" md="3">
                                     <v-text-field v-model="current.category" label="Напишите категорию"
                                         variant="underlined" required density="comfortable" type="text"></v-text-field>
-                                </v-col>
+                                </v-col> -->
 
                                 <v-col cols="12" md="3">
                                     <v-text-field v-model="current.service" label="Напишите услугу" variant="underlined"
                                         required density="comfortable" type="text"></v-text-field>
                                 </v-col>
 
-                                <v-col cols="12" md="2">
+                                <!-- <v-col cols="12" md="2">
                                     <v-text-field v-model="current.unit" label="Ед. изм." variant="underlined" required
                                         density="comfortable" type="text"></v-text-field>
+                                </v-col> -->
+                                <v-col cols="12" md="2">
+                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
+                                        label="name" track-by="name"></multiselect>
                                 </v-col>
                             </template>
 
@@ -145,7 +159,7 @@
                                 <tr>
                                     <th>№</th>
                                     <th>Наименование спец. техники</th>
-                                    <th>Срок (дней)</th>
+                                    <th>Ед. изм.</th>
                                     <th>Кол-во</th>
                                     <th>Примечание</th>
                                     <th></th>
@@ -156,7 +170,7 @@
                                 <tr v-for="(item, index) in equipments" :key="item.id">
                                     <td>{{ item.id }}</td>
                                     <td>{{ item.equipment.name }}</td>
-                                    <td>{{ item.days }}</td>
+                                    <td>{{ item.unit.name }}</td>
                                     <td class="d-flex mt-3">
                                         <v-text-field v-model="equipments[index].quantity" type="number" variant="plain"
                                             density="compact">
@@ -344,7 +358,7 @@ export default {
                     equipment: this.current.equipment,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
-                    days: this.current.days,
+                    unit: this.current.unit,
                 });
 
                 // console.log(this.equipments);
@@ -354,8 +368,10 @@ export default {
                 this.services.push({
                     id: this.services.length + 1,
                     service: this.current.service,
-                    unit: this.current.unit,
-                    category: this.current.category,
+                    // unit: this.current.unit,
+                    unit: this.current.unit.name,
+                    // category: this.current.category,
+                    category: this.current.category.name,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
                 });

@@ -251,7 +251,7 @@ export default {
                 'service': 'заявка на услугу'
             };
 
-            return kinds[params?.data?.kind];
+            return typeof params === 'string' ? kinds[params] : kinds[params?.data?.kind];
         },
 
         getStatus(params) {

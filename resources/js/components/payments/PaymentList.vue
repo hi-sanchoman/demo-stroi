@@ -127,7 +127,7 @@
                                     {{ offer.application_equipment.equipment.name }}
                                 </td>
                                 <td>
-                                    {{ offer.quantity }} шт
+                                    {{ offer.quantity }} {{ offer.application_equipment.unit.name }}
                                 </td>
                                 <td>
                                     {{ offer.price }} ₸

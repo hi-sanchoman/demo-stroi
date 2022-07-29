@@ -17,9 +17,14 @@ return new class extends Migration
             $table->id();
 
             $table->datetime('issued_at')->nullable();
+            $table->string('name')->nullable();
             $table->string('kind')->default('default');
             $table->string('status')->default('draft');
             $table->boolean('is_urgent')->default(0)->nullable();
+
+            $table->string('file_application')->nullable();
+            $table->string('file_contract')->nullable();
+            $table->string('file_singed')->nullable();
 
             $table->unsignedBigInteger('owner_id')->nullable();
             $table->foreign('owner_id', 'owner_fk_123456789')->references('id')->on('users');

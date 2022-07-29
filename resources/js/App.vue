@@ -43,6 +43,15 @@
           <v-btn flat class="text-white">Накопители</v-btn>
         </router-link>
 
+        <!-- <router-link v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman')" to="/contracts?status=all"
+          class="text-decoration-none">
+          <v-btn flat class="text-white">
+            Договоры
+            <span v-if="store.badgeContracts > 0">
+              <v-badge color="error" :content="store.badgeContracts" inline></v-badge>
+            </span>
+          </v-btn>
+        </router-link> -->
 
         <!-- <router-link to="/storages" class="text-decoration-none">
           <v-btn flat class="text-white">Склады</v-btn>
