@@ -16,7 +16,7 @@
                     <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
                         :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
                         rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
-                        @grid-ready="onGridReady" @first-data-rendered="onFirstDataRendered">
+                        @grid-ready="onGridReady">
                     </ag-grid-vue>
 
                     <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
@@ -253,9 +253,6 @@ export default {
                 // Date Filter
                 dateFormatOoo: 'dd-mm-YYYY',
             },
-            defaultColDef: {
-                resizable: true,
-            },
         }
     },
 
@@ -273,13 +270,13 @@ export default {
 
                 // columns
                 this.columnDefs.value = [
-                    { field: 'item.id', minWidth: 50, headerName: '№', filter: 'agNumberColumnFilter', valueGetter: this.getIndex },
-                    { field: 'item.id', minWidth: 150, headerName: 'Наименование ресурса', valueGetter: this.getName },
-                    { field: 'item.id', minWidth: 150, headerName: 'Статья расходов', valueGetter: this.getCategory },
-                    { field: 'item.id', minWidth: 50, headerName: 'Ед. изм.', valueGetter: this.getUnit },
-                    { field: "item.quantity", minWidth: 120, headerName: 'Количество', filter: 'agNumberColumnFilter' },
+                    { field: 'item.id', minWidth: 100, headerName: '№', filter: 'agNumberColumnFilter', valueGetter: this.getIndex },
+                    { field: 'item.id', minWidth: 300, headerName: 'Наименование ресурса', valueGetter: this.getName },
+                    { field: 'item.id', minWidth: 300, headerName: 'Статья расходов', valueGetter: this.getCategory },
+                    { field: 'item.id', minWidth: 150, headerName: 'Ед. изм.', valueGetter: this.getUnit },
+                    { field: "item.quantity", minWidth: 150, headerName: 'Количество', filter: 'agNumberColumnFilter' },
                     {
-                        field: "item.created_at", minWidth: 100, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
+                        field: "item.created_at", minWidth: 200, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
                             debounceMs: 500,
                             suppressAndOrCondition: true,
                             comparator: function (filterLocalDateAtMidnight, cellValue) {
@@ -378,7 +375,7 @@ export default {
         },
 
         onGridReady: (params) => {
-            this.onFirstDataRendered(params);
+            // this.onFirstDataRendered(params);
             console.log('grid ready', params);
             // this.gridApi.value = params.api;
         },
