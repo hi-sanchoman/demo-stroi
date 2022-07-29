@@ -2305,28 +2305,35 @@ export default {
     z-index: 1000;
 }
 
+
+
 .v-table__wrapper {
     overflow-x: auto;
     overflow-y: visible !important;
 }
+
 
 .v-table__wrapper table {
     overflow-x: auto;
     overflow-y: visible !important;
 }
 
+
 .v-expansion-panel-text__wrapper {
     padding-left: 0 !important;
 }
+
 
 .v-list-item-title {
     white-space: normal !important;
 }
 
+
 @media only screen and (min-width: 768px) {
     .oks-dialog {
         width: 500px;
     }
+
 
     .v-table__wrapper {
         overflow: visible !important;
