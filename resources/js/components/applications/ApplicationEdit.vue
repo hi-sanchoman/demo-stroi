@@ -68,7 +68,8 @@
 
                                 <v-col cols="12" md="2">
                                     <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
-                                        label="name" track-by="name"></multiselect>
+                                        label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
+                                    </multiselect>
                                 </v-col>
                             </template>
 
@@ -86,7 +87,8 @@
 
                                 <v-col cols="12" md="2">
                                     <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
-                                        label="name" track-by="name"></multiselect>
+                                        label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
+                                    </multiselect>
                                 </v-col>
                             </template>
 
@@ -112,7 +114,8 @@
                                 </v-col> -->
                                 <v-col cols="12" md="2">
                                     <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
-                                        label="name" track-by="name"></multiselect>
+                                        label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
+                                    </multiselect>
                                 </v-col>
                             </template>
 
@@ -165,9 +168,9 @@
                                 <template v-for="(item, index) in products" :key="item.id">
                                     <tr>
                                         <td>{{ index + 1 }}</td>
-                                        <td>{{ item.category.name }}</td>
-                                        <td>{{ item.product.name }}</td>
-                                        <td>{{ item.unit.name }}</td>
+                                        <td>{{ item.category?.name }}</td>
+                                        <td>{{ item.product?.name }}</td>
+                                        <td>{{ item.unit?.name }}</td>
 
                                         <td v-if="!isWarehouseManager() && !isSupplier()" :class="
                                             application.status == 'draft'
@@ -712,8 +715,8 @@
         <template v-for="(item, index) in equipments" :key="item.id">
             <tr>
                 <td>{{ item.id }}</td>
-                <td>{{ item.equipment.name }}</td>
-                <td>{{ item.unit.name }}</td>
+                <td>{{ item.equipment?.name }}</td>
+                <td>{{ item.unit?.name }}</td>
                 <td v-if="!isWarehouseManager() && !isSupplier()" :class="
                     application.status == 'draft'
                         ? 'd-flex mt-3'
@@ -1443,9 +1446,11 @@ export default {
 
         // get products -> async autocomplete TODO!
         axios.get("/api/v1/products").then((response) => {
-            response.data.data.forEach((item) => {
-                this.options.push(item);
-            });
+            this.options = response.data.data;
+
+            // response.data.data.forEach((item) => {
+            //     this.options.push(item);
+            // });
 
             // this.isLoading = false
         });
