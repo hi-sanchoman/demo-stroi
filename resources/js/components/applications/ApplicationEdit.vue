@@ -62,8 +62,11 @@
                                 </v-col>
 
                                 <v-col cols="12" md="3">
-                                    <multiselect v-model="current.product" :options="options"
-                                        placeholder="Укажите товар" label="name" track-by="name"></multiselect>
+                                    <multiselect v-model="current.product" placeholder="Укажите товар" label="name"
+                                        track-by="name" :options="options" :multiple="false" :searchable="true"
+                                        :loading="isLoading" @search-change="asyncFind" :selectLabel="''"
+                                        :deselectLabel="''">
+                                    </multiselect>
                                 </v-col>
 
                                 <v-col cols="12" md="2">
@@ -90,6 +93,7 @@
                                         label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
                                     </multiselect>
                                 </v-col>
+
                             </template>
 
                             <!-- Service -->
@@ -98,7 +102,7 @@
                                     <v-text-field v-model="current.category" label="Напишите категорию"
                                         variant="underlined" required density="comfortable" type="text"></v-text-field>
                                 </v-col> -->
-                                <v-col cols="12" md="3">
+                                <v-col cols="12" md="2">
                                     <multiselect v-model="current.category" :options="categories"
                                         placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
                                 </v-col>
@@ -116,6 +120,11 @@
                                     <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
                                         label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
                                     </multiselect>
+                                </v-col>
+
+                                <v-col cols="12" md="1">
+                                    <v-text-field v-model="current.price" label="Цена за ед." variant="underlined"
+                                        required density="comfortable" type="number"></v-text-field>
                                 </v-col>
                             </template>
 
@@ -250,7 +259,7 @@
                                             'in_review')
                                     " class="bg-slate-100">
                                         <td colspan="9" class="border-none">
-                                            <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible">
+                                            <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
                                                 <thead>
                                                     <tr>
                                                         <th style="width: 25%">
@@ -286,7 +295,7 @@
     offer.company
 " :options="
     companies
-" placeholder="Укажите компанию" label="name" track-by="id">
+" placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
                                             </multiselect>
 
                                             <v-btn v-if="
@@ -432,6 +441,8 @@
                 <th>остаток</th>
             </template>
 
+            <th>Цена за ед.</th>
+            <th>Сумма</th>
             <th>Примечание</th>
             <th></th>
         </tr>
@@ -447,7 +458,7 @@
 
                 <td v-if="!isWarehouseManager() && !isSupplier()" :class="
                     application.status == 'draft'
-                        ? 'd-flex mt-3'
+                        ? ''
                         : ''
                 ">
                     <v-text-field v-model="
@@ -483,6 +494,24 @@
                         }}
                     </td>
                 </template>
+
+                <td>
+                    <v-text-field v-if="application.status == 'draft'" v-model="services[index].price" type="number"
+                        variant="plain" density="compact"></v-text-field>
+
+                    <tempalte v-else-if="application.status == 'in_progress' && isSupplier()">
+                        <v-text-field :id="item.id" v-model="services[index].price" type="number" variant="plain"
+                            density="compact" @change="onServicePriceChanged">
+                        </v-text-field>
+                    </tempalte>
+
+                    <span v-else>{{ item.price }}</span>
+                </td>
+                <td>
+                    <template v-if="item.price">
+                        {{ item.price * item.quantity }}₸
+                    </template>
+                </td>
 
                 <td>{{ item.notes }}</td>
 
@@ -522,7 +551,7 @@
                     'in_review')
             " class="bg-slate-100">
                 <td colspan="9" class="border-none">
-                    <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible">
+                    <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
                         <thead>
                             <tr>
                                 <th style="width: 25%">
@@ -558,7 +587,7 @@
     offer.company
 " :options="
     companies
-" placeholder="Укажите компанию" label="name" track-by="id">
+" placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
                     </multiselect>
 
                     <v-btn v-if="
@@ -803,7 +832,7 @@
                     'in_review')
             " class="bg-slate-100">
                 <td colspan="9" class="border-none">
-                    <v-table class="mt-4 mb-8 mx-8 border" style="overflow: visible">
+                    <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
                         <thead>
                             <tr>
                                 <th style="width: 25%">
@@ -839,7 +868,7 @@
     offer.company
 " :options="
     companies
-" placeholder="Укажите компанию" label="name" track-by="id">
+" placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
                     </multiselect>
 
                     <v-btn v-if="
@@ -915,7 +944,7 @@
                     offer.file !=
                     null
                 ">
-                    <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                    <a class="px-2 py-2 mr-2 border text-sm text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
                         target="_blank" :href="
                             '/uploads/' +
                             offer.file
@@ -1377,8 +1406,12 @@ export default {
                 isAddNotes: false,
                 delivered: null,
                 days: null,
+                price: null,
             },
+
             options: [],
+            isLoading: false,
+
             categories: [],
             equipmentOptions: [],
             units: [],
@@ -1439,21 +1472,13 @@ export default {
     },
 
     mounted() {
-        this.isLoading = true;
-
         // get current user
         this.getCurrentUser();
 
         // get products -> async autocomplete TODO!
-        axios.get("/api/v1/products").then((response) => {
-            this.options = response.data.data;
-
-            // response.data.data.forEach((item) => {
-            //     this.options.push(item);
-            // });
-
-            // this.isLoading = false
-        });
+        // axios.get("/api/v1/products").then((response) => {
+        //     this.options = response.data.data;
+        // });
 
         // get categories
         axios.get("/api/v1/categories").then((response) => {
@@ -1489,6 +1514,29 @@ export default {
     },
 
     methods: {
+        onServicePriceChanged(e) {
+            console.log(e.target.value, e.target.id);
+            const data = { price: e.target.value };
+
+            axios.put(`/api/v1/application-services/${e.target.id}/service-price`, data).then((response) => {
+                this.snackbar.text = "Цена успешно обновлена. Инженер ПТО уведомлен";
+                this.snackbar.status = true;
+            })
+        },
+
+        asyncFind(query) {
+            console.log(query);
+
+            if (query.length < 2) return;
+
+            this.isLoading = true
+
+            axios.get('/api/v1/products?q=' + query).then(response => {
+                this.options = response.data;
+                this.isLoading = false
+            })
+        },
+
         showNotes() {
             this.current.isAddNotes = true;
         },
@@ -1565,6 +1613,7 @@ export default {
                     service: this.current.service,
                     // unit: this.current.unit,
                     unit: this.current.unit.name,
+                    price: this.current.price,
                     // category: this.current.category,
                     category: this.current.category.name,
                     quantity: this.current.quantity,
@@ -1583,6 +1632,7 @@ export default {
                 notes: null,
                 isAddNotes: false,
                 days: null,
+                price: null,
             };
         },
 

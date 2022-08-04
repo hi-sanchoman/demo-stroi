@@ -29,6 +29,9 @@
                                     Компания
                                 </th>
                                 <th>
+                                    Счета на оплату
+                                </th>
+                                <th>
                                     Сумма к оплате
                                 </th>
                                 <!-- <th>
@@ -46,13 +49,26 @@
 
                             <tr v-for="payment in payments" :key="payment.id">
                                 <td>{{ payment.application.construction.name }}</td>
-                                <td @click="goToApplication(payment.application.id)" style="cursor:pointer">
-                                    <span class="">{{ payment.application.id
-                                    }}</span>
+                                <td style="">
+                                    <span class="cursor-pointer hover:underline"
+                                        @click="goToApplication(payment.application.id)">
+                                        {{ payment.application.id }}
+                                    </span>
                                     <br />
                                     {{ getKind(payment.application.kind) }}
+                                    <br />
+                                    <a class="mb-1" :href="`/export/application/${payment.application.id}`">скачать
+                                        заявку</a>
                                 </td>
                                 <td width="30%">{{ payment.company.name }}</td>
+                                <td>
+                                    <a v-for="(file, index) in payment.files" :key="index"
+                                        class="block px-2 py-1 mb-1 text-sm border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                        target="_blank" :href="'/uploads/' + file"
+                                        style="display: block; min-width: 120px">
+                                        Счет на оплату - {{ index + 1 }}
+                                    </a>
+                                </td>
                                 <td>{{ payment.to_be_paid }} тг</td>
                                 <!-- <td>
 
@@ -123,6 +139,8 @@ export default {
         },
 
         setPaid(offer) {
+            if (!confirm('Вы действительно оплатили?')) return;
+
             axios.put(`/api/v1/to-pay/${offer.id}`).then((response) => {
                 this.getPayments();
 

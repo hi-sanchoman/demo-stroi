@@ -198,6 +198,7 @@ class ApplicationApiController extends Controller
                         'service' => $item['service'],
                         'category' => $item['category'],
                         'unit' => $item['unit'],
+                        'price' => $item['price'],
                         'quantity' => $item['quantity'],
                         'notes' => $item['notes'],
                         'is_delivered_by_us' => 0,
@@ -328,20 +329,44 @@ class ApplicationApiController extends Controller
                 } else if ($application->kind == 'service') {
                     // dd($request->all());
 
-                    // application services
-                    ApplicationService::where('application_id', $application->id)->delete();
+                    // 
 
+
+                    // application services
+                    // ApplicationService::where('application_id', $application->id)->delete();
+
+                    $ids = [];
                     foreach ($input['services'] as $item) {
-                        ApplicationService::create([
-                            'application_id' => $application->id,
-                            'service' => $item['service'],
-                            'category' => $item['category'],
-                            'unit' => $item['unit'],
-                            'quantity' => $item['quantity'],
-                            'notes' => $item['notes'],
-                            'is_delivered_by_us' => 0,
-                        ]);
+                        // ApplicationService::create([
+                        //     'application_id' => $application->id,
+                        //     'service' => $item['service'],
+                        //     'category' => $item['category'],
+                        //     'unit' => $item['unit'],
+                        //     'price' => $item['price'],
+                        //     'quantity' => $item['quantity'],
+                        //     'notes' => $item['notes'],
+                        //     'is_delivered_by_us' => 0,
+                        // ]);
+
+                        // dd($item);
+                        $ids[] = $item['id'];
+
+                        unset($item['offers']); // TODO: how to keep them?
+                        $service = ApplicationService::find($item['id']);
+                        
+                        if ($item['price'] && abs(($service->price - $item['price']) / $item['price']) > 0.00001) {   
+                            if ($request->user()->roles[0]->title == 'Supplier' || $request->user()->roles[0]->title == 'Supervisor') {
+                                dd('price change');
+                                // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                            } 
+                        }
+                        
+                        $service->update($item);
+
+                        // if ($item['price'])
                     }
+
+                    ApplicationService::whereNotIn('id', $ids)->delete();
                 }
             }
 

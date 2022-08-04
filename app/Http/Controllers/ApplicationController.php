@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ApplicationExport;
 use Illuminate\Http\Request;
 use App\Models\Application;
 use App\Models\ApplicationOffer;
 use App\Models\EquipmentOffer;
 use App\Models\Product;
 use App\Models\ServiceOffer;
+use Maatwebsite\Excel\Excel;
 use Storage;
 
 class ApplicationController extends Controller
@@ -95,5 +97,13 @@ class ApplicationController extends Controller
         Product::insert($data);
 
         return 'done';
+    }
+
+    public function exportApplication($id) {
+        $application = Application::query()
+            ->with(['construction', 'applicationApplicationProducts'])
+            ->find($id);
+
+        return (new ApplicationExport($application))->download('Заявка #' . $application->id . '.xlsx');
     }
 }

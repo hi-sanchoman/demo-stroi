@@ -82,6 +82,20 @@ class PaymentApiController extends Controller
         foreach ($payments as $payment) {
             // if ($payment->application->status == 'in_progress') {
             if ($payment->to_be_paid > 0 && $payment->company_id != null) {
+                $files = [];
+
+                foreach ($payment->productOffers as $offer) {
+                    if ($offer->file) $files[] = $offer->file;
+                }
+                foreach ($payment->equipmentOffers as $offer) {
+                    if ($offer->file) $files[] = $offer->file;
+                }
+                foreach ($payment->serviceOffers as $offer) {
+                    if ($offer->file) $files[] = $offer->file;
+                }
+
+                $payment->files = $files;
+
                 $data[] = $payment;
             }
             // }

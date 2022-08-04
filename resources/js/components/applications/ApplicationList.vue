@@ -13,12 +13,12 @@
                 </v-col>
 
                 <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                    <!-- <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :columnDefs="columnDefs.value"
-                        :rowData="rowData.value" :defaultColDef="defaultColDef" rowSelection="multiple"
-                        animateRows="true" @cell-clicked="cellWasClicked" @grid-ready="onGridReady">
-                    </ag-grid-vue> -->
+                    <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :rowClassRules="rowClassRules"
+                        :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
+                        rowSelection="multiple" animateRows="true" @grid-ready="onGridReady" :localeText="localeText">
+                    </ag-grid-vue>
 
-                    <v-table transition="slide-x-transition">
+                    <!-- <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
                                 <th class="text-left">
@@ -89,7 +89,7 @@
                                 </td>
                             </tr>
                         </tbody>
-                    </v-table>
+                    </v-table> -->
                 </v-col>
             </v-row>
 
@@ -108,6 +108,8 @@ import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { reactive, ref } from "vue";
 import DeleteBtnRenderer from '../grid/DeleteBtnRenderer.js';
 
+let self = this;
+
 export default {
     components: {
         ApplicationSidebar,
@@ -117,6 +119,7 @@ export default {
 
     data() {
         return {
+            router: this.$router,
             applications: [],
             currentUser: null,
             store,
@@ -131,7 +134,44 @@ export default {
                 floatingFilter: true,
                 resizable: true,
             },
+            rowClassRules: {
+                'tr-unread': (params) => {
+                    return params.data.opened_statuses.length > 0;
+                }
+            },
+            localeText: {
+                selectAll: '(Выбрать все)',
+                selectAllSearchResults: '(Выбрать все результаты)',
+                searchOoo: 'Поиск...',
+                blanks: '(Пусто)',
+                noMatches: 'Нет совпадений',
 
+                // Number Filter & Text Filter
+                filterOoo: 'Фильтр...',
+                equals: 'Равно',
+                notEqual: 'Не равно',
+                blank: 'Пусто',
+                notBlank: 'Не пусто',
+                empty: 'Выберите одно',
+
+                // Number Filter
+                lessThan: 'Меньше чем',
+                greaterThan: 'Больше чем',
+                lessThanOrEqual: 'Меньше чем или равно',
+                greaterThanOrEqual: 'Больше чем или равно',
+                inRange: 'В диапазоне',
+                inRangeStart: 'от',
+                inRangeEnd: 'до',
+
+                // Text Filter
+                contains: 'Содержит',
+                notContains: 'Не содержит',
+                startsWith: 'Начинается с ',
+                endsWith: 'Заканчивается на',
+
+                // Date Filter
+                dateFormatOoo: 'dd-mm-YYYY',
+            },
 
         }
     },
@@ -153,14 +193,70 @@ export default {
 
                 // columns
                 this.columnDefs.value = [
-                    { field: "id", headerName: '№ заявки', filter: 'agNumberColumnFilter' },
-                    { field: "construction.name", headerName: 'Объект' },
-                    { field: "kind", headerName: 'Тип заявки', valueGetter: this.getKind },
-                    { field: "issued_at", headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter' },
-                    { field: "status", headerName: 'Статус', valueGetter: this.getStatus },
+                    {
+                        field: "id", minWidth: 100, headerName: '№ заявки', filter: 'agNumberColumnFilter', cellRenderer: (params) => {
+                            // console.log(params);
+
+                            var link = document.createElement('a');
+                            link.href = '#';
+                            link.innerText = params.value;
+
+                            link.style = 'text-decoration: underline; color: black;';
+                            link.className = params.data.opened_statuses.length > 0 ? 'unread' : 'read';
+
+                            link.addEventListener('click', (e) => {
+                                e.preventDefault();
+                                const id = params.data.id;
+                                this.$router.push(`/applications/${id}/edit`);
+                            });
+                            return link;
+                        }
+                    },
+                    { field: "construction.name", minWidth: 200, headerName: 'Объект' },
+                    {
+                        field: "kind", minWidth: 200, headerName: 'Тип заявки', valueGetter: this.getKind,
+                    },
+                    {
+                        field: "issued_at", minWidth: 200, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
+                            debounceMs: 500,
+                            suppressAndOrCondition: true,
+                            comparator: function (filterLocalDateAtMidnight, cellValue) {
+                                if (cellValue == null) {
+                                    return 0;
+                                }
+                                var dateParts = cellValue.split('/');
+                                var year = Number(dateParts[2]);
+                                var month = Number(dateParts[1]) - 1;
+                                var day = Number(dateParts[0]);
+                                var cellDate = new Date(year, month, day);
+
+                                // console.log([cellValue, dateParts, year, month, day]);
+
+                                if (cellDate < filterLocalDateAtMidnight) {
+                                    return -1;
+                                } else if (cellDate > filterLocalDateAtMidnight) {
+                                    return 1;
+                                } else {
+                                    return 0;
+                                }
+                            },
+                        },
+                    },
+                    {
+                        field: "status", minWidth: 200, headerName: 'Статус', valueGetter: this.getStatus, cellStyle: params => {
+                            // console.log(params);
+
+                            if (params.data.status === 'declined') {
+                                //mark police cells as red
+                                return { color: 'red' };
+                            }
+                            return null;
+                        }
+                    },
                     // { field: "signs", headerName: 'Подписи' },
                     {
                         field: "action",
+                        minWidth: 200,
                         headerName: 'Действие',
                         cellRendererSelector: (params) => {
                             // console.log('cell', params);
@@ -272,7 +368,7 @@ export default {
 
         onGridReady: (params) => {
             // console.log(params);
-            this.gridApi.value = params.api;
+            // this.gridApi.value = params.api;
         },
 
         cellWasClicked: (event) => { // Example of consuming Grid Event
@@ -281,9 +377,15 @@ export default {
 
         deselectRows: () => {
             this.gridApi.value.deselectAll()
-        }
+        },
 
+        rowWasClicked: (r) => {
+            const id = r.data.id;
+            console.log(this);
+            console.log(this.router);
 
+            self.$router.push(`/applications/${id}/edit`);
+        },
     },
 
     mounted() {
@@ -310,7 +412,11 @@ export default {
 
 
 <style>
-.tr-unread td {
+.tr-unread {
+    font-weight: bold;
+}
+
+.unread {
     font-weight: bold;
 }
 </style>

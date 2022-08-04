@@ -15,6 +15,12 @@ use App\Models\ApplicationProduct;
 class ProductApiController extends Controller 
 {
     public function index(Request $request) {
+        if ($request->has('q')) {
+            return Product::query()
+                ->where('name', 'like', '%' . $request->q . '%')
+                ->get();
+        }
+
         $collection = Product::query()
             // ->with(['categories'])
             // ->limit(100)

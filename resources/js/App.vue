@@ -33,7 +33,7 @@
         </router-link>
 
         <router-link
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor')"
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor' || currentUser.roles[0].title == 'Economist')"
           to="/payments" class="text-decoration-none">
           <v-btn flat class="text-white">Реестр платежей</v-btn>
         </router-link>
@@ -121,7 +121,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor')">
+          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor' || currentUser.roles[0].title == 'Economist')">
           <router-link to="/payments" class="text-decoration-none">
             <v-btn flat class="">Реестр платежей</v-btn>
           </router-link>

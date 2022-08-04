@@ -29,6 +29,7 @@ class ApplicationService extends Model
         'prepared',
         'delivered',
         'notes',
+        'price',
         'is_delivered_by_us',
         'created_at',
         'updated_at',

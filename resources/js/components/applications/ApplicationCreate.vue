@@ -42,8 +42,11 @@
                                 </v-col>
 
                                 <v-col cols="12" md="3">
-                                    <multiselect v-model="current.product" :options="options"
-                                        placeholder="Укажите товар" label="name" track-by="name"></multiselect>
+                                    <multiselect v-model="current.product" placeholder="Укажите товар" label="name"
+                                        track-by="name" :options="options" :multiple="false" :searchable="true"
+                                        :loading="isLoading" @search-change="asyncFind" :selectLabel="''"
+                                        :deselectLabel="''">
+                                    </multiselect>
                                 </v-col>
 
                                 <v-col cols="12" md="2">
@@ -74,7 +77,7 @@
 
                             <!-- Service -->
                             <template v-else-if="form.kind == 'service'">
-                                <v-col cols="12" md="3">
+                                <v-col cols="12" md="2">
                                     <multiselect v-model="current.category" :options="categories"
                                         placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
                                 </v-col>
@@ -97,6 +100,11 @@
                                     <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
                                         label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
                                     </multiselect>
+                                </v-col>
+
+                                <v-col cols="12" md="1">
+                                    <v-text-field v-model="current.price" label="Цена за ед." variant="underlined"
+                                        required density="comfortable" type="number"></v-text-field>
                                 </v-col>
                             </template>
 
@@ -197,6 +205,8 @@
                                     <th>Наименование ресурсов</th>
                                     <th>Ед. изм.</th>
                                     <th>Кол-во</th>
+                                    <th>Цена за ед.</th>
+                                    <th>Сумма</th>
                                     <th>Примечание</th>
                                     <th></th>
                                 </tr>
@@ -208,10 +218,14 @@
                                     <td>{{ item.category }}</td>
                                     <td>{{ item.service }}</td>
                                     <td>{{ item.unit }}</td>
-                                    <td class="d-flex mt-3">
-                                        <v-text-field v-model="services[index].quantity" type="number" variant="plain"
-                                            density="compact">
-                                        </v-text-field>
+                                    <td>
+                                        {{ item.quantity }}
+                                    </td>
+                                    <td>
+                                        {{ item.price }}
+                                    </td>
+                                    <td>
+                                        <template v-if="item.price">{{ item.price * item.quantity }}₸</template>
                                     </td>
                                     <td>{{ item.notes }}</td>
                                     <td>
@@ -265,8 +279,10 @@ export default {
                 notes: null,
                 isAddNotes: false,
                 days: null,
+                price: null,
             },
             options: [],
+            isLoading: false,
             categories: [],
             units: [],
             equipmentOptions: [],
@@ -290,19 +306,15 @@ export default {
     },
 
     mounted() {
-        this.isLoading = true
+        // this.isLoading = true
 
         // get current user
         this.getCurrentUser();
 
         // get products -> async autocomplete TODO!
-        axios.get('/api/v1/products').then((response) => {
-            this.options = response.data.data;
-
-            // response.data.data.forEach((item) => {
-            //     this.options.push(item)
-            // });
-        });
+        // axios.get('/api/v1/products').then((response) => {
+        //     this.options = response.data.data;
+        // });
 
         // get categories
         axios.get('/api/v1/categories').then((response) => {
@@ -330,6 +342,18 @@ export default {
     },
 
     methods: {
+        asyncFind(query) {
+            console.log(query);
+
+            if (query.length < 2) return;
+
+            this.isLoading = true
+
+            axios.get('/api/v1/products?q=' + query).then(response => {
+                this.options = response.data;
+                this.isLoading = false
+            })
+        },
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data;
@@ -375,7 +399,7 @@ export default {
                     service: this.current.service,
                     // unit: this.current.unit,
                     unit: this.current.unit.name,
-                    // category: this.current.category,
+                    price: this.current.price,
                     category: this.current.category.name,
                     quantity: this.current.quantity,
                     notes: this.current.notes,
@@ -394,6 +418,7 @@ export default {
                 notes: null,
                 isAddNotes: false,
                 days: null,
+                price: null,
             }
         },
 

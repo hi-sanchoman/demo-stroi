@@ -4,6 +4,9 @@ Route::get('/', function () {
     return view('welcome');
 });
 
+Route::get('/export/application/{id}', 'ApplicationController@exportApplication');
+
+
 Route::get('/home', function () {
     if (session('status')) {
         return redirect('/')->with('status', session('status'));

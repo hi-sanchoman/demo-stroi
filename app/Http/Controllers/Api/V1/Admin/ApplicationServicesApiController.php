@@ -91,6 +91,11 @@ class ApplicationServicesApiController extends Controller
     // return response(null, Response::HTTP_NO_CONTENT);
   }
 
+  public function updateServicePrice(Request $request, $id) {
+    $service = ApplicationService::find($id);
+    $service->price = $request->price;
+    $service->save();
+  }
 
   public function prepare(Request $request, $id)
   {
