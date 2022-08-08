@@ -35,9 +35,20 @@ class ApplicationApiController extends Controller
                     return $q
                         ->where('user_id', $request->user()->id)
                         ->where('status', 'unread');
-                }])
-                ->orderBy('created_at', 'DESC')
-                ->get();
+                }]);
+            
+            $roles = $request->user()->roles->pluck('title');
+            
+            if (in_array('PTD Engineer', $roles->toArray())) {
+                $collection = $collection
+                    ->where('owner_id', $request->user()->id)
+                    ->orderBy('created_at', 'DESC')
+                    ->get();
+            } else {
+                $collection = $collection
+                    ->orderBy('created_at', 'DESC')
+                    ->get();
+            }
 
             return new ApplicationResource($collection);
         } else if ($status == 'incoming') {
