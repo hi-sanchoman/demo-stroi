@@ -1,24 +1,20 @@
 <template>
-    <div>
-        <v-container>
-            <!-- <v-row no-gutters>
-                <v-col cols="12">
-                    <h1 class="w-full text-left">Заявки</h1>
-                </v-col>
-            </v-row> -->
+    <div class="" style="padding: 20px;">
+        <!-- <v-container> -->
 
-            <v-row no-gutters class="mt-10">
-                <v-col cols="12" md="3" class="border px-5 py-5">
-                    <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
-                </v-col>
+        <v-row no-gutters class="mt-10">
+            <v-col cols="12" md="3" class="border px-5 py-5">
+                <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
+            </v-col>
 
-                <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                    <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :rowClassRules="rowClassRules"
-                        :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
-                        rowSelection="multiple" animateRows="true" @grid-ready="onGridReady" :localeText="localeText">
-                    </ag-grid-vue>
+            <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :rowClassRules="rowClassRules"
+                    :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
+                    rowSelection="multiple" animateRows="true" @grid-ready="onGridReady" :localeText="localeText"
+                    @row-clicked="rowWasClicked">
+                </ag-grid-vue>
 
-                    <!-- <v-table transition="slide-x-transition">
+                <!-- <v-table transition="slide-x-transition">
                         <thead>
                             <tr>
                                 <th class="text-left">
@@ -90,10 +86,10 @@
                             </tr>
                         </tbody>
                     </v-table> -->
-                </v-col>
-            </v-row>
+            </v-col>
+        </v-row>
 
-        </v-container>
+        <!-- </v-container> -->
     </div>
 </template>
 
@@ -382,9 +378,11 @@ export default {
         rowWasClicked: (r) => {
             const id = r.data.id;
             console.log(this);
-            console.log(this.router);
+            // console.log(this.router);
 
-            self.$router.push(`/applications/${id}/edit`);
+            // self.$router.push(`/applications/${id}/edit`);
+
+            location.href = `/applications/${id}/edit`;
         },
     },
 

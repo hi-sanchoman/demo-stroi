@@ -236,6 +236,7 @@ export default {
                 where: null,
                 quantity: 0,
                 unit: null,
+                max: 0,
             },
 
             moveOutsideDialog: false,
@@ -244,6 +245,7 @@ export default {
                 unit: null,
                 where: null,
                 quantity: 0,
+                max: 0,
             },
 
             inventories: [],
@@ -255,13 +257,14 @@ export default {
                 product: null,
                 unit: null,
                 where: null,
-                quantity: 0
+                quantity: 0,
+                max: 0,
             }
         }
     },
 
     mounted() {
-        console.log('user', this.currentUser);
+        // console.log('user', this.currentUser);
 
         if (this.inventory != null) {
             axios.get('/api/v1/inventory-stocks/' + this.inventory.id).then((response) => {
@@ -269,7 +272,7 @@ export default {
                 // console.log("goods", goods);
 
                 for (var i = 0; i < goods.length; i++) {
-                    console.log(goods[i]);
+                    // console.log(goods[i]);
 
                     this.stocks.push({
                         'stock_id': goods[i].id,
@@ -340,12 +343,18 @@ export default {
             }
 
             axios.post('/api/v1/move-stocks', data).then((response) => {
+                if (response.data == 0) {
+                    alert('Недопустимое количество для перемещения');
+                    return;
+                }
+
                 this.moveDialog = false;
                 this.move = {
                     product: null,
                     where: null,
                     quantity: 0,
                     unit: null,
+                    max: 0,
                 };
 
                 location.reload();
@@ -366,11 +375,17 @@ export default {
             }
 
             axios.post('/api/v1/move-stocks-foreman', data).then((response) => {
+                if (response.data == 0) {
+                    alert('Недопустимое количество для перемещения');
+                    return;
+                }
+
                 this.moveForeman = {
                     product: null,
                     where: null,
                     unit: null,
                     quantity: 0,
+                    max: 0,
                 };
 
                 this.moveForemanDialog = false;
@@ -380,7 +395,7 @@ export default {
         },
 
         moveOutsideIt() {
-            console.log(this.moveOutside);
+            // console.log(this.moveOutside);
 
             // TODO: check for quantity
 
@@ -395,11 +410,17 @@ export default {
             }
 
             axios.post('/api/v1/move-stocks-outside', data).then((response) => {
+                if (response.data == 0) {
+                    alert('Недопустимое количество для перемещения');
+                    return;
+                }
+
                 this.moveOutside = {
                     product: null,
                     where: null,
                     unit: null,
                     quantity: 0,
+                    max: 0,
                 };
 
                 this.moveOutsideDialog = false;
@@ -409,8 +430,13 @@ export default {
         },
 
         onProductSelect(val) {
+            // console.log(val);
+
             this.move.unit = val.unit;
             this.moveOutside.unit = val.unit;
+            this.moveForeman.unit = val.unit;
+
+            // this.move.max = val.
         }
     }
 }

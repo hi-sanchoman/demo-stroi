@@ -1,25 +1,25 @@
 <template>
-    <div>
-        <v-container>
-            <!-- <v-row no-gutters>
+    <div style="padding: 20px;">
+        <!-- <v-container> -->
+        <!-- <v-row no-gutters>
                 <v-col cols="12">
                     <h1 class="w-full text-left">Заявки</h1>
                 </v-col>
             </v-row> -->
 
-            <v-row no-gutters class="mt-5">
-                <v-col cols="12" class="mb-5">
-                    <h2>Накопители</h2>
-                </v-col>
+        <v-row no-gutters class="mt-5">
+            <v-col cols="12" class="mb-5">
+                <h2>Накопители</h2>
+            </v-col>
 
-                <v-col cols="12" class="">
-                    <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
-                        :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
-                        rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
-                        @grid-ready="onGridReady">
-                    </ag-grid-vue>
+            <v-col cols="12" class="">
+                <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
+                    :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
+                    rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
+                    @grid-ready="onGridReady">
+                </ag-grid-vue>
 
-                    <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
+                <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
                         <thead>
                             <tr>
                                 <th class="text-left">
@@ -92,9 +92,10 @@
                             </tr>
                         </tbody>
                     </v-table> -->
-                </v-col>
-            </v-row>
-        </v-container>
+            </v-col>
+        </v-row>
+
+        <!-- </v-container> -->
 
 
         <!-- inventory history dialog -->

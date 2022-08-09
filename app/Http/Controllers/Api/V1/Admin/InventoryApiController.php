@@ -113,6 +113,11 @@ class InventoryApiController extends Controller
         DB::beginTransaction();
 
         $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])->findOrFail($request->stock['stock_id']);
+        
+        if ($stock->quantity < $request->quantity) {
+            return 0;
+        }
+        
         $stock->quantity -= $request->quantity;
         $stock->save();
 
@@ -133,6 +138,11 @@ class InventoryApiController extends Controller
 
         // remove quantity 
         $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])->findOrFail($request->stock['stock_id']);
+        
+        if ($stock->quantity < $request->quantity) {
+            return 0;
+        }
+        
         $stock->quantity -= $request->quantity;
         $stock->save();
 
@@ -166,6 +176,11 @@ class InventoryApiController extends Controller
 
         // remove quantity 
         $stock = InventoryStock::with(['applicationProduct', 'applicationProduct.product', 'applicationProduct.unit'])->findOrFail($request->stock['stock_id']);
+        
+        if ($stock->quantity < $request->quantity) {
+            return 0;
+        }
+        
         $stock->quantity -= $request->quantity;
         $stock->save();
 

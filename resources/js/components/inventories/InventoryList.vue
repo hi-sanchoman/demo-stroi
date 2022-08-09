@@ -1,28 +1,29 @@
 <template>
-    <div>
-        <v-container>
-            <!-- <v-row no-gutters>
+    <div style="padding: 20px;">
+        <!-- <v-container> -->
+        <!-- <v-row no-gutters>
                 <v-col cols="12">
                     <h1 class="w-full text-left">Заявки</h1>
                 </v-col>
             </v-row> -->
 
-            <v-row no-gutters class="mt-10">
-                <v-col cols="12" class="mb-5">
-                    <h2>Склады</h2>
-                </v-col>
+        <v-row no-gutters class="mt-10">
+            <v-col cols="12" class="mb-5">
+                <h2>Склады</h2>
+            </v-col>
 
-                <div v-for="inventory in inventories" :key="inventory.id" class="border rounded px-4 py-4 w-fit">
-                    <h2 class="block mb-4">{{ inventory.construction.name }}</h2>
+            <div v-for="inventory in inventories" :key="inventory.id" class="border rounded px-4 py-4 w-fit">
+                <h2 class="block mb-4">{{ inventory.construction.name }}</h2>
 
-                    <router-link :to="'/inventories/' + inventory.id + '/products?status=accepted'"
-                        class="text-decoration-none text-black">
-                        <a
-                            class="mt-4 py-2 px-2 block text-decoration-none text-black border hover:bg-slate-200">Перейти</a>
-                    </router-link>
-                </div>
-            </v-row>
-        </v-container>
+                <router-link :to="'/inventories/' + inventory.id + '/products?status=accepted'"
+                    class="text-decoration-none text-black">
+                    <a
+                        class="mt-4 py-2 px-2 block text-decoration-none text-black border hover:bg-slate-200">Перейти</a>
+                </router-link>
+            </div>
+        </v-row>
+
+        <!-- </v-container> -->
 
 
         <!-- Snackbar -->

@@ -1,333 +1,332 @@
 <template>
-    <div>
-        <v-container>
-            <!-- <v-row no-gutters>
+    <div style="padding: 20px;">
+        <!-- <v-container> -->
+        <!-- <v-row no-gutters>
                 <v-col cols="12">
                     <h1 class="w-full text-left">Заявки</h1>
                 </v-col>
             </v-row> -->
 
-            <v-row no-gutters class="mt-10">
-                <v-col cols="12" md="3" class="border px-5 py-5">
-                    <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
-                </v-col>
+        <v-row no-gutters class="mt-10">
+            <v-col cols="12" md="3" class="border px-5 py-5">
+                <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
+            </v-col>
 
-                <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                    <div v-if="errors">
-                        <div v-for="(v, k) in errors" :key="k"
-                            class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
-                            <p v-for="error in v" :key="error" class="text-sm">
-                                {{ error }}
-                            </p>
-                        </div>
+            <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                <div v-if="errors">
+                    <div v-for="(v, k) in errors" :key="k"
+                        class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
+                        <p v-for="error in v" :key="error" class="text-sm">
+                            {{ error }}
+                        </p>
                     </div>
+                </div>
 
-                    <v-form class="space-y-6">
-                        <v-row v-if="
+                <v-form class="space-y-6">
+                    <v-row v-if="
+                        application != null &&
+                        application.status != 'draft'
+                    " class="mb-5">
+                        <v-col cols="12">
+                            <strong>Заявка №{{ application.id }}</strong><br />
+                            Дата заявки: {{ application.issued_at }}
+                        </v-col>
+                    </v-row>
+
+                    <multiselect v-model="form.construction" :options="constructions"
+                        placeholder="Укажите строительный объект" :disabled="
                             application != null &&
                             application.status != 'draft'
-                        " class="mb-5">
-                            <v-col cols="12">
-                                <strong>Заявка №{{ application.id }}</strong><br />
-                                Дата заявки: {{ application.issued_at }}
+                        " label="name" track-by="name">
+                    </multiselect>
+
+                    <v-row v-if="
+                        application != null &&
+                        application.status == 'draft'
+                    " class="mt-5">
+                        <v-col v-if="application.kind == 'product'" cols="12">Добавить товар к заявке:</v-col>
+                        <v-col v-else-if="application.kind == 'equipment'" cols="12">Добавить спец. технику к
+                            заявке:
+                        </v-col>
+                        <v-col v-else-if="application.kind == 'service'" cols="12">Добавить услугу к заявке:</v-col>
+                    </v-row>
+
+                    <v-row v-if="
+                        application != null &&
+                        application.status == 'draft'
+                    ">
+                        <template v-if="application.kind == 'product'">
+                            <v-col cols="12" md="3">
+                                <multiselect v-model="current.category" :options="categories"
+                                    placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
                             </v-col>
-                        </v-row>
 
-                        <multiselect v-model="form.construction" :options="constructions"
-                            placeholder="Укажите строительный объект" :disabled="
-                                application != null &&
-                                application.status != 'draft'
-                            " label="name" track-by="name">
-                        </multiselect>
-
-                        <v-row v-if="
-                            application != null &&
-                            application.status == 'draft'
-                        " class="mt-5">
-                            <v-col v-if="application.kind == 'product'" cols="12">Добавить товар к заявке:</v-col>
-                            <v-col v-else-if="application.kind == 'equipment'" cols="12">Добавить спец. технику к
-                                заявке:
+                            <v-col cols="12" md="3">
+                                <multiselect v-model="current.product" placeholder="Укажите товар" label="name"
+                                    track-by="name" :options="options" :multiple="false" :searchable="true"
+                                    :loading="isLoading" @search-change="asyncFind" :selectLabel="''"
+                                    :deselectLabel="''">
+                                </multiselect>
                             </v-col>
-                            <v-col v-else-if="application.kind == 'service'" cols="12">Добавить услугу к заявке:</v-col>
-                        </v-row>
 
-                        <v-row v-if="
-                            application != null &&
-                            application.status == 'draft'
-                        ">
-                            <template v-if="application.kind == 'product'">
-                                <v-col cols="12" md="3">
-                                    <multiselect v-model="current.category" :options="categories"
-                                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
-                                </v-col>
+                            <v-col cols="12" md="2">
+                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
+                                    track-by="name" :selectLabel="''" :deselectLabel="''">
+                                </multiselect>
+                            </v-col>
+                        </template>
 
-                                <v-col cols="12" md="3">
-                                    <multiselect v-model="current.product" placeholder="Укажите товар" label="name"
-                                        track-by="name" :options="options" :multiple="false" :searchable="true"
-                                        :loading="isLoading" @search-change="asyncFind" :selectLabel="''"
-                                        :deselectLabel="''">
-                                    </multiselect>
-                                </v-col>
+                        <!-- Equipment -->
+                        <template v-else-if="application.kind == 'equipment'">
+                            <v-col cols="12" md="4">
+                                <multiselect v-model="current.equipment" :options="equipmentOptions"
+                                    placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
+                            </v-col>
 
-                                <v-col cols="12" md="2">
-                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
-                                        label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
-                                    </multiselect>
-                                </v-col>
-                            </template>
-
-                            <!-- Equipment -->
-                            <template v-else-if="application.kind == 'equipment'">
-                                <v-col cols="12" md="4">
-                                    <multiselect v-model="current.equipment" :options="equipmentOptions"
-                                        placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
-                                </v-col>
-
-                                <!-- <v-col cols="12" md="2">
+                            <!-- <v-col cols="12" md="2">
                                     <v-text-field v-model="current.days" label="Срок (дней)" variant="underlined"
                                         required density="comfortable" type="number"></v-text-field>
                                 </v-col> -->
 
-                                <v-col cols="12" md="2">
-                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
-                                        label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
-                                    </multiselect>
-                                </v-col>
+                            <v-col cols="12" md="2">
+                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
+                                    track-by="name" :selectLabel="''" :deselectLabel="''">
+                                </multiselect>
+                            </v-col>
 
-                            </template>
+                        </template>
 
-                            <!-- Service -->
-                            <template v-else-if="application.kind == 'service'">
-                                <!-- <v-col cols="12" md="3">
+                        <!-- Service -->
+                        <template v-else-if="application.kind == 'service'">
+                            <!-- <v-col cols="12" md="3">
                                     <v-text-field v-model="current.category" label="Напишите категорию"
                                         variant="underlined" required density="comfortable" type="text"></v-text-field>
                                 </v-col> -->
-                                <v-col cols="12" md="2">
-                                    <multiselect v-model="current.category" :options="categories"
-                                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
-                                </v-col>
+                            <v-col cols="12" md="2">
+                                <multiselect v-model="current.category" :options="categories"
+                                    placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                            </v-col>
 
-                                <v-col cols="12" md="3">
-                                    <v-text-field v-model="current.service" label="Напишите название"
-                                        variant="underlined" required density="comfortable" type="text"></v-text-field>
-                                </v-col>
+                            <v-col cols="12" md="3">
+                                <v-text-field v-model="current.service" label="Напишите название" variant="underlined"
+                                    required density="comfortable" type="text"></v-text-field>
+                            </v-col>
 
-                                <!-- <v-col cols="12" md="2">
+                            <!-- <v-col cols="12" md="2">
                                     <v-text-field v-model="current.unit" label="Ед. изм." variant="underlined" required
                                         density="comfortable" type="text"></v-text-field>
                                 </v-col> -->
-                                <v-col cols="12" md="2">
-                                    <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм."
-                                        label="name" track-by="name" :selectLabel="''" :deselectLabel="''">
-                                    </multiselect>
-                                </v-col>
-
-                                <v-col cols="12" md="1">
-                                    <v-text-field v-model="current.price" label="Цена за ед." variant="underlined"
-                                        required density="comfortable" type="number"></v-text-field>
-                                </v-col>
-                            </template>
-
-                            <!-- Common -->
-                            <v-col cols="12" md="1">
-                                <v-text-field v-model="current.quantity" label="Количество" @keyup.enter="addProduct()"
-                                    variant="underlined" required density="comfortable" type="number"></v-text-field>
-                            </v-col>
-
                             <v-col cols="12" md="2">
-                                <v-textarea v-if="current.isAddNotes" outlined v-model="current.notes"
-                                    label="Примечание" variant="underlined" density="comfortable"
-                                    @keyup.enter="addProduct()"></v-textarea>
-                                <v-btn v-if="!current.isAddNotes" color="" size="small" @click="showNotes()">
-                                    + примечание
-                                </v-btn>
+                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
+                                    track-by="name" :selectLabel="''" :deselectLabel="''">
+                                </multiselect>
                             </v-col>
 
                             <v-col cols="12" md="1">
-                                <v-btn size="small" color="primary" @click="addProduct()">
-                                    <v-icon>mdi-plus</v-icon>
-                                </v-btn>
+                                <v-text-field v-model="current.price" label="Цена за ед." variant="underlined" required
+                                    density="comfortable" type="number"></v-text-field>
                             </v-col>
-                        </v-row>
+                        </template>
 
-                        <v-table style="" v-if="
-                            application != null &&
-                            application.kind == 'product'
-                        ">
-                            <thead>
+                        <!-- Common -->
+                        <v-col cols="12" md="1">
+                            <v-text-field v-model="current.quantity" label="Количество" @keyup.enter="addProduct()"
+                                variant="underlined" required density="comfortable" type="number"></v-text-field>
+                        </v-col>
+
+                        <v-col cols="12" md="2">
+                            <v-textarea v-if="current.isAddNotes" outlined v-model="current.notes" label="Примечание"
+                                variant="underlined" density="comfortable" @keyup.enter="addProduct()"></v-textarea>
+                            <v-btn v-if="!current.isAddNotes" color="" size="small" @click="showNotes()">
+                                + примечание
+                            </v-btn>
+                        </v-col>
+
+                        <v-col cols="12" md="1">
+                            <v-btn size="small" color="primary" @click="addProduct()">
+                                <v-icon>mdi-plus</v-icon>
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+
+                    <v-table style="" v-if="
+                        application != null &&
+                        application.kind == 'product'
+                    ">
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Статья расходов</th>
+                                <th>Наименование ресурсов</th>
+                                <th>Ед. изм.</th>
+
+                                <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
+                                <template v-else>
+                                    <th>заказано</th>
+                                    <th>фактически</th>
+                                    <th>остаток</th>
+                                </template>
+
+                                <th>Примечание</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+
+                        <tbody>
+                            <template v-for="(item, index) in products" :key="item.id">
                                 <tr>
-                                    <th>№</th>
-                                    <th>Статья расходов</th>
-                                    <th>Наименование ресурсов</th>
-                                    <th>Ед. изм.</th>
+                                    <td>{{ index + 1 }}</td>
+                                    <td>{{ item.category?.name }}</td>
+                                    <td>{{ item.product?.name }}</td>
+                                    <td>{{ item.unit?.name }}</td>
 
-                                    <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
-                                    <template v-else>
-                                        <th>заказано</th>
-                                        <th>фактически</th>
-                                        <th>остаток</th>
-                                    </template>
-
-                                    <th>Примечание</th>
-                                    <th></th>
-                                </tr>
-                            </thead>
-
-                            <tbody>
-                                <template v-for="(item, index) in products" :key="item.id">
-                                    <tr>
-                                        <td>{{ index + 1 }}</td>
-                                        <td>{{ item.category?.name }}</td>
-                                        <td>{{ item.product?.name }}</td>
-                                        <td>{{ item.unit?.name }}</td>
-
-                                        <td v-if="!isWarehouseManager() && !isSupplier()" :class="
-                                            application.status == 'draft'
-                                                ? 'd-flex mt-3'
-                                                : ''
-                                        ">
-                                            <v-text-field v-model="
-                                                products[index].quantity
-                                            " type="number" variant="plain" density="compact" v-if="
+                                    <td v-if="!isWarehouseManager() && !isSupplier()" :class="
+                                        application.status == 'draft'
+                                            ? 'd-flex mt-3'
+                                            : ''
+                                    ">
+                                        <v-text-field v-model="
+                                            products[index].quantity
+                                        " type="number" variant="plain" density="compact" v-if="
     application.status ==
     'draft'
 ">
-                                            </v-text-field>
+                                        </v-text-field>
 
-                                            <!-- <span v-if="!isPTDEngineer()">
+                                        <!-- <span v-if="!isPTDEngineer()">
                                                 {{ products[index].prepared }} /
                                             </span> -->
 
-                                            <span v-if="
-                                                application.status !=
-                                                'draft'
-                                            ">
-                                                {{ products[index].quantity }}
-                                            </span>
-                                        </td>
+                                        <span v-if="
+                                            application.status !=
+                                            'draft'
+                                        ">
+                                            {{ products[index].quantity }}
+                                        </span>
+                                    </td>
 
-                                        <template v-else>
-                                            <td>
-                                                {{ products[index].quantity }}
-                                            </td>
-                                            <td>
-                                                {{ products[index].prepared }}
-                                            </td>
-                                            <td>
-                                                {{
-                                                        products[index].quantity -
-                                                        products[index].prepared
-                                                }}
-                                            </td>
-                                        </template>
-
-                                        <td>{{ item.notes }}</td>
-
+                                    <template v-else>
                                         <td>
-                                            <v-btn v-if="
-                                                application.status ==
-                                                'draft'
-                                            " size="small" color="error" @click="deleteProduct(item)">
-                                                <v-icon>mdi-close</v-icon>
-                                            </v-btn>
-
-                                            <v-btn v-if="
-                                                application.status ==
-                                                'in_progress' &&
-                                                isSupplier()
-                                            " @click="addOffer(item.id)" color="info" size="small">
-                                                + компания
-                                            </v-btn>
-
-                                            <v-btn v-if="
-                                                isWarehouseManager() &&
-                                                products[index].quantity !=
-                                                products[index].prepared
-                                            " @click="showAcceptProduct(item)" color="info" size="small">
-                                                принять товар
-                                            </v-btn>
+                                            {{ products[index].quantity }}
                                         </td>
-                                    </tr>
+                                        <td>
+                                            {{ products[index].prepared }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                    products[index].quantity -
+                                                    products[index].prepared
+                                            }}
+                                        </td>
+                                    </template>
 
-                                    <tr v-if="
-                                        !isWarehouseManager() &&
-                                        item.offers != null &&
-                                        item.offers.length > 0 &&
-                                        (application.status ==
-                                            'in_progress' ||
+                                    <td>{{ item.notes }}</td>
+
+                                    <td>
+                                        <v-btn v-if="
                                             application.status ==
-                                            'in_review')
-                                    " class="bg-slate-100">
-                                        <td colspan="9" class="border-none">
-                                            <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
-                                                <thead>
-                                                    <tr>
-                                                        <th style="width: 25%">
-                                                            Название компании
-                                                        </th>
-                                                        <th style="width: 10%">
-                                                            Кол-во
-                                                        </th>
-                                                        <th style="width: 10%">
-                                                            Цена за ед.
-                                                        </th>
-                                                        <th>Общая сумма</th>
-                                                        <th>Счет на оплату</th>
-                                                        <th></th>
-                                                    </tr>
-                                                </thead>
-                            <tbody>
-                                <tr v-for="offer in item.offers" :key="offer.id">
-                                    <td class="">
-                                        <!-- <v-text-field
+                                            'draft'
+                                        " size="small" color="error" @click="deleteProduct(item)">
+                                            <v-icon>mdi-close</v-icon>
+                                        </v-btn>
+
+                                        <v-btn v-if="
+                                            application.status ==
+                                            'in_progress' &&
+                                            isSupplier()
+                                        " @click="addOffer(item.id)" color="info" size="small">
+                                            + компания
+                                        </v-btn>
+
+                                        <v-btn v-if="
+                                            isWarehouseManager() &&
+                                            products[index].quantity !=
+                                            products[index].prepared
+                                        " @click="showAcceptProduct(item)" color="info" size="small">
+                                            принять товар
+                                        </v-btn>
+                                    </td>
+                                </tr>
+
+                                <tr v-if="
+                                    !isWarehouseManager() &&
+                                    item.offers != null &&
+                                    item.offers.length > 0 &&
+                                    (application.status ==
+                                        'in_progress' ||
+                                        application.status ==
+                                        'in_review')
+                                " class="bg-slate-100">
+                                    <td colspan="9" class="border-none">
+                                        <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 25%">
+                                                        Название компании
+                                                    </th>
+                                                    <th style="width: 10%">
+                                                        Кол-во
+                                                    </th>
+                                                    <th style="width: 10%">
+                                                        Цена за ед.
+                                                    </th>
+                                                    <th>Общая сумма</th>
+                                                    <th>Счет на оплату</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                        <tbody>
+                            <tr v-for="offer in item.offers" :key="offer.id">
+                                <td class="">
+                                    <!-- <v-text-field
                                                                 v-if="offer.status == 'draft' && isEditable()"
                                                                 v-model="offer.name"
                                                                 type="text"
                                                                 variant="underlined"
                                                                 required
                                                             ></v-text-field> -->
-                                        <div class="flex">
-                                            <multiselect v-if="
-                                                offer.status ==
-                                                'draft' &&
-                                                isEditable()
-                                            " v-model="
+                                    <div class="flex">
+                                        <multiselect v-if="
+                                            offer.status ==
+                                            'draft' &&
+                                            isEditable()
+                                        " v-model="
     offer.company
 " :options="
     companies
 " placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
-                                            </multiselect>
+                                        </multiselect>
 
-                                            <v-btn v-if="
-                                                offer.status ==
-                                                'draft' &&
-                                                isEditable()
-                                            " class="mt-1" color="primary" size="x-small" plain @click="
+                                        <v-btn v-if="
+                                            offer.status ==
+                                            'draft' &&
+                                            isEditable()
+                                        " class="mt-1" color="primary" size="x-small" plain @click="
     showAddCompanyDialog()
 ">
-                                                Добавить
-                                                компанию
-                                            </v-btn>
-                                        </div>
+                                            Добавить
+                                            компанию
+                                        </v-btn>
+                                    </div>
 
-                                        <span v-if="
-                                            !isEditable() &&
-                                            offer !=
-                                            null &&
-                                            offer.company !=
-                                            null
-                                        ">{{
+                                    <span v-if="
+                                        !isEditable() &&
+                                        offer !=
+                                        null &&
+                                        offer.company !=
+                                        null
+                                    ">{{
         offer
             .company
             .name
 }}</span>
-                                    </td>
-                                    <td>
-                                        <v-text-field v-if="
-                                            offer.status ==
-                                            'draft' &&
-                                            isEditable()
-                                        " @change="
+                                </td>
+                                <td>
+                                    <v-text-field v-if="
+                                        offer.status ==
+                                        'draft' &&
+                                        isEditable()
+                                    " @change="
     offerHasChanged(
         $event,
         offer
@@ -335,65 +334,65 @@
 " v-model="
     offer.quantity
 " label="" type="number" variant="underlined" required>
-                                        </v-text-field>
-                                        <span v-if="
-                                            !isEditable()
-                                        ">{{
+                                    </v-text-field>
+                                    <span v-if="
+                                        !isEditable()
+                                    ">{{
         offer.quantity
 }}</span>
-                                    </td>
-                                    <td>
-                                        <v-text-field v-if="
-                                            offer.status ==
-                                            'draft' &&
-                                            isEditable()
-                                        " v-model="
+                                </td>
+                                <td>
+                                    <v-text-field v-if="
+                                        offer.status ==
+                                        'draft' &&
+                                        isEditable()
+                                    " v-model="
     offer.price
 " label="" type="number" variant="underlined" required>
-                                        </v-text-field>
-                                        <span v-if="
-                                            !isEditable()
-                                        ">{{
+                                    </v-text-field>
+                                    <span v-if="
+                                        !isEditable()
+                                    ">{{
         offer.price
 }}
-                                            тг</span>
-                                    </td>
-                                    <td>
-                                        {{
-                                                offer.price *
-                                                offer.quantity
-                                        }}
-                                        тг
-                                    </td>
+                                        тг</span>
+                                </td>
+                                <td>
+                                    {{
+                                            offer.price *
+                                            offer.quantity
+                                    }}
+                                    тг
+                                </td>
 
-                                    <td>
-                                        <span v-if="
-                                            offer.file !=
-                                            null
-                                        ">
-                                            <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
-                                                target="_blank" :href="
-                                                    '/uploads/' +
-                                                    offer.file
-                                                ">Просмотр</a>
-                                        </span>
+                                <td>
+                                    <span v-if="
+                                        offer.file !=
+                                        null
+                                    ">
+                                        <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                            target="_blank" :href="
+                                                '/uploads/' +
+                                                offer.file
+                                            ">Просмотр</a>
+                                    </span>
 
-                                        <input v-if="
-                                            isEditable()
-                                        " type="file" id="file" v-on:change="
+                                    <input v-if="
+                                        isEditable()
+                                    " type="file" id="file" v-on:change="
     handleFileUpload(
         offer,
         $event
     )
 " />
-                                    </td>
+                                </td>
 
-                                    <td>
-                                        <v-btn v-if="
-                                            offer.status ==
-                                            'draft' &&
-                                            isEditable()
-                                        " :id="
+                                <td>
+                                    <v-btn v-if="
+                                        offer.status ==
+                                        'draft' &&
+                                        isEditable()
+                                    " :id="
     'offer_' +
     offer.id
 " @click="
@@ -401,27 +400,27 @@
         offer
     )
 " color="success" size="small" class="mr-2">
-                                            Сохранить
-                                        </v-btn>
+                                        Сохранить
+                                    </v-btn>
 
-                                        <v-btn @click="
-                                            deleteOffer(
-                                                offer.id,
-                                                item.id
-                                            )
-                                        " color="error" size="small" v-if="
+                                    <v-btn @click="
+                                        deleteOffer(
+                                            offer.id,
+                                            item.id
+                                        )
+                                    " color="error" size="small" v-if="
     offer.status ==
     'draft' &&
     isEditable()
 ">
-                                            Удалить
-                                        </v-btn>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </v-table>
-                        </td>
-                        </tr>
+                                        Удалить
+                                    </v-btn>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </v-table>
+                    </td>
+                    </tr>
 </template>
 </tbody>
 </v-table>
@@ -1147,7 +1146,7 @@
 </v-container>
 </v-col>
 </v-row>
-</v-container>
+<!-- </v-container> -->
 
 <!-- Snackbar -->
 <v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
