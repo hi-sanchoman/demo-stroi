@@ -8,7 +8,7 @@
           Склад: {{ inventory.construction.name }} (спец. техника)
         </h1>
       </v-col>
-    </v-row>style="padding: 20px;"
+    </v-row>
 
     <v-row no-gutters class="mt-10">
       <v-col cols="12" md="4" lg="3" class="border px-5 py-5">
