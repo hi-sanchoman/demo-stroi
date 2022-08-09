@@ -160,7 +160,7 @@
                                 <th>Наименование ресурсов</th>
                                 <th>Ед. изм.</th>
 
-                                <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
+                                <th v-if="application.status === 'draft'">Кол-во</th>
                                 <template v-else>
                                     <th>заказано</th>
                                     <th>фактически</th>
@@ -180,8 +180,8 @@
                                     <td>{{ item.product?.name }}</td>
                                     <td>{{ item.unit?.name }}</td>
 
-                                    <td v-if="!isWarehouseManager() && !isSupplier()" :class="
-                                        application.status == 'draft'
+                                    <td v-if="application.status === 'draft'" :class="
+                                        application.status === 'draft'
                                             ? 'd-flex mt-3'
                                             : ''
                                     ">
@@ -433,7 +433,7 @@
             <th>Наименование ресурсов</th>
             <th>Ед. изм.</th>
 
-            <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
+            <th v-if="application.status === 'draft'">Кол-во</th>
             <template v-else>
                 <th>заказано</th>
                 <th>фактически</th>
@@ -455,7 +455,7 @@
                 <td>{{ item.service }}</td>
                 <td>{{ item.unit }}</td>
 
-                <td v-if="!isWarehouseManager() && !isSupplier()" :class="
+                <td v-if="application.status === 'draft'" :class="
                     application.status == 'draft'
                         ? ''
                         : ''
@@ -727,7 +727,7 @@
             <th>Наименование спец. техники</th>
             <th>Ед. изм.</th>
 
-            <th v-if="!isWarehouseManager() && !isSupplier()">Кол-во</th>
+            <th v-if="application.status === 'draft'">Кол-во</th>
             <template v-else>
                 <th>заказано</th>
                 <th>фактически</th>
@@ -745,7 +745,7 @@
                 <td>{{ item.id }}</td>
                 <td>{{ item.equipment?.name }}</td>
                 <td>{{ item.unit?.name }}</td>
-                <td v-if="!isWarehouseManager() && !isSupplier()" :class="
+                <td v-if="application.status === 'draft'" :class="
                     application.status == 'draft'
                         ? 'd-flex mt-3'
                         : ''

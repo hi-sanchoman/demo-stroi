@@ -46,6 +46,7 @@ class ApplicationApiController extends Controller
                     ->get();
             } else {
                 $collection = $collection
+                    ->whereNot('status', 'draft')
                     ->orderBy('created_at', 'DESC')
                     ->get();
             }
