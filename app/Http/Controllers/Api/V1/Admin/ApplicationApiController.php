@@ -220,7 +220,11 @@ class ApplicationApiController extends Controller
             // else -> throw error
 
             // application statuses
-            $path = ApplicationPath::where('type', $application->kind)->orderBy('order', 'asc')->get();
+            $path = ApplicationPath::query()
+                ->where('type', $application->kind)
+                ->where('construction_id', $application->construction_id)
+                ->orderBy('order', 'asc')
+                ->get();
 
             $index = 0;
             foreach ($path as $step) {
