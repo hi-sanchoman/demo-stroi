@@ -13,11 +13,22 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ConstructionApiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         abort_if(Gate::denies('construction_access'), Response::HTTP_FORBIDDEN, '403 Forbidden');
 
-        return new ConstructionResource(Construction::all());
+        $query = Construction::query();
+
+        $allowedConstructions = $request->user()->constructions->pluck('id');
+        
+        if (!empty($allowedConstructions)) {
+            $query = $query->whereIn('id', $allowedConstructions);
+        }
+        
+        $constructions = $query->orderBy('name')
+            ->get();
+
+        return new ConstructionResource($constructions);
     }
 
     public function store(StoreConstructionRequest $request)

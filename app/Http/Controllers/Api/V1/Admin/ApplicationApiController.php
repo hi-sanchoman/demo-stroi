@@ -37,6 +37,15 @@ class ApplicationApiController extends Controller
                         ->where('status', 'unread');
                 }]);
             
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            // $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            if (!empty($allowedConstructions)) {
+                $collection = $collection->whereIn('construction_id', $allowedConstructions);    
+            }
+
+            // check if PTD -> show only his applications
             $roles = $request->user()->roles->pluck('title');
             
             if (in_array('PTD Engineer', $roles->toArray())) {
@@ -71,7 +80,13 @@ class ApplicationApiController extends Controller
                         ->where('status', 'unread');
                 }])
                 ->whereIn('id', $statuses->pluck('application_id'))
-                ->whereNot('status', 'draft')
+                ->whereNot('status', 'draft');
+
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            $collection = $collection
                 ->orderBy('updated_at', 'DESC')
                 ->get();
 
@@ -89,8 +104,14 @@ class ApplicationApiController extends Controller
                         ->where('user_id', $request->user()->id)
                         ->where('status', 'unread');
                 }])
-                ->whereIn('id', $statuses->pluck('application_id'))
-                ->orderBy('id', 'DESC')
+                ->whereIn('id', $statuses->pluck('application_id'));
+            
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            $collection = $collection
+                ->orderBy('updated_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -101,8 +122,14 @@ class ApplicationApiController extends Controller
                         ->where('user_id', $request->user()->id)
                         ->where('status', 'unread');
                 }])
-                ->where('status', 'in_progress')
-                ->orderBy('id', 'DESC')
+                ->where('status', 'in_progress');
+
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            $collection = $collection
+                ->orderBy('updated_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -113,8 +140,14 @@ class ApplicationApiController extends Controller
                         ->where('user_id', $request->user()->id)
                         ->where('status', 'unread');
                 }])
-                ->where('status', 'in_review')
-                ->orderBy('id', 'DESC')
+                ->where('status', 'in_review');
+
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            $collection = $collection
+                ->orderBy('updated_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -127,8 +160,14 @@ class ApplicationApiController extends Controller
                 }])
                 ->where('status', 'in_progress')
                 ->orWhere('status', 'in_review')
-                ->orWhere('status', 'signed')
-                ->orderBy('id', 'DESC')
+                ->orWhere('status', 'signed');
+
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            $collection = $collection
+                ->orderBy('updated_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -139,8 +178,14 @@ class ApplicationApiController extends Controller
                         ->where('user_id', $request->user()->id)
                         ->where('status', 'unread');
                 }])
-                ->where('status', 'completed')
-                ->orderBy('id', 'DESC')
+                ->where('status', 'completed');
+
+            // allowed constructions
+            $allowedConstructions = $request->user()->constructions->pluck('id');
+            $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+            $collection = $collection
+                ->orderBy('updated_at', 'DESC')
                 ->get();
 
             return new ApplicationResource($collection);
@@ -154,8 +199,14 @@ class ApplicationApiController extends Controller
                     ->where('status', 'unread');
             }])
             ->where('status', $status)
-            ->where('owner_id', $request->user()->id)
-            ->orderBy('id', 'DESC')
+            ->where('owner_id', $request->user()->id);
+
+        // allowed constructions
+        $allowedConstructions = $request->user()->constructions->pluck('id');
+        $collection = $collection->whereIn('construction_id', $allowedConstructions);
+
+        $collection = $collection
+            ->orderBy('updated_at', 'DESC')
             ->get();
 
         return new ApplicationResource($collection);

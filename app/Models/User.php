@@ -89,6 +89,12 @@ class User extends Authenticatable
         return $this->belongsToMany(Inventory::class, 'pivot_inventory_user');
     }
 
+    public function constructions()
+    {
+        return $this->belongsToMany(Construction::class, 'pivot_construction_user');
+    }
+
+
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
