@@ -93,6 +93,14 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::apiResource('units', 'UnitApiController');
     Route::apiResource('equipments', 'EquipmentApiController');
 
+    Route::delete('companies/{id}/contacts/{contactId}', 'CompanyContactApiController@destroy');
+    Route::get('companies/{id}/contacts', 'CompanyContactApiController@index');
+    Route::post('companies/{id}/contacts', 'CompanyContactApiController@store');
+
+    Route::get('companies/{id}/offers', 'CompanyApiController@offers');
+
+    Route::apiResource('companies', 'CompanyApiController');
+
     Route::get('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'payments']);
     Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);
     Route::get('/payments-to-pay', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'paymentsToPay']);

@@ -1,19 +1,21 @@
 <template>
     <div style="padding: 20px;">
         <!-- <v-container> -->
-        <!-- <v-row no-gutters>
-                <v-col cols="12">
-                    <h1 class="w-full text-left">Заявки</h1>
-                </v-col>
-            </v-row> -->
+        <v-row no-gutters>
+            <v-col cols="4">
+                <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
+                    track-by="name">
+                </multiselect>
+            </v-col>
+        </v-row>
 
-        <v-row no-gutters class="mt-5">
+        <v-row no-gutters class="mt-5" v-if="chosenObject">
             <v-col cols="12" class="mb-5">
-                <h2>Накопители</h2>
+                <h2>Накопитель</h2>
             </v-col>
 
             <v-col cols="12" class="">
-                <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 500px"
+                <ag-grid-vue v-if="currentUser != null" class="ag-theme-alpine" style="height: 800px"
                     :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
                     rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
                     @grid-ready="onGridReady">
@@ -196,10 +198,12 @@ import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { reactive, ref } from "vue";
 import AG_GRID_LOCALE_EN from '../../assets/gridlocale.js';
+import Multiselect from 'vue-multiselect'
 
 export default {
     components: {
-        AgGridVue
+        AgGridVue,
+        Multiselect,
     },
 
     data() {
@@ -254,10 +258,27 @@ export default {
                 // Date Filter
                 dateFormatOoo: 'dd-mm-YYYY',
             },
+
+            chosenObject: null,
+            objects: [],
         }
     },
 
+    mounted() {
+        // this.getApplications('draft')
+        this.getCurrentUser();
+        // this.getSupplies();
+        this.getObjects();
+    },
+
     methods: {
+        getObjects() {
+            axios.get('/api/v1/constructions').then((response) => {
+                console.log(response.data);
+                this.objects = response.data.data;
+            });
+        },
+
         dateFormatter(params) {
             var dateAsString = params.data.item.created_at;
             var dateParts = dateAsString.split('/');
@@ -334,9 +355,9 @@ export default {
             this.getHistoryInventories()
         },
 
-        getSupplies() {
+        getSupplies(construction) {
             // get applications 
-            axios.get('/api/v1/supplies').then((response) => {
+            axios.get(`/api/v1/supplies?construction_id=${construction.id}`).then((response) => {
                 console.log('resp', response);
                 // this.inventories = response.data.data;
                 this.rowData.value = response.data.data;
@@ -476,21 +497,14 @@ export default {
 
     },
 
-    mounted() {
-        // this.getApplications('draft')
-        this.getCurrentUser();
-        this.getSupplies();
-    },
 
     watch: {
-        // '$route.query': {
-        //     handler(newValue) {
-        //         const { status } = newValue
+        chosenObject(newVal) {
+            if (!newVal) return;
 
-        //         this.getInventories()
-        //     },
-        //     immediate: true,
-        // }
+            this.rowData.value = [];
+            this.getSupplies(newVal);
+        }
     }
 }
 </script>

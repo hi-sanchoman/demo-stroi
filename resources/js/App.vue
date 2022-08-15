@@ -43,6 +43,10 @@
           <v-btn flat class="text-white">Накопители</v-btn>
         </router-link>
 
+        <router-link v-if="currentUser != null" to="/companies" class="text-decoration-none">
+          <v-btn flat class="text-white">Клиенты</v-btn>
+        </router-link>
+
         <!-- <router-link v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman')" to="/contracts?status=all"
           class="text-decoration-none">
           <v-btn flat class="text-white">
@@ -132,6 +136,13 @@
             <v-btn flat class="">Накопители</v-btn>
           </router-link>
         </v-list-item>
+
+        <v-list-item v-if="currentUser != null">
+          <router-link to="/companies" class="text-decoration-none">
+            <v-btn flat class="">Клиенты</v-btn>
+          </router-link>
+        </v-list-item>
+
       </v-list>
     </v-navigation-drawer>
 

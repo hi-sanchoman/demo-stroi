@@ -21,6 +21,10 @@ import ProfileEdit from './components/profile/ProfileEdit.vue'
 import ContractList from './components/contracts/ContractList.vue'
 import ContractCreate from './components/contracts/ContractCreate.vue'
 import ContractEdit from './components/contracts/ContractEdit.vue'
+import CompanyList from './components/companies/CompanyList.vue'
+import CompanyCreate from './components/companies/CompanyCreate.vue'
+import CompanyEdit from './components/companies/CompanyEdit.vue'
+import CompanyContactCreate from './components/companies/contacts/ContactCreate.vue'
 
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -57,6 +61,16 @@ const routes = [
   { path: '/inventories/:id/history', name: 'inventories.history', component: InventoryHistory },
 
   { path: '/supplies', name: 'supplies.index', component: SupplyList },
+  
+  { path: '/companies', name: 'companies.index', component: CompanyList },
+  { path: '/companies/create', name: 'companies.create', component: CompanyCreate },
+  
+  // company contacts
+  { path: '/companies/:id/contacts/create', name: 'companies.contacts.create', component: CompanyContactCreate },
+  
+  { path: '/companies/:id/edit', name: 'companies.edit', component: CompanyEdit },
+
+
 
   { path: '/storages', component: HelloWorld },
   { path: '/payments', component: PaymentList },

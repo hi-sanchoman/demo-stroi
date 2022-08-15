@@ -297,16 +297,15 @@
 " placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
                                         </multiselect>
 
-                                        <v-btn v-if="
+                                        <router-link v-if="
                                             offer.status ==
                                             'draft' &&
                                             isEditable()
-                                        " class="mt-1" color="primary" size="x-small" plain @click="
-    showAddCompanyDialog()
-">
-                                            Добавить
-                                            компанию
-                                        </v-btn>
+                                        " class="mt-1 text-underline-none" to="/companies/create" target="_blank">
+                                            <v-btn color="primary" size="x-small" plain>
+                                                Добавить компанию
+                                            </v-btn>
+                                        </router-link>
                                     </div>
 
                                     <span v-if="
@@ -589,16 +588,15 @@
 " placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
                     </multiselect>
 
-                    <v-btn v-if="
+                    <router-link v-if="
                         offer.status ==
                         'draft' &&
                         isEditable()
-                    " class="mt-1" color="primary" size="x-small" plain @click="
-    showAddCompanyDialog()
-">
-                        Добавить
-                        компанию
-                    </v-btn>
+                    " class="mt-1 text-underline-none" to="/companies/create" target="_blank">
+                        <v-btn color="primary" size="x-small" plain>
+                            Добавить компанию
+                        </v-btn>
+                    </router-link>
                 </div>
 
                 <span v-if="
@@ -870,16 +868,15 @@
 " placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
                     </multiselect>
 
-                    <v-btn v-if="
+                    <router-link v-if="
                         offer.status ==
                         'draft' &&
                         isEditable()
-                    " class="mt-1" color="primary" size="x-small" plain @click="
-    showAddCompanyDialog()
-">
-                        Добавить
-                        компанию
-                    </v-btn>
+                    " class="mt-1 text-underline-none" to="/companies/create" target="_blank">
+                        <v-btn color="primary" size="x-small" plain>
+                            Добавить компанию
+                        </v-btn>
+                    </router-link>
                 </div>
 
                 <span v-if="

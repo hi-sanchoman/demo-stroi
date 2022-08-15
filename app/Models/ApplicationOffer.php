@@ -41,4 +41,9 @@ class ApplicationOffer extends Model
     public function company() {
         return $this->belongsTo(Company::class);
     } 
+
+    protected function serializeDate(DateTimeInterface $date)
+    {
+        return $date->format('Y-m-d H:i:s');
+    }
 }

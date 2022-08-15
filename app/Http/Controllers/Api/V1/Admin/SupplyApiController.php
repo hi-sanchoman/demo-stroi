@@ -24,6 +24,10 @@ class SupplyApiController extends Controller
             ->get();
 
         foreach ($supplies as $item) {
+            if ($request->has('construction_id') && $item->construction->id !== intval($request->construction_id)) {
+                continue;
+            }
+
             if ($item->applicationProduct) {
                 if (!isset($collection[$item->applicationProduct->product->id])) {
                     $collection[$item->applicationProduct->product->id] = [

@@ -1,15 +1,17 @@
 <template>
     <div style="padding: 20px;">
         <!-- <v-container> -->
-        <!-- <v-row no-gutters>
-                <v-col cols="12">
-                    <h1 class="w-full text-left">Заявки</h1>
-                </v-col>
-            </v-row> -->
+        <v-row no-gutters>
+            <v-col cols="4">
+                <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
+                    track-by="name">
+                </multiselect>
+            </v-col>
+        </v-row>
 
-        <v-row no-gutters class="mt-5">
+        <v-row v-if="chosenObject" no-gutters class="mt-5">
             <v-col cols="12" class="mb-5">
-                <h2>Общий Реестр платежей</h2>
+                <h2>Реестр платежей</h2>
             </v-col>
 
             <v-col cols="12" class="">
@@ -198,9 +200,11 @@
 
 <script>
 import axios from 'axios'
+import Multiselect from 'vue-multiselect'
 
 export default {
     components: {
+        Multiselect,
     },
 
     data() {
@@ -212,7 +216,18 @@ export default {
             },
             payments: [],
             currentUser: null,
+
+            chosenObject: null,
+            objects: [],
         }
+    },
+
+    mounted() {
+        // this.getApplications('draft')
+        this.getCurrentUser();
+
+        this.getObjects();
+        // this.getPayments()
     },
 
     methods: {
@@ -223,11 +238,18 @@ export default {
             })
         },
 
-        getPayments() {
-            // console.log('get payments')
+        getObjects() {
+            axios.get('/api/v1/constructions').then((response) => {
+                console.log(response.data);
+                this.objects = response.data.data;
+            });
+        },
+
+        getPayments(construction) {
+            console.log('get payments for ', construction);
 
             // get applications 
-            axios.get('/api/v1/payments').then((response) => {
+            axios.get(`/api/v1/payments?construction_id=${construction.id}`).then((response) => {
                 this.payments = response.data.data
                 console.log('payments', this.payments)
             });
@@ -279,14 +301,14 @@ export default {
 
     },
 
-    mounted() {
-        // this.getApplications('draft')
-        this.getCurrentUser();
-
-        this.getPayments()
-    },
-
     watch: {
+
+        chosenObject(newVal) {
+            if (!newVal) return;
+
+            this.payments = [];
+            this.getPayments(newVal);
+        }
         // '$route.query': {
         //     handler(newValue) {
         //         const { status } = newValue

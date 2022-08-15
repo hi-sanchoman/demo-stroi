@@ -79,11 +79,11 @@ class Application extends Model
         return $this->belongsTo(Construction::class, 'construction_id');
     }
 
-    public function getIssuedAtAttribute($value)
-    {
-        // return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
-        return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
-    }
+    // public function getIssuedAtAttribute($value)
+    // {
+    //     // return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+    //     return $value ? Carbon::createFromFormat('Y-m-d H:i:s', $value)->format(config('panel.date_format') . ' ' . config('panel.time_format')) : null;
+    // }
 
     public function setIssuedAtAttribute($value)
     {
@@ -97,7 +97,7 @@ class Application extends Model
 
     protected function serializeDate(DateTimeInterface $date)
     {
-        return $date->format('Y-m-d H:i:s');
+        return $date->format('d/m/Y');
     }
 
     public function payments()

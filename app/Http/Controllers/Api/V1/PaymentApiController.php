@@ -13,7 +13,7 @@ use Mail;
 
 class PaymentApiController extends Controller
 {
-    public function payments()
+    public function payments(Request $request)
     {
         $payments = Payment::query()
             ->with([
@@ -32,7 +32,13 @@ class PaymentApiController extends Controller
         foreach ($payments as $payment) {
             // if ($payment->application->status == 'in_progress') {
             if ($payment->amount > 0 && $payment->company_id != null) {
-                $data[] = $payment;
+                if ($request->has('construction_id')) {
+                    if ($payment->application->construction_id === intval($request->construction_id)) {
+                        $data[] = $payment;
+                    }
+                } else {
+                    $data[] = $payment;
+                }
             }
             // }
         }

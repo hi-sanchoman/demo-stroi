@@ -2,13 +2,13 @@
     <div class="" style="padding: 20px;">
         <!-- <v-container> -->
 
-        <v-row no-gutters class="mt-10">
+        <v-row no-gutters class="">
             <v-col cols="12" md="3" class="border px-5 py-5">
                 <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
             </v-col>
 
             <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :rowClassRules="rowClassRules"
+                <ag-grid-vue class="ag-theme-alpine" style="height: 800px" :rowClassRules="rowClassRules"
                     :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
                     rowSelection="multiple" animateRows="true" @grid-ready="onGridReady" :localeText="localeText"
                     @row-clicked="rowWasClicked">
@@ -103,6 +103,7 @@ import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { reactive, ref } from "vue";
 import DeleteBtnRenderer from '../grid/DeleteBtnRenderer.js';
+import AgSelectFilter from '../AgSelectFilter.js';
 
 let self = this;
 
@@ -111,6 +112,7 @@ export default {
         ApplicationSidebar,
         AgGridVue,
         deleteBtnRenderer: DeleteBtnRenderer,
+        AgSelectFilter
     },
 
     data() {
@@ -169,10 +171,27 @@ export default {
                 dateFormatOoo: 'dd-mm-YYYY',
             },
 
+            constructionOptions: [],
+            kindOptions: [
+                { value: '', name: 'Все' },
+                { value: 'product', name: 'заявка на товар' },
+                { value: 'equipment', name: 'заявка на спец. технику' },
+                { value: 'service', name: 'заявка на услуги' }
+            ],
         }
     },
 
     methods: {
+        getConstructions() {
+            this.constructionOptions.push({ value: '', name: 'Все' });
+
+            axios.get('/api/v1/constructions').then((response) => {
+                response.data.data.forEach(c => {
+                    this.constructionOptions.push({ value: c.id, name: c.name });
+                })
+            })
+        },
+
         isPTDEngineer() {
             return this.currentUser != null && this.currentUser.roles[0].title == 'PTD Engineer';
         },
@@ -208,9 +227,17 @@ export default {
                             return link;
                         }
                     },
-                    { field: "construction.name", minWidth: 200, headerName: 'Объект' },
                     {
-                        field: "kind", minWidth: 200, headerName: 'Тип заявки', valueGetter: this.getKind,
+                        field: "construction.name", minWidth: 200, headerName: 'Объект', filter: AgSelectFilter, filterParams: {
+                            column: 'construction_id',
+                            options: this.constructionOptions,
+                        },
+                    },
+                    {
+                        field: "kind", minWidth: 200, headerName: 'Тип заявки', valueGetter: this.getKind, filter: AgSelectFilter, filterParams: {
+                            column: 'kind',
+                            options: this.kindOptions,
+                        },
                     },
                     {
                         field: "issued_at", minWidth: 200, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
@@ -247,7 +274,10 @@ export default {
                                 return { color: 'red' };
                             }
                             return null;
-                        }
+                        }, filter: AgSelectFilter, filterParams: {
+                            column: 'status',
+                            options: [{ value: '', name: 'Все' }, { value: 'draft', name: 'черновик' }, { value: 'in_progress', name: 'в процессе' }, { value: 'completed', name: 'закрыта' }],
+                        },
                     },
                     // { field: "signs", headerName: 'Подписи' },
                     {
@@ -317,7 +347,7 @@ export default {
         },
 
         deleteApplication(id) {
-            if (!window.confirm('Вы действительно хотите?')) {
+            if (!window.confirm('Вы действительно хотите удалить?')) {
                 return
             }
 
@@ -388,8 +418,9 @@ export default {
 
     mounted() {
         // this.getApplications('draft')
-        this.getCurrentUser()
+        this.getCurrentUser();
 
+        this.getConstructions();
         // fetch("https://www.ag-grid.com/example-assets/row-data.json")
         //     .then((result) => result.json())
         //     .then((remoteRowData) => (this.rowData.value = remoteRowData));

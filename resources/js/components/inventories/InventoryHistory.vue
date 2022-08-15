@@ -17,7 +17,7 @@
 
 
             <v-col cols="12" md="8" lg="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                <ag-grid-vue class="ag-theme-alpine" style="height: 500px" :columnDefs="columnDefs.value"
+                <ag-grid-vue class="ag-theme-alpine" style="height: 800px" :columnDefs="columnDefs.value"
                     :rowData="rowData.value" :defaultColDef="defaultColDef" animateRows="true" @grid-ready="onGridReady"
                     :localeText="localeText">
                 </ag-grid-vue>
