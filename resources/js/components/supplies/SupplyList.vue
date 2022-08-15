@@ -2,7 +2,7 @@
     <div style="padding: 20px;">
         <!-- <v-container> -->
         <v-row no-gutters>
-            <v-col cols="4">
+            <v-col cols="12" md="4">
                 <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
                     track-by="name">
                 </multiselect>

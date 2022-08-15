@@ -8,7 +8,7 @@
     </v-row>
 
     <v-row no-gutters class="mt-10">
-      <v-col cols="4" class="pl-0 pl-md-5 mt-4 mt-md-0">
+      <v-col cols="12" md="4" class="pl-0 pl-md-5 mt-4 mt-md-0">
         <div v-if="errors">
           <div v-for="(v, k) in errors" :key="k"
             class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
