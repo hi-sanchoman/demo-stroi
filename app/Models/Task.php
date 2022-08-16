@@ -35,7 +35,9 @@ class Task extends Model implements HasMedia
         'description',
         'status_id',
         'due_date',
-        'assigned_to_id',
+        'owner_id',
+        'status',
+        'is_hurry',
         'created_at',
         'updated_at',
         'deleted_at',
@@ -62,15 +64,15 @@ class Task extends Model implements HasMedia
         return $this->getMedia('attachment')->last();
     }
 
-    public function getDueDateAttribute($value)
-    {
-        return $value ? Carbon::parse($value)->format(config('panel.date_format')) : null;
-    }
+    // public function getDueDateAttribute($value)
+    // {
+    //     return $value ? Carbon::parse($value)->format(config('panel.date_format')) : null;
+    // }
 
-    public function setDueDateAttribute($value)
-    {
-        $this->attributes['due_date'] = $value ? Carbon::createFromFormat(config('panel.date_format'), $value)->format('Y-m-d') : null;
-    }
+    // public function setDueDateAttribute($value)
+    // {
+    //     $this->attributes['due_date'] = $value ? Carbon::createFromFormat(config('panel.date_format'), $value)->format('Y-m-d') : null;
+    // }
 
     public function assigned_to()
     {
@@ -80,5 +82,16 @@ class Task extends Model implements HasMedia
     protected function serializeDate(DateTimeInterface $date)
     {
         return $date->format('Y-m-d H:i:s');
+    }
+
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class);
+    }
+    
+    public function responsibles()
+    {
+        return $this->belongsToMany(User::class, 'pivot_task_user');
     }
 }

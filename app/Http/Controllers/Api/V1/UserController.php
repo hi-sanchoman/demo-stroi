@@ -17,6 +17,11 @@ class UserController extends Controller
         return User::with(['roles'])->findOrFail($request->user()->id);
     }
 
+    public function index()
+    {
+        return User::orderBy('name')->get();
+    }
+
     public function saveDeviceToken(Request $request)
     {
         $request->user()->device_token = $request->device_token;

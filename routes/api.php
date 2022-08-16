@@ -87,6 +87,8 @@ Route::post('/v1/auth/logout', [App\Http\Controllers\Api\V1\AuthController::clas
 // non admin
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middleware' => ['auth:sanctum']], function () {
 
+    Route::get('users', 'UserController@index');
+
     Route::apiResource('products', 'ProductApiController');
     Route::apiResource('categories', 'CategoryApiController');
     Route::apiResource('companies', 'CompanyApiController');
@@ -100,6 +102,11 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::get('companies/{id}/offers', 'CompanyApiController@offers');
 
     Route::apiResource('companies', 'CompanyApiController');
+
+    
+    Route::post('tasks/{id}/start', 'TaskApiController@start');
+    Route::post('tasks/{id}/complete', 'TaskApiController@complete');
+    Route::apiResource('tasks', 'TaskApiController');
 
     Route::get('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'payments']);
     Route::put('/payments', [App\Http\Controllers\Api\V1\PaymentApiController::class, 'updateBatch']);

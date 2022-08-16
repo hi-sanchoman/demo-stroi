@@ -25,6 +25,9 @@ import CompanyList from './components/companies/CompanyList.vue'
 import CompanyCreate from './components/companies/CompanyCreate.vue'
 import CompanyEdit from './components/companies/CompanyEdit.vue'
 import CompanyContactCreate from './components/companies/contacts/ContactCreate.vue'
+import TaskList from './components/tasks/TaskList.vue'
+import TaskCreate from './components/tasks/TaskCreate.vue'
+import TaskEdit from './components/tasks/TaskEdit.vue'
 
 import * as components from 'vuetify/components'
 import * as directives from 'vuetify/directives'
@@ -62,6 +65,7 @@ const routes = [
 
   { path: '/supplies', name: 'supplies.index', component: SupplyList },
   
+  // companies
   { path: '/companies', name: 'companies.index', component: CompanyList },
   { path: '/companies/create', name: 'companies.create', component: CompanyCreate },
   
@@ -70,6 +74,10 @@ const routes = [
   
   { path: '/companies/:id/edit', name: 'companies.edit', component: CompanyEdit },
 
+  // tasks
+  { path: '/tasks', name: 'tasks.index', component: TaskList },
+  { path: '/tasks/create', name: 'tasks.create', component: TaskCreate },
+  { path: '/tasks/:id/edit', name: 'tasks.edit', component: TaskEdit },
 
 
   { path: '/storages', component: HelloWorld },

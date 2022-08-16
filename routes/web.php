@@ -34,12 +34,15 @@ Route::get('/to-pay', 'ApplicationController@index');
 
 Route::get('/companies', 'ApplicationController@index');
 Route::get('/companies/create', 'ApplicationController@index');
-
 Route::get('/companies/{id}/contacts/create', 'ApplicationController@index');
 Route::delete('/companies/{id}/contacts/{contactId}', 'ApplicationController@index');
-
 Route::get('/companies/{id}/edit', 'ApplicationController@index');
 Route::get('/companies/{id}', 'ApplicationController@index');
+
+Route::get('/tasks', 'ApplicationController@index');
+Route::get('/tasks/create', 'ApplicationController@index');
+Route::get('/tasks/{id}/edit', 'ApplicationController@index');
+Route::get('/tasks/{id}', 'ApplicationController@index');
 
 
 Route::get('/profile', 'ApplicationController@index');
