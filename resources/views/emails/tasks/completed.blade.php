@@ -1,0 +1,1 @@
+<strong>{{ $user->name }}</strong> только что закончил задачу <strong>{{ $task->name }}</strong>

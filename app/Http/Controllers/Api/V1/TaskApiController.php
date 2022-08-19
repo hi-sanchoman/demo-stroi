@@ -9,6 +9,9 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
 use App\Models\Task;
 use App\Http\Resources\ProductResource;
+use App\Mail\TaskAssigned;
+use App\Mail\TaskStarted;
+use App\Mail\TaskCompleted;
 use App\Models\Application;
 use App\Models\ApplicationOffer;
 use App\Models\ApplicationProduct;
@@ -16,6 +19,9 @@ use App\Models\EquipmentOffer;
 use App\Models\PivotTaskUser;
 use App\Models\ServiceOffer;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Mail;
+use Kreait\Firebase\Messaging\CloudMessage;
+use Kreait\Firebase\Messaging\Notification;
 
 class TaskApiController extends Controller 
 {
@@ -45,7 +51,7 @@ class TaskApiController extends Controller
 
         if ($input['responsibles']) {
           foreach ($input['responsibles'] as $user) {
-            $responsibles[] = $user['id'];
+            $responsibles[] = $user;
           }
 
           unset($input['responsibles']);
@@ -57,8 +63,19 @@ class TaskApiController extends Controller
         // dd($task);
         
         if($responsibles) {
-          foreach ($responsibles as $userId) {
-            PivotTaskUser::create(['task_id' => $task->id, 'user_id' => $userId]);
+          foreach ($responsibles as $user) {
+            PivotTaskUser::create(['task_id' => $task->id, 'user_id' => $user['id']]);
+
+            // notify via email
+            Mail::to($user['email'])->send(new TaskAssigned($task));
+
+            // notify via push
+            if ($user['device_token'] != null) {
+              $messaging = app('firebase.messaging');
+              $message = CloudMessage::withTarget('token', $user['device_token'])
+                  ->withNotification(Notification::create('Новая задача', 'Вам назначили новую задачу'));
+              $messaging->send($message);
+            }
           }
         }
 
@@ -66,19 +83,41 @@ class TaskApiController extends Controller
     }
 
     public function start(Request $request) {
-      $task = Task::findOrFail($request->id);
+      $task = Task::with(['owner'])->findOrFail($request->id);
       $task->started_at = now();
       $task->status = 'in_progress';
       $task->save();
+      
+      // notify via email
+      Mail::to($task->owner->email)->send(new TaskStarted($task, $request->user()));
+
+      // notify via push
+      if ($task->owner->device_token != null) {
+        $messaging = app('firebase.messaging');
+        $message = CloudMessage::withTarget('token', $task->owner->device_token)
+            ->withNotification(Notification::create('Старт задачи', 'Начали выполнение вашей задачи: "' . $task->name . '"'));
+        $messaging->send($message);
+      }
 
       return $task;
     }
 
     public function complete(Request $request) {
-      $task = Task::findOrFail($request->id);
+      $task = Task::with(['owner'])->findOrFail($request->id);
       // $task->started_at = now();
       $task->status = 'completed';
       $task->save();
+      
+      // notify via email
+      Mail::to($task->owner->email)->send(new TaskCompleted($task, $request->user()));
+
+      // notify via push
+      if ($task->owner->device_token != null) {
+        $messaging = app('firebase.messaging');
+        $message = CloudMessage::withTarget('token', $task->owner->device_token)
+            ->withNotification(Notification::create('Задача завершена', 'Ваша задача "' . $task->name . '" закончена'));
+        $messaging->send($message);
+      }
 
       return 1;
     }

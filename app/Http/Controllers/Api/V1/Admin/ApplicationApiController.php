@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreApplicationRequest;
 use App\Http\Requests\UpdateApplicationRequest;
 use App\Http\Resources\Admin\ApplicationResource;
+use App\Mail\PriceChanged;
 use App\Models\Application;
 use App\Models\ApplicationEquipment;
 use App\Models\ApplicationProduct;
@@ -19,6 +20,7 @@ use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\Response;
 use DB;
 use Carbon;
+use Illuminate\Support\Facades\Mail;
 
 class ApplicationApiController extends Controller
 {
@@ -419,12 +421,12 @@ class ApplicationApiController extends Controller
                         $ids[] = $item['id'];
 
                         unset($item['offers']); // TODO: how to keep them?
-                        $service = ApplicationService::find($item['id']);
+                        $service = ApplicationService::with(['application', 'application.owner'])->find($item['id']);
                         
                         if ($item['price'] && abs(($service->price - $item['price']) / $item['price']) > 0.00001) {   
                             if ($request->user()->roles[0]->title == 'Supplier' || $request->user()->roles[0]->title == 'Supervisor') {
-                                dd('price change');
-                                // Mail::to($nextUserNote->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                                // dd('price change');
+                                Mail::to($service->application->owner->email)->send(new PriceChanged($service));
                             } 
                         }
                         

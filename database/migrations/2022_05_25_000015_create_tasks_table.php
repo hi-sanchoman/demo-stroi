@@ -12,7 +12,7 @@ class CreateTasksTable extends Migration
             $table->bigIncrements('id');
             $table->string('name')->nullable();
             $table->longText('description')->nullable();
-            $table->date('due_date')->nullable();
+            $table->date('timestamp')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });

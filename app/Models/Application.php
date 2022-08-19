@@ -104,4 +104,9 @@ class Application extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function owner()
+    {
+        return $this->belongsTo(User::class);
+    }
 }
