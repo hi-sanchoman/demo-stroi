@@ -18,6 +18,7 @@ class Company extends Model
         'phone',
         'status',
         'website',
+        'service',
         'responsible_id',
     ];
 

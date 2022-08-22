@@ -1,16 +1,22 @@
 <template>
     <div style="padding: 20px;">
         <!-- <v-container> -->
-        <v-row no-gutters>
+        <v-row no-gutters v-if="!chosenObject">
             <v-col cols="12" md="4">
-                <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
+                <!-- <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
                     track-by="name">
-                </multiselect>
+                </multiselect> -->
+
+                <v-card v-for="construction in objects" :key="construction.id" class="border rounded px-4 py-4 w-fit"
+                    @click="selectConstruction(construction)">
+                    <v-card-title>{{ construction.name }}</v-card-title>
+                </v-card>
             </v-col>
         </v-row>
 
         <v-row no-gutters class="mt-5" v-if="chosenObject">
             <v-col cols="12" class="mb-5">
+                <v-btn @click="chosenObject = null" size="small">Выбрать другой объект</v-btn>
                 <h2>Накопитель</h2>
             </v-col>
 
@@ -274,7 +280,7 @@ export default {
     methods: {
         getObjects() {
             axios.get('/api/v1/constructions').then((response) => {
-                console.log(response.data);
+                // console.log(response.data);
                 this.objects = response.data.data;
             });
         },
@@ -358,7 +364,7 @@ export default {
         getSupplies(construction) {
             // get applications 
             axios.get(`/api/v1/supplies?construction_id=${construction.id}`).then((response) => {
-                console.log('resp', response);
+                // console.log('resp', response);
                 // this.inventories = response.data.data;
                 this.rowData.value = response.data.data;
             })
@@ -493,18 +499,24 @@ export default {
 
             // fill out any available space to ensure there are no gaps
             params.api.sizeColumnsToFit();
+        },
+
+        selectConstruction(c) {
+            this.chosenObject = c;
+            this.rowData.value = [];
+            this.getSupplies(c);
         }
 
     },
 
 
     watch: {
-        chosenObject(newVal) {
-            if (!newVal) return;
+        // chosenObject(newVal) {
+        //     if (!newVal) return;
 
-            this.rowData.value = [];
-            this.getSupplies(newVal);
-        }
+        //     this.rowData.value = [];
+        //     this.getSupplies(newVal);
+        // }
     }
 }
 </script>

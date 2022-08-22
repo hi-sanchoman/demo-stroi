@@ -98,10 +98,12 @@ export default {
       },
       statusOptions: [
         { value: '', name: 'Все' },
-        { value: 'lead', name: 'лид' },
-        { value: 'prospect', name: 'потенциальный' },
-        { value: 'customer', name: 'клиент' },
-        { value: 'recurrent', name: 'повторный' },
+        // { value: 'lead', name: 'лид' },
+        // { value: 'prospect', name: 'потенциальный' },
+        // { value: 'customer', name: 'клиент' },
+        // { value: 'recurrent', name: 'повторный' },
+        { value: 'supplier', name: 'поставщик' },
+        { value: 'service', name: 'услуги' },
       ]
     }
   },
@@ -136,6 +138,7 @@ export default {
               options: this.statusOptions,
             },
           },
+          { field: 'item.service', minWidth: 150, headerName: 'Вид услуги', valueGetter: this.getService },
           { field: 'item.phone', minWidth: 150, headerName: 'Телефон', valueGetter: this.getPhone },
           { field: 'item.email', minWidth: 150, headerName: 'Эл. почта', valueGetter: this.getEmail },
           {
@@ -198,15 +201,23 @@ export default {
 
     },
 
+    getService(params) {
+      return params.data.service;
+    },
+
     getStatus: (params) => {
       var statuses = {
-        'lead': 'лид',
-        'prospect': 'потенциальный',
-        'customer': 'клиент',
-        'recurrent': 'повторный'
+        'supplier': 'поставщик',
+        'service': 'услуги',
       };
 
       return typeof params === 'string' ? statuses[params] : statuses[params?.data?.status];
+
+      // if ($params?.data?.status === 'service') {
+      //   $statusStr += '<br>' + $params?.data?.service;
+      // }
+
+      // return $statusStr;
     },
 
     getPhone: (params) => {

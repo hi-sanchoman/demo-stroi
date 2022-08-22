@@ -38,6 +38,10 @@
                 track-by="name">
               </multiselect>
 
+              <v-text-field v-if="form.status?.value === 'service'" v-model="form.service" label="Вид услуги"
+                variant="underlined" density="comfortable" type="text">
+              </v-text-field>
+
               <div v-if="company && company.responsible" class="px-1 py-1">
                 <h3 class="mt-6">Ответственный:</h3>
                 <v-row class="mt-2 d-flex align-center">
@@ -80,7 +84,7 @@
 
               <v-window-item value="offers">
 
-                <v-table class="w-100">
+                <v-table class="w-100" v-if="canSeeOffers">
                   <thead>
                     <tr>
                       <th>№ заявки</th>
@@ -223,13 +227,12 @@ export default {
         address: null,
         status: null,
         notes: null,
+        service: null,
       },
 
       statuses: [
-        { name: 'Лид', value: 'lead' },
-        { name: 'Потенциальный', value: 'prospect' },
-        { name: 'Клиент', value: 'customer' },
-        { name: 'Повторный', value: 'recurrent' },
+        { name: 'Поставщик', value: 'supplier' },
+        { name: 'Услуги', value: 'service' },
       ],
 
       currentUser: null,
@@ -244,7 +247,9 @@ export default {
       snackbar: {
         text: null,
         status: false,
-      }
+      },
+
+      canSeeOffers: false,
     }
   },
 
@@ -265,6 +270,8 @@ export default {
         this.currentUser = response.data;
 
         this.loadPage();
+
+        this.canSeeOffers = ['Vice President', 'Ecomonist', 'Supplier', 'Supervisor', 'Accountant', 'Chief Financial Officer'].includes(this.currentUser.roles[0].title);
       });
     },
 
@@ -283,6 +290,7 @@ export default {
             website: this.company.website,
             status: this.findStatus(this.company.status),
             notes: this.company.notes,
+            service: this.company.service,
           }
         });
 
@@ -305,19 +313,18 @@ export default {
     },
 
     findStatus(status) {
-      console.log({ status });
+      // console.log({ status });
       return this.statuses.find(s => s.value === status);
     },
 
     save() {
-
       try {
         axios.put(`/api/v1/companies/${this.form.id}`, this.form).then((response) => {
           this.snackbar.text = "Клиент успешно обновлен.";
           this.snackbar.status = true;
         })
       } catch (e) {
-        console.log(e)
+        // console.log(e)
 
         if (e.response.status === 422) {
           // errors.value = e.response.data.errors

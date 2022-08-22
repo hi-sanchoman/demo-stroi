@@ -28,6 +28,8 @@ class CompanyApiController extends Controller
         $input['status'] = $input['status']['value'];
         $input['responsible_id'] = $request->user()->id;
 
+        if ($input['status'] === 'supplier') $input['service'] = null;
+
         $company = Company::create($input);
 
         return $company;
@@ -55,7 +57,9 @@ class CompanyApiController extends Controller
     public function update(Request $request, Company $company) {
         $input = $request->all();
         $input['status'] = $input['status']['value'];
+        if ($input['status'] === 'supplier') $input['service'] = null;
         $company->update($input);
+        
         return $company;
     }
 

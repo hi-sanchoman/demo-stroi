@@ -1,16 +1,22 @@
 <template>
     <div style="padding: 20px;">
         <!-- <v-container> -->
-        <v-row no-gutters>
+        <v-row no-gutters v-if="!chosenObject">
             <v-col cols="12" md="4">
-                <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
+                <!-- <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
                     track-by="name">
-                </multiselect>
+                </multiselect> -->
+
+                <v-card v-for="construction in objects" :key="construction.id" class="border rounded px-4 py-4 w-fit"
+                    @click="selectConstruction(construction)">
+                    <v-card-title>{{ construction.name }}</v-card-title>
+                </v-card>
             </v-col>
         </v-row>
 
         <v-row v-if="chosenObject" no-gutters class="mt-5">
             <v-col cols="12" class="mb-5">
+                <v-btn @click="chosenObject = null" size="small">Выбрать другой объект</v-btn>
                 <h2>Реестр платежей</h2>
             </v-col>
 
@@ -297,18 +303,25 @@ export default {
             }
 
             return kinds[kind] ?? '';
+        },
+
+        selectConstruction(c) {
+            this.chosenObject = c;
+            this.rowData.value = [];
+            this.getSupplies(c);
         }
 
     },
 
     watch: {
 
-        chosenObject(newVal) {
-            if (!newVal) return;
+        // chosenObject(newVal) {
+        //     if (!newVal) return;
 
-            this.payments = [];
-            this.getPayments(newVal);
-        }
+        //     this.payments = [];
+        //     this.getPayments(newVal);
+        // }
+
         // '$route.query': {
         //     handler(newValue) {
         //         const { status } = newValue

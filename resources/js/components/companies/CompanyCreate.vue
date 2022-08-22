@@ -41,6 +41,10 @@
             track-by="name">
           </multiselect>
 
+          <v-text-field v-if="form.status?.value === 'service'" v-model="form.service" label="Вид услуги"
+            variant="underlined" density="comfortable" type="text">
+          </v-text-field>
+
           <v-btn v-if="form.name" class="mt-5" @click="save" color="primary">
             Создать
           </v-btn>
@@ -72,13 +76,12 @@ export default {
         address: null,
         status: null,
         notes: null,
+        service: null,
       },
 
       statuses: [
-        { name: 'Лид', value: 'lead' },
-        { name: 'Потенциальный', value: 'prospect' },
-        { name: 'Клиент', value: 'customer' },
-        { name: 'Повторный', value: 'recurrent' },
+        { name: 'Поставщик', value: 'supplier' },
+        { name: 'Услуги', value: 'service' },
       ],
 
       currentUser: null,

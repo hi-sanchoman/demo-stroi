@@ -56,10 +56,20 @@ class ApplicationApiController extends Controller
                     ->orderBy('created_at', 'DESC')
                     ->get();
             } else {
+                // get responsibles whose order > my application_path order
+                //  ->order()
+
+
+                // get from statuses where in_array application_paths
+                // get from applications where id is in_array
+
                 $collection = $collection
+                    // ->with(['application'])
                     ->whereNot('status', 'draft')
                     ->orderBy('created_at', 'DESC')
                     ->get();
+
+
             }
 
             return new ApplicationResource($collection);

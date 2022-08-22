@@ -1,14 +1,22 @@
 <template>
     <div style="padding: 20px;">
         <!-- <v-container> -->
-        <!-- <v-row no-gutters>
-                <v-col cols="12">
-                    <h1 class="w-full text-left">Заявки</h1>
-                </v-col>
-            </v-row> -->
+        <v-row no-gutters v-if="!chosenObject">
+            <v-col cols="12" md="4">
+                <!-- <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
+                    track-by="name">
+                </multiselect> -->
 
-        <v-row no-gutters class="mt-5">
+                <v-card v-for="construction in objects" :key="construction.id" class="border rounded px-4 py-4 w-fit"
+                    @click="selectConstruction(construction)">
+                    <v-card-title>{{ construction.name }}</v-card-title>
+                </v-card>
+            </v-col>
+        </v-row>
+
+        <v-row no-gutters class="mt-5" v-if="chosenObject">
             <v-col cols="12" class="mb-5">
+                <v-btn @click="chosenObject = null" size="small">Выбрать другой объект</v-btn>
                 <h2>Входящие на оплату</h2>
             </v-col>
 
@@ -116,6 +124,9 @@ export default {
             },
             payments: [],
             currentUser: null,
+
+            chosenObject: null,
+            objects: [],
         }
     },
 
@@ -127,13 +138,20 @@ export default {
             })
         },
 
-        getPayments() {
-            console.log('get payments')
+        getObjects() {
+            axios.get('/api/v1/constructions').then((response) => {
+                // console.log(response.data);
+                this.objects = response.data.data;
+            });
+        },
+
+        getPayments(construction) {
+            // console.log('get payments')
 
             // get applications 
-            axios.get('/api/v1/payments-to-pay').then((response) => {
+            axios.get(`/api/v1/payments-to-pay?construction_id=${construction.id}`).then((response) => {
                 this.payments = response.data.data
-                console.log(this.payments)
+                // console.log(this.payments)
             });
         },
 
@@ -141,7 +159,7 @@ export default {
             if (!confirm('Вы действительно оплатили?')) return;
 
             axios.put(`/api/v1/to-pay/${offer.id}`).then((response) => {
-                this.getPayments();
+                this.getPayments(this.chosenObject);
 
                 this.snackbar.text = 'Оплачено';
                 this.snackbar.status = true;
@@ -160,13 +178,21 @@ export default {
             }
 
             return kinds[kind] ?? '';
+        },
+
+        selectConstruction(c) {
+            this.chosenObject = c;
+            this.payments = [];
+            this.getPayments(c);
         }
 
     },
 
     mounted() {
         // this.getApplications('draft')
-        this.getPayments()
+        this.getCurrentUser();
+        this.getObjects();
+        // this.getPayments();
     },
 
     watch: {
