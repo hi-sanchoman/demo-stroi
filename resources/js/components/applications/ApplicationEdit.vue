@@ -30,6 +30,10 @@
                         <v-col cols="12">
                             <strong>Заявка №{{  application.id  }}</strong><br />
                             Дата заявки: {{  application.issued_at  }}
+                            <a class="mb-1"
+                                v-if="application != null && application.status == 'in_progress' && isPTDEngineer()"
+                                :href="`/export/application/${application.id}`">скачать
+                                заявку</a>
                         </v-col>
                     </v-row>
 
@@ -222,6 +226,8 @@
 
 
 
+
+
                                             }}
                                         </td>
                                     </template>
@@ -328,6 +334,8 @@
 
 
 
+
+
                                         }}</span>
                                 </td>
                                 <td>
@@ -370,6 +378,8 @@
                                     {{
                                      offer.price *
                                      offer.quantity
+
+
 
 
 
@@ -515,6 +525,8 @@
 
 
 
+
+
                         }}
                     </td>
                 </template>
@@ -639,6 +651,8 @@
 
 
 
+
+
                     }}</span>
             </td>
             <td>
@@ -681,6 +695,8 @@
                 {{
                  offer.price *
                  offer.quantity
+
+
 
 
 
@@ -816,6 +832,8 @@
 
 
 
+
+
                         }}
                     </td>
                 </template>
@@ -931,6 +949,8 @@
 
 
 
+
+
                     }}</span>
             </td>
             <td>
@@ -973,6 +993,8 @@
                 {{
                  offer.price *
                  offer.quantity
+
+
 
 
 
@@ -1106,6 +1128,8 @@
 
 
 
+
+
                                             }}</strong>
                                         -
                                         {{
@@ -1113,6 +1137,8 @@
                                          .application_path
                                          .responsible
                                          .name
+
+
 
 
 

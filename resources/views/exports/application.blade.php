@@ -84,5 +84,28 @@
         </tr>
       @endforeach
     @endif
+
+    <tr>
+      <td colspan="6" style="font-weight: bold">&nbsp;</td>
+    </tr>
+
+    <tr>
+      <td colspan="6" style="font-weight: bold">Подписи</td>
+    </tr>
+
+    @foreach($statuses as $item)
+      <tr style="border: 1px solid black;">
+        <td style="border: 1px solid black;">{{ $loop->index + 1 }}</td>
+        <td colspan="2" style="border: 1px solid black;">{{ $item['application_path']['position'] }} - {{ $item['application_path']['responsible']['name'] }}</td>
+        <td colspan="2" style="border: 1px solid black;">
+          @if ($item['status'] == 'declined')
+            Отклонено
+          @elseif($item['status'] == 'accepted')
+            Подписано
+          @endif
+        </td>
+        <td style="border: 1px solid black;">{{ $item['updated_at'] }}</td>
+      </tr>
+    @endforeach
   </tbody>
 </table>

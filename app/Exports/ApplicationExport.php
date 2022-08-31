@@ -46,9 +46,13 @@ class ApplicationExport implements FromView, WithColumnWidths, WithDefaultStyles
       $items = $this->application->applicationEquipments;
     }
 
+    $statuses = $this->application->applicationApplicationStatuses()->with(['application_path', 'application_path.responsible'])->get();
+    // dd($statuses->toArray());
+
     return view('exports.application', [
       'application' => $this->application,
       'items' => $items,
+      'statuses' => $statuses->toArray(),
       // 'num' => 10,
     ]);
   }
