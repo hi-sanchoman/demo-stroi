@@ -1,8 +1,22 @@
 <template>
     <div class="" style="padding: 20px;">
-        <!-- <v-container> -->
 
-        <v-row no-gutters class="">
+        <v-row no-gutters v-if="!chosenObject">
+            <v-col cols="12" md="4">
+
+                <v-card v-for="construction in objects" :key="construction.id" class="border rounded px-4 py-4 w-fit"
+                    @click="selectConstruction(construction)">
+                    <v-card-title>{{  construction.name  }}</v-card-title>
+                </v-card>
+            </v-col>
+        </v-row>
+
+        <v-row no-gutters class="" v-if="chosenObject">
+            <v-col cols="12" class="mb-5">
+                <v-btn @click="chosenObject = null" size="small">Выбрать другой объект</v-btn>
+                <h2>Заявки</h2>
+            </v-col>
+
             <v-col cols="12" md="3" class="border px-5 py-5">
                 <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
             </v-col>
@@ -13,83 +27,9 @@
                     rowSelection="multiple" animateRows="true" @grid-ready="onGridReady" :localeText="localeText"
                     @row-clicked="rowWasClicked">
                 </ag-grid-vue>
-
-                <!-- <v-table transition="slide-x-transition">
-                        <thead>
-                            <tr>
-                                <th class="text-left">
-                                    №
-                                </th>
-                                <th class="text-left">
-                                    Объект
-                                </th>
-                                <th class="text-left">
-                                    Тип
-                                </th>
-                                <th class="text-left">
-                                    Дата заявки
-                                </th>
-                                <th class="text-left">
-                                    Статус
-                                </th>
-                                <th>
-                                    Управление
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="applications.length <= 0">
-                                <td colspan="5">Нет заявок.</td>
-                            </tr>
-
-                            <tr v-for="application in applications" :key="application.id"
-                                :class="application.opened_statuses.length > 0 ? 'tr-unread' : 'tr-read'">
-                                <td @click="showApplication(application.id)" style="cursor: pointer">{{ application.id
-                                }}</td>
-                                <td @click="showApplication(application.id)" style="cursor: pointer">{{
-                                        application.construction.name
-                                }}</td>
-                                <td>
-                                    {{ getKind(application.kind) }}
-                                </td>
-                                <td @click="showApplication(application.id)" style="cursor: pointer">{{
-                                        application.issued_at
-                                }}</td>
-
-                                <td>
-                                    <v-chip v-if="application.status == 'draft'" class="ma-2" color="grey"
-                                        text-color="white">
-                                        Черновик
-                                    </v-chip>
-
-                                    <v-row v-if="application.status == 'in_review'" class="py-3">
-                                        <v-chip v-for="item in application.application_application_statuses"
-                                            :key="item.id" class="ma-2" :color="getStatusColor(item)"
-                                            text-color="white">
-                                            {{ getStatusText(item) }}
-                                        </v-chip>
-                                    </v-row>
-
-                                    <v-col v-if="application.status == 'declined'">
-                                        <v-chip class="ma-2" color="red" text-color="white">
-                                            Отклонено
-                                        </v-chip>
-                                    </v-col>
-                                </td>
-
-                                <td>
-                                    <v-btn @click="deleteApplication(application.id)" color="error" size="small"
-                                        v-if="application.status == 'draft' && isPTDEngineer()">
-                                        Удалить
-                                    </v-btn>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </v-table> -->
             </v-col>
         </v-row>
 
-        <!-- </v-container> -->
     </div>
 </template>
 
@@ -131,6 +71,9 @@ export default {
                 flex: 1,
                 floatingFilter: true,
                 resizable: true,
+                suppressMovable: true,
+                wrapText: true,
+                autoHeight: true,
             },
             rowClassRules: {
                 'tr-unread': (params) => {
@@ -178,10 +121,28 @@ export default {
                 { value: 'equipment', name: 'заявка на спец. технику' },
                 { value: 'service', name: 'заявка на услуги' }
             ],
+
+            chosenObject: null,
+            objects: [],
         }
     },
 
     methods: {
+        getObjects() {
+            axios.get('/api/v1/constructions').then((response) => {
+                // console.log(response.data);
+                this.objects = response.data.data;
+            });
+        },
+
+        selectConstruction(c) {
+            const status = 'all';
+
+            this.chosenObject = c;
+            this.rowData.value = [];
+            this.getApplications(this.chosenObject, status);
+        },
+
         getConstructions() {
             this.constructionOptions.push({ value: '', name: 'Все' });
 
@@ -234,10 +195,20 @@ export default {
                         },
                     },
                     {
-                        field: "kind", minWidth: 200, headerName: 'Тип заявки', valueGetter: this.getKind, filter: AgSelectFilter, filterParams: {
+                        field: "kind", minWidth: 200, headerName: 'Тип заявки', filter: AgSelectFilter, filterParams: {
                             column: 'kind',
                             options: this.kindOptions,
-                        },
+                        }, cellRenderer: (params) => {
+                            var kinds = {
+                                'product': 'заявка на товар',
+                                'equipment': 'заявка на спец. технику',
+                                'service': 'заявка на услугу'
+                            };
+
+                            const kind = typeof params === 'string' ? kinds[params] : kinds[params?.data?.kind];
+                            const inners = this.getInners(params);
+                            return `<span>${kind}</span><br>${inners}`;
+                        }
                     },
                     {
                         field: "issued_at", minWidth: 200, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
@@ -279,7 +250,6 @@ export default {
                             options: [{ value: '', name: 'Все' }, { value: 'draft', name: 'черновик' }, { value: 'in_progress', name: 'в процессе' }, { value: 'completed', name: 'закрыта' }],
                         },
                     },
-                    // { field: "signs", headerName: 'Подписи' },
                     {
                         field: "action",
                         minWidth: 200,
@@ -295,37 +265,10 @@ export default {
                                 }
                             }
                         },
-                        // cellRenderer: this.deleteBtnRenderer,
-                        // cellRendererParams: {
-                        //     clicked: function (field) {
-                        //         alert(`${field} was clicked`);
-                        //     },
-                        // },
                     },
                 ];
 
                 if (this.$route.query.status == 'redirect') {
-                    console.log('redirect')
-
-                    // this.readApplicationsBadge();
-
-                    // if (this.currentUser.roles[0].title == 'PTD Engineer') {
-                    //     this.$router.push('/applications?status=draft')
-                    //     return
-                    // } else if (this.currentUser.roles[0].title == 'Supplier') {
-                    //     this.$router.push('/applications?status=in_progress_supplier')
-                    //     return
-                    // } else if (this.currentUser.roles[0].title == 'Economist' ||
-                    //     this.currentUser.roles[0].title == 'Chief Financial Officer'
-                    // ) {
-                    //     this.$router.push('/applications?status=in_progress_economist')
-                    //     return
-                    // }
-                    // } else if (this.currentUser.roles[0].title == 'Warehouse Manager') {
-                    //     this.$router.push('/applications?status=in_progress_warehouse')
-                    //     return
-                    // }
-
                     this.$router.push('/applications?status=all')
                 }
             })
@@ -335,13 +278,12 @@ export default {
             this.$router.push(`/applications/${id}/edit`)
         },
 
-        getApplications(status) {
+        getApplications(construction, status) {
             console.log(`get applications with ${status} status`);
 
             // get applications 
-            axios.get('/api/v1/applications?status=' + status).then((response) => {
+            axios.get(`/api/v1/applications?status=${status}&construction_id=${construction.id}`).then((response) => {
                 this.applications = response.data.data;
-
                 this.rowData.value = response.data.data;
             })
         },
@@ -366,14 +308,33 @@ export default {
             return item.application_path.responsible.name
         },
 
-        getKind(params) {
-            var kinds = {
-                'product': 'заявка на товар',
-                'equipment': 'заявка на спец. технику',
-                'service': 'заявка на услугу'
-            };
+        // getKind(params) {
+        //     var kinds = {
+        //         'product': 'заявка на товар',
+        //         'equipment': 'заявка на спец. технику',
+        //         'service': 'заявка на услугу'
+        //     };
 
-            return typeof params === 'string' ? kinds[params] : kinds[params?.data?.kind];
+        //     const kind = typeof params === 'string' ? kinds[params] : kinds[params?.data?.kind];
+        //     const inners = this.getInners(params);
+        //     return `${kind}<br>${inners}`;
+        // },
+
+        getInners(params) {
+            console.log(params?.data);
+            let inners = '';
+
+            if (params?.data?.application_application_products?.length > 0) {
+                inners += params?.data?.application_application_products[0]?.product?.name + '<br/>';
+            }
+            if (params?.data?.application_equipments?.length > 0) {
+                inners += params?.data?.application_equipments[0]?.equipment?.name + '<br/>';
+            }
+            if (params?.data?.application_services?.length > 0) {
+                inners += params?.data?.application_services[0]?.service + '<br/>';
+            }
+
+            return `<div style="color: grey;">${inners}</div>`;
         },
 
         getStatus(params) {
@@ -421,6 +382,9 @@ export default {
         this.getCurrentUser();
 
         this.getConstructions();
+
+        this.getObjects();
+
         // fetch("https://www.ag-grid.com/example-assets/row-data.json")
         //     .then((result) => result.json())
         //     .then((remoteRowData) => (this.rowData.value = remoteRowData));
@@ -431,7 +395,7 @@ export default {
             handler(newValue) {
                 const { status } = newValue
 
-                this.getApplications(status)
+                if (this.chosenObject) this.getApplications(this.chosenObject, status);
             },
             immediate: true,
         }

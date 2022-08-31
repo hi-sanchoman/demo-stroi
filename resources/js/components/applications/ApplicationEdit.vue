@@ -17,7 +17,7 @@
                     <div v-for="(v, k) in errors" :key="k"
                         class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
                         <p v-for="error in v" :key="error" class="text-sm">
-                            {{ error }}
+                            {{  error  }}
                         </p>
                     </div>
                 </div>
@@ -28,8 +28,8 @@
                         application.status != 'draft'
                     " class="mb-5">
                         <v-col cols="12">
-                            <strong>Заявка №{{ application.id }}</strong><br />
-                            Дата заявки: {{ application.issued_at }}
+                            <strong>Заявка №{{  application.id  }}</strong><br />
+                            Дата заявки: {{  application.issued_at  }}
                         </v-col>
                     </v-row>
 
@@ -175,10 +175,12 @@
                         <tbody>
                             <template v-for="(item, index) in products" :key="item.id">
                                 <tr>
-                                    <td>{{ index + 1 }}</td>
-                                    <td>{{ item.category?.name }}</td>
-                                    <td>{{ item.product?.name }}</td>
-                                    <td>{{ item.unit?.name }}</td>
+                                    <td>{{  index + 1  }}</td>
+                                    <td>
+                                        {{  item.category?.name  }}
+                                    </td>
+                                    <td>{{  item.product?.name  }}</td>
+                                    <td>{{  item.unit?.name  }}</td>
 
                                     <td v-if="application.status === 'draft'" :class="
                                         application.status === 'draft'
@@ -201,26 +203,29 @@
                                             application.status !=
                                             'draft'
                                         ">
-                                            {{ products[index].quantity }}
+                                            {{  products[index].quantity  }}
                                         </span>
                                     </td>
 
                                     <template v-else>
                                         <td>
-                                            {{ products[index].quantity }}
+                                            {{  products[index].quantity  }}
                                         </td>
                                         <td>
-                                            {{ products[index].prepared }}
+                                            {{  products[index].prepared  }}
                                         </td>
                                         <td>
                                             {{
-                                                    products[index].quantity -
-                                                    products[index].prepared
+                                             products[index].quantity -
+                                             products[index].prepared
+
+
+
                                             }}
                                         </td>
                                     </template>
 
-                                    <td>{{ item.notes }}</td>
+                                    <td>{{  item.notes  }}</td>
 
                                     <td>
                                         <v-btn v-if="
@@ -315,10 +320,13 @@
                                         offer.company !=
                                         null
                                     ">{{
-        offer
-            .company
-            .name
-}}</span>
+                                         offer
+                                         .company
+                                         .name
+
+
+
+                                        }}</span>
                                 </td>
                                 <td>
                                     <v-text-field v-if="
@@ -337,8 +345,8 @@
                                     <span v-if="
                                         !isEditable()
                                     ">{{
-        offer.quantity
-}}</span>
+                                         offer.quantity 
+                                        }}</span>
                                 </td>
                                 <td>
                                     <v-text-field v-if="
@@ -352,14 +360,17 @@
                                     <span v-if="
                                         !isEditable()
                                     ">{{
-        offer.price
-}}
+                                         offer.price 
+                                        }}
                                         тг</span>
                                 </td>
                                 <td>
                                     {{
-                                            offer.price *
-                                            offer.quantity
+                                     offer.price *
+                                     offer.quantity
+
+
+
                                     }}
                                     тг
                                 </td>
@@ -449,10 +460,18 @@
     <tbody>
         <template v-for="(item, index) in services" :key="item.id">
             <tr>
-                <td>{{ index + 1 }}</td>
-                <td>{{ item.category }}</td>
-                <td>{{ item.service }}</td>
-                <td>{{ item.unit }}</td>
+                <td>{{  index + 1  }}</td>
+                <td>
+                    <!-- {{ item.category }} -->
+                    <multiselect v-model="services[index].category" :options="categories"
+                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                </td>
+                <td>
+                    <v-text-field v-model="services[index].service" label="Напишите название" variant="underlined"
+                        required density="comfortable" type="text"></v-text-field>
+                    <!-- {{  item.service  }} -->
+                </td>
+                <td>{{  item.unit  }}</td>
 
                 <td v-if="application.status === 'draft'" :class="
                     application.status == 'draft'
@@ -474,21 +493,24 @@
                         application.status !=
                         'draft'
                     ">
-                        {{ services[index].quantity }}
+                        {{  services[index].quantity  }}
                     </span>
                 </td>
 
                 <template v-else>
                     <td>
-                        {{ services[index].quantity }}
+                        {{  services[index].quantity  }}
                     </td>
                     <td>
-                        {{ services[index].prepared }}
+                        {{  services[index].prepared  }}
                     </td>
                     <td>
                         {{
-                                services[index].quantity -
-                                services[index].prepared
+                         services[index].quantity -
+                         services[index].prepared
+
+
+
                         }}
                     </td>
                 </template>
@@ -503,15 +525,15 @@
                         </v-text-field>
                     </tempalte>
 
-                    <span v-else>{{ item.price }}</span>
+                    <span v-else>{{  item.price  }}</span>
                 </td>
                 <td>
                     <template v-if="item.price">
-                        {{ item.price * item.quantity }}₸
+                        {{  item.price * item.quantity  }}₸
                     </template>
                 </td>
 
-                <td>{{ item.notes }}</td>
+                <td>{{  item.notes  }}</td>
 
                 <td>
                     <v-btn v-if="
@@ -606,10 +628,13 @@
                     offer.company !=
                     null
                 ">{{
-        offer
-            .company
-            .name
-}}</span>
+                     offer
+                     .company
+                     .name
+
+
+
+                    }}</span>
             </td>
             <td>
                 <v-text-field v-if="
@@ -628,8 +653,8 @@
                 <span v-if="
                     !isEditable()
                 ">{{
-        offer.quantity
-}}</span>
+                     offer.quantity 
+                    }}</span>
             </td>
             <td>
                 <v-text-field v-if="
@@ -643,14 +668,17 @@
                 <span v-if="
                     !isEditable()
                 ">{{
-        offer.price
-}}
+                     offer.price 
+                    }}
                     тг</span>
             </td>
             <td>
                 {{
-                        offer.price *
-                        offer.quantity
+                 offer.price *
+                 offer.quantity
+
+
+
                 }}
                 тг
             </td>
@@ -740,9 +768,9 @@
     <tbody>
         <template v-for="(item, index) in equipments" :key="item.id">
             <tr>
-                <td>{{ item.id }}</td>
-                <td>{{ item.equipment?.name }}</td>
-                <td>{{ item.unit?.name }}</td>
+                <td>{{  item.id  }}</td>
+                <td>{{  item.equipment?.name  }}</td>
+                <td>{{  item.unit?.name  }}</td>
                 <td v-if="application.status === 'draft'" :class="
                     application.status == 'draft'
                         ? 'd-flex mt-3'
@@ -763,26 +791,29 @@
                         application.status !=
                         'draft'
                     ">
-                        {{ equipments[index].quantity }}
+                        {{  equipments[index].quantity  }}
                     </span>
                 </td>
 
                 <template v-else>
                     <td>
-                        {{ equipments[index].quantity }}
+                        {{  equipments[index].quantity  }}
                     </td>
                     <td>
-                        {{ equipments[index].prepared }}
+                        {{  equipments[index].prepared  }}
                     </td>
                     <td>
                         {{
-                                equipments[index].quantity -
-                                equipments[index].prepared
+                         equipments[index].quantity -
+                         equipments[index].prepared
+
+
+
                         }}
                     </td>
                 </template>
 
-                <td>{{ item.notes }}</td>
+                <td>{{  item.notes  }}</td>
 
                 <td>
                     <v-btn v-if="
@@ -886,10 +917,13 @@
                     offer.company !=
                     null
                 ">{{
-        offer
-            .company
-            .name
-}}</span>
+                     offer
+                     .company
+                     .name
+
+
+
+                    }}</span>
             </td>
             <td>
                 <v-text-field v-if="
@@ -908,8 +942,8 @@
                 <span v-if="
                     !isEditable()
                 ">{{
-        offer.quantity
-}}</span>
+                     offer.quantity 
+                    }}</span>
             </td>
             <td>
                 <v-text-field v-if="
@@ -923,14 +957,17 @@
                 <span v-if="
                     !isEditable()
                 ">{{
-        offer.price
-}}
+                     offer.price 
+                    }}
                     тг</span>
             </td>
             <td>
                 {{
-                        offer.price *
-                        offer.quantity
+                 offer.price *
+                 offer.quantity
+
+
+
                 }}
                 тг
             </td>
@@ -1050,19 +1087,25 @@
                                 <v-list-item-title>
                                     <v-col cols="12" class="px-0">
                                         <strong>{{
-                                                index + 1
-                                        }}.
+                                             index + 1 
+                                            }}.
                                             {{
-                                                    item
-                                                        .application_path
-                                                        .position
+                                             item
+                                             .application_path
+                                             .position
+
+
+
                                             }}</strong>
                                         -
                                         {{
-                                                item
-                                                    .application_path
-                                                    .responsible
-                                                    .name
+                                         item
+                                         .application_path
+                                         .responsible
+                                         .name
+
+
+
                                         }}
                                     </v-col>
 
@@ -1076,12 +1119,12 @@
                                         </v-chip>
 
                                         <span>{{
-                                                item.declined_reason
-                                        }}</span>
+                                             item.declined_reason 
+                                            }}</span>
                                         -
                                         <span>{{
-                                                item.updated_at
-                                        }}</span>
+                                             item.updated_at 
+                                            }}</span>
                                     </span>
                                     <!-- accepted -->
                                     <span v-else-if="
@@ -1093,8 +1136,8 @@
                                         </v-chip>
 
                                         <span>{{
-                                                item.updated_at
-                                        }}</span>
+                                             item.updated_at 
+                                            }}</span>
                                     </span>
 
                                     <!-- incoming -->
@@ -1147,7 +1190,7 @@
 
 <!-- Snackbar -->
 <v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
-    {{ snackbar.text }}
+    {{  snackbar.text  }}
 
     <template v-slot:actions>
         <v-btn color="blue" variant="text" @click="snackbar.status = false">
@@ -1290,7 +1333,7 @@
         <v-card-text>
             <v-container>
                 <v-row>
-                    <v-col cols="12">{{ priemka.name }}</v-col>
+                    <v-col cols="12">{{  priemka.name  }}</v-col>
                 </v-row>
                 <v-row>
                     <v-col cols="12">
@@ -1300,7 +1343,7 @@
                         <v-textarea class="mt-2" v-model="priemka.notes" label="Примечание" variant="underlined"
                             required density="comfortable"></v-textarea>
 
-                        <span class="mt-2">Ед. изм.: {{ priemka.unit }}</span>
+                        <span class="mt-2">Ед. изм.: {{  priemka.unit  }}</span>
                     </v-col>
                 </v-row>
             </v-container>
@@ -1332,7 +1375,7 @@
         <v-card-text>
             <v-container>
                 <v-row no-gutters class="">
-                    Полных рабочих дней: {{ getWorkingDays() }}
+                    Полных рабочих дней: {{  getWorkingDays()  }}
                     <v-col cols="12" class="">
                         <v-table>
                             <thead>
@@ -1346,10 +1389,10 @@
                             </thead>
                             <tbody>
                                 <tr v-for="(note, n) in equipmentNotes" :key="note.id">
-                                    <td>{{ n + 1 }}</td>
-                                    <td>{{ note.created_at }}</td>
-                                    <td>{{ note.hours }}</td>
-                                    <td>{{ note.notes }}</td>
+                                    <td>{{  n + 1  }}</td>
+                                    <td>{{  note.created_at  }}</td>
+                                    <td>{{  note.hours  }}</td>
+                                    <td>{{  note.notes  }}</td>
                                     <td>
                                         <!-- <v-btn color="error" size="small">удалить</v-btn> -->
                                     </td>

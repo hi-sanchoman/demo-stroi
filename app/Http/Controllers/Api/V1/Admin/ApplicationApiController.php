@@ -33,18 +33,29 @@ class ApplicationApiController extends Controller
         // responsible user watching applications to review
         if ($status == 'all') {
             $collection = Application::query()
-                ->with(['construction', 'applicationApplicationStatuses', 'applicationApplicationStatuses.application_path.responsible', 'openedStatuses' => function ($q) use ($request) {
-                    return $q
-                        ->where('user_id', $request->user()->id)
-                        ->where('status', 'unread');
-                }]);
+                ->with([
+                    'construction', 
+                    'applicationApplicationStatuses', 
+                    'applicationApplicationStatuses.application_path.responsible', 
+                    'applicationApplicationProducts', 'applicationApplicationProducts.product', 
+                    'applicationServices', 
+                    'applicationEquipments', 'applicationEquipments.equipment',
+                    'openedStatuses' => function ($q) use ($request) {
+                        return $q
+                            ->where('user_id', $request->user()->id)
+                            ->where('status', 'unread');
+                    }]);
             
             // allowed constructions
             $allowedConstructions = $request->user()->constructions->pluck('id');
             // $collection = $collection->whereIn('construction_id', $allowedConstructions);
 
             if (!empty($allowedConstructions)) {
-                $collection = $collection->whereIn('construction_id', $allowedConstructions);    
+                // dd($allowedConstructions);
+                $collection = $collection
+                    ->whereIn('construction_id', $allowedConstructions->filter(function($el) use ($request) { 
+                        return $el == $request->construction_id; 
+                    }));
             }
 
             // check if PTD -> show only his applications

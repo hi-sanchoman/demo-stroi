@@ -5,7 +5,7 @@
 
         <v-row no-gutters>
             <v-col cols="12">
-                <h1 v-if="inventory != null" class="w-full text-left">Склад: {{ inventory.construction.name }}</h1>
+                <h1 v-if="inventory != null" class="w-full text-left">Склад: {{  inventory.construction.name  }}</h1>
             </v-col>
         </v-row>
 
@@ -49,10 +49,10 @@
                         </tr>
 
                         <tr v-for="(item, index) in logs" :key="item.id" class="hover:bg-slate-100">
-                            <td>{{ index + 1 }}</td>
-                            <td>{{ item.log }}</td>
-                            <td>{{ item.user.email }}</td>
-                            <td>{{ item.created_at }}</td>
+                            <td>{{  index + 1  }}</td>
+                            <td>{{  item.log  }}</td>
+                            <td>{{  item.user.email  }}</td>
+                            <td>{{  item.created_at  }}</td>
                             <td>
                                 <!-- Management -->
                             </td>
@@ -103,6 +103,7 @@ export default {
                 resizable: true,
                 wrapText: true,
                 autoHeight: true,
+                suppressMovable: true,
             },
             localeText: {
                 selectAll: '(Выбрать все)',

@@ -62,6 +62,7 @@ export default {
         flex: 1,
         floatingFilter: true,
         resizable: true,
+        suppressMovable: true,
       },
       localeText: {
         selectAll: '(Выбрать все)',

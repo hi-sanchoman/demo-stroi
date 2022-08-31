@@ -1,15 +1,11 @@
 <template>
     <div style="padding: 20px;">
-        <!-- <v-container> -->
+
         <v-row no-gutters v-if="!chosenObject">
             <v-col cols="12" md="4">
-                <!-- <multiselect v-model="chosenObject" :options="objects" placeholder="Выберите объект" label="name"
-                    track-by="name">
-                </multiselect> -->
-
                 <v-card v-for="construction in objects" :key="construction.id" class="border rounded px-4 py-4 w-fit"
                     @click="selectConstruction(construction)">
-                    <v-card-title>{{ construction.name }}</v-card-title>
+                    <v-card-title>{{  construction.name  }}</v-card-title>
                 </v-card>
             </v-col>
         </v-row>
@@ -26,91 +22,15 @@
                     rowSelection="multiple" animateRows="true" @row-clicked="showPosition" :localeText="localeText"
                     @grid-ready="onGridReady">
                 </ag-grid-vue>
-
-                <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
-                        <thead>
-                            <tr>
-                                <th class="text-left">
-                                    №
-                                </th>
-                                <th class="text-left">
-                                    Объект
-                                </th>
-                                <th class="text-left">
-                                    Наименование ресурса
-                                </th>
-                                <th class="text-left">
-                                    Статья расходов
-                                </th>
-                                <th class="text-left">
-                                    Ед. изм.
-                                </th>
-                                <th>
-                                    Кол-во
-                                </th>
-                                <th>
-                                    По плану
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr v-if="inventories.length <= 0">
-                                <td colspan="5">Нет данных.</td>
-                            </tr>
-
-                            <tr v-for="(inventory, index) in inventories" :key="inventory.item.id"
-                                style="cursor:pointer" @click="showPosition(inventory)">
-                                <td>{{ index + 1 }}</td>
-                                <td>{{ inventory.item.construction.name }}</td>
-                                <td>
-                                    <span v-if="inventory.item.application_product">
-                                        {{ inventory.item.application_product.product.name }}
-                                    </span>
-                                    <span v-else-if="inventory.item.application_equipment">
-                                        {{ inventory.item.application_equipment.equipment.name }}
-                                    </span>
-                                    <span v-else-if="inventory.item.application_service">
-                                        {{ inventory.item.application_service.service }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span v-if="inventory.item.application_product">
-                                        {{ inventory.item.application_product.category.name }}
-                                    </span>
-                                    <span v-else-if="inventory.item.application_equipment">
-                                        -
-                                    </span>
-                                    <span v-else-if="inventory.item.application_service">
-                                        {{ inventory.item.application_service.category }}
-                                    </span>
-                                </td>
-                                <td>
-                                    <span v-if="inventory.item.application_product">
-                                        {{ inventory.item.application_product.unit.name }}
-                                    </span>
-                                    <span v-else-if="inventory.item.application_service">
-                                        {{ inventory.item.application_service.unit }}
-                                    </span>
-                                    <span v-else-if="inventory.item.application_equipment">
-                                        шт
-                                    </span>
-                                </td>
-                                <td>{{ inventory.total }}</td>
-                                <td></td>
-                            </tr>
-                        </tbody>
-                    </v-table> -->
             </v-col>
         </v-row>
-
-        <!-- </v-container> -->
 
 
         <!-- inventory history dialog -->
         <v-dialog v-model="historyDialog">
             <v-card class="oks-dialog min-w-5xl w-7xl">
                 <v-card-title>
-                    <span class="text-h5">История "{{ historyName }}"</span>
+                    <span class="text-h5">История "{{  historyName  }}"</span>
                 </v-card-title>
 
                 <v-card-text>
@@ -147,42 +67,42 @@
                                         </tr>
 
                                         <tr v-for="(inventory, index) in historyInventories" :key="inventory.id">
-                                            <td>{{ index + 1 }}</td>
+                                            <td>{{  index + 1  }}</td>
                                             <td>
                                                 <template v-if="inventory.application_product">
-                                                    {{ inventory.application_product.product.name }}
+                                                    {{  inventory.application_product.product.name  }}
                                                 </template>
                                                 <template v-else-if="inventory.application_equipment">
-                                                    {{ inventory.application_equipment.equipment.name }}
+                                                    {{  inventory.application_equipment.equipment.name  }}
                                                 </template>
                                                 <template v-else-if="inventory.application_service">
-                                                    {{ inventory.application_service.service }}
+                                                    {{  inventory.application_service.service  }}
                                                 </template>
                                             </td>
                                             <td>
                                                 <template v-if="inventory.application_product">
-                                                    {{ inventory.application_product.category.name }}
+                                                    {{  inventory.application_product.category.name  }}
                                                 </template>
                                                 <template v-else-if="inventory.application_equipment">
                                                     спец. техника
                                                 </template>
                                                 <template v-else-if="inventory.application_service">
-                                                    {{ inventory.application_service.category }}
+                                                    {{  inventory.application_service.category  }}
                                                 </template>
                                             </td>
                                             <td>
                                                 <template v-if="inventory.application_product">
-                                                    {{ inventory.application_product.unit.name }}
+                                                    {{  inventory.application_product.unit.name  }}
                                                 </template>
                                                 <template v-else-if="inventory.application_equipment">
-                                                    {{ inventory.application_equipment.unit.name }}
+                                                    {{  inventory.application_equipment.unit.name  }}
                                                 </template>
                                                 <template v-else-if="inventory.application_service">
-                                                    {{ inventory.application_service.unit }}
+                                                    {{  inventory.application_service.unit  }}
                                                 </template>
                                             </td>
-                                            <td>{{ inventory.quantity }}</td>
-                                            <td>{{ inventory.created_at }}</td>
+                                            <td>{{  inventory.quantity  }}</td>
+                                            <td>{{  inventory.created_at  }}</td>
                                         </tr>
                                     </tbody>
                                 </v-table>
@@ -230,6 +150,7 @@ export default {
                 flex: 1,
                 floatingFilter: true,
                 resizable: true,
+                suppressMovable: true,
             },
             localeText: {
                 selectAll: '(Выбрать все)',

@@ -68,6 +68,7 @@ export default {
         resizable: true,
         wrapText: true,
         autoHeight: true,
+        suppressMovable: true,
       },
       localeText: {
         selectAll: '(Выбрать все)',
