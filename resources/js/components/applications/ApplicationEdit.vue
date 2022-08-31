@@ -221,6 +221,7 @@
 
 
 
+
                                             }}
                                         </td>
                                     </template>
@@ -326,6 +327,7 @@
 
 
 
+
                                         }}</span>
                                 </td>
                                 <td>
@@ -368,6 +370,7 @@
                                     {{
                                      offer.price *
                                      offer.quantity
+
 
 
 
@@ -462,14 +465,14 @@
             <tr>
                 <td>{{  index + 1  }}</td>
                 <td>
-                    <!-- {{ item.category }} -->
-                    <multiselect v-model="services[index].category" :options="categories"
-                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                    {{  item.category  }}
+                    <!-- <multiselect v-model="services[index].category" :options="categories"
+                        placeholder="Укажите категорию" label="name" track-by="name"></multiselect> -->
                 </td>
                 <td>
-                    <v-text-field v-model="services[index].service" label="Напишите название" variant="underlined"
-                        required density="comfortable" type="text"></v-text-field>
-                    <!-- {{  item.service  }} -->
+                    <!-- <v-text-field v-model="services[index].service" label="Напишите название" variant="underlined"
+                        required density="comfortable" type="text"></v-text-field> -->
+                    {{  item.service  }}
                 </td>
                 <td>{{  item.unit  }}</td>
 
@@ -508,6 +511,7 @@
                         {{
                          services[index].quantity -
                          services[index].prepared
+
 
 
 
@@ -634,6 +638,7 @@
 
 
 
+
                     }}</span>
             </td>
             <td>
@@ -676,6 +681,7 @@
                 {{
                  offer.price *
                  offer.quantity
+
 
 
 
@@ -809,6 +815,7 @@
 
 
 
+
                         }}
                     </td>
                 </template>
@@ -923,6 +930,7 @@
 
 
 
+
                     }}</span>
             </td>
             <td>
@@ -965,6 +973,7 @@
                 {{
                  offer.price *
                  offer.quantity
+
 
 
 
@@ -1096,6 +1105,7 @@
 
 
 
+
                                             }}</strong>
                                         -
                                         {{
@@ -1103,6 +1113,7 @@
                                          .application_path
                                          .responsible
                                          .name
+
 
 
 
