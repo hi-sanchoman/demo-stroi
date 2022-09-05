@@ -6,8 +6,12 @@
                     <h3 class="w-full text-center mb-3">Вход в систему</h3>
 
                     <v-form ref="form">
-                        <v-text-field v-model="formData.email" label="Электронная почта" :error-messages="errors.email"
-                            required></v-text-field>
+                        <!-- <v-text-field v-model="formData.email" label="Электронная почта" :error-messages="errors.email"
+                            required></v-text-field> -->
+
+                        <multiselect class="mb-4" v-model="formData.email" :options="users"
+                            placeholder="Выберите пользователя" label="name" track-by="name">
+                        </multiselect>
 
                         <v-text-field v-model="formData.password" label="Пароль"
                             :append-icon="show ? 'mdi-eye' : 'mdi-eye-off'" :type="show ? 'text' : 'password'"
@@ -27,9 +31,14 @@
 
 <script>
 import axios from 'axios'
+import Multiselect from 'vue-multiselect'
 
 export default {
     name: 'Login',
+
+    components: {
+        Multiselect,
+    },
 
     data: () => ({
         valid: false,
@@ -41,11 +50,28 @@ export default {
             device_name: 'browser',
         },
 
+        users: [
+            { 'name': 'ПТО', value: 'ptd@mail.com' },
+            { 'name': 'Начальник ПТО', value: 'ptdchief@mail.com' },
+            { 'name': 'Главный инженер', value: 'engineer@mail.com' },
+            { 'name': 'Зам.директора по строительству', value: 'stroidir@mail.com' },
+            { 'name': 'Начальник снабжения', value: 'supervisor@mail.com' },
+            { 'name': 'Зав. склада', value: 'warehouse@mail.com' },
+            { 'name': 'Экономист', value: 'economist@mail.com' },
+            { 'name': 'Финансовый директор', value: 'findir@mail.com' },
+            { 'name': 'Бухгалтер', value: 'buh@mail.com' },
+            { 'name': 'Бригадир', value: 'brigadir@mail.com' },
+        ],
+
         errors: {},
     }),
 
     methods: {
         login() {
+            // console.log(this.formData);
+
+            this.formData.email = this.formData.email.value;
+
             axios.post('/api/v1/auth/login', this.formData).then((response) => {
                 localStorage.setItem('token', response.data)
                 // this.$router.push('/applications?status=redirect')
@@ -57,7 +83,8 @@ export default {
     },
 
     mounted() {
-
+        // this.formData.email = 'ptd@mail.com';
+        this.formData.password = 'password123';
     }
 }
 </script>
