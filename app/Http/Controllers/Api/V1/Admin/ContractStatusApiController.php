@@ -90,7 +90,7 @@ class ContractStatusApiController extends Controller
           }
 
           // TODO: hardcoded: kurtayev -> SET A ROLE, not an email!!!
-          if ($request->user()->email == 'kurtayev.meirzhan@mail.ru') {
+          if ($request->user()->email == 'stroidir@mail.com') {
               $contractStatus->contract->status = 'in_progress';
               // final responsible
           } else if (!$nextUsers) {

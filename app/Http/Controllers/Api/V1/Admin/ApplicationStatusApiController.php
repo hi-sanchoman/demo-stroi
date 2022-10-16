@@ -157,12 +157,12 @@ class ApplicationStatusApiController extends Controller
             }
 
             // TODO: hardcoded: kurtayev -> SET A ROLE, not an email!!!
-            if ($request->user()->email == 'kurtayev.meirzhan@mail.ru') {
+            if ($request->user()->email == 'stroidir@mail.com') {
                 $applicationStatus->application->status = 'in_progress';
                 $applicationStatus->application->is_accepted = 1;
             } 
             // TODO: hardcoded email of fin dir
-            else if ($request->user()->email == 'gulzhans81@mail.ru') {
+            else if ($request->user()->email == 'findir@mail.com') {
                 $this->_signAllPayments($applicationStatus->application);
             }
             // final responsible
