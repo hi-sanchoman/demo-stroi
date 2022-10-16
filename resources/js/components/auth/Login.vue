@@ -56,6 +56,7 @@
             { 'name': 'Начальник Участка', value: 'nachuch@mail.com' },
             { 'name': 'Главный инженер', value: 'engineer@mail.com' },
             { 'name': 'Зам.директора по строительству', value: 'stroidir@mail.com' },
+            { 'name': 'Снабженец', value: 'supplier@mail.com' },
             { 'name': 'Начальник снабжения', value: 'supervisor@mail.com' },
             { 'name': 'Зав. склада', value: 'warehouse@mail.com' },
             { 'name': 'Экономист', value: 'economist@mail.com' },
