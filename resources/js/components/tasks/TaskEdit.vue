@@ -41,7 +41,7 @@
             </v-list>
           </div>
 
-          <v-btn v-if="task.status === 'new'" class="mt-5" @click="start" color="green">
+          <v-btn v-if="task.status === 'new' && isResponsible()" class="mt-5" @click="start" color="green">
             Начать
           </v-btn>
 
@@ -92,6 +92,11 @@ export default {
   },
 
   methods: {
+    isResponsible() {
+      // $ids = this.task.responsibles.find(r => r.user_id)
+      return this.currentUser != null && this.task != null && this.task.responsibles.find(r => r.id == this.currentUser.id);
+    },
+
     getCurrentUser() {
       axios.get('/api/v1/me').then((response) => {
         this.currentUser = response.data;
@@ -112,6 +117,7 @@ export default {
 
     getTask() {
       axios.get(`/api/v1/tasks/${this.$route.params.id}`).then((response) => {
+        console.log(response.data);
         this.task = response.data;
 
         this.task.is_hurry = this.task.is_hurry === 1 ? true : false;

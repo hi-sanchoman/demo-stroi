@@ -99,7 +99,7 @@
                   </thead>
                   <tbody>
                     <tr v-for="(offer, index) in offers" :key="index">
-                      <td>{{ offer.application.id }}</td>
+                      <td>{{ offer.application.num ? offer.application.num : offer.application.id}}</td>
                       <td>{{ offer.construction.name }}</td>
                       <td>
                         <span v-if="offer.type === 'application'">{{ offer.data.product.name }}</span>

@@ -16,4 +16,8 @@ class ApplicationOpenedStatus extends Model
         'user_id',
         'status',
     ];
+
+    public function application() {
+        return $this->belongsTo(Application::class);
+    }
 }

@@ -6,10 +6,10 @@
       <td style="font-weight: bold">{{ $application->created_at->format('d/m/Y') }}</td>
     </tr>
     <tr>
-      <td colspan="6" style="font-weight: bold">ТОО "Демо Строй"</td>
+      <td colspan="6" style="font-weight: bold">ТОО "Онтүстік-құрылыс-сервис"</td>
     </tr>
     <tr>
-      <td colspan="6" style="font-weight: bold">Фамилия Имя</td>
+      <td colspan="6" style="font-weight: bold">Құртаеву А.Ә.</td>
     </tr>
     
     {{-- line break --}}
@@ -19,7 +19,7 @@
 
     {{--  --}}
     <tr>
-      <td colspan="6" style="text-align: center; font-weight: bold">Заявка №{{ $application->id }}</td>
+      <td colspan="6" style="text-align: center; font-weight: bold">Заявка №{{ $application->num ? $application->num : $application->id }}</td>
     </tr>
     <tr>
       <td colspan="6" style="text-align: center; font-weight: bold">на приобретение товарно-материальных ценностей</td>
@@ -94,6 +94,11 @@
     </tr>
 
     @foreach($statuses as $item)
+      @php
+        if (!$item['application_path'] || $item['status'] != 'accepted') continue;    
+      @endphp
+      
+      @endphp
       <tr style="border: 1px solid black;">
         <td style="border: 1px solid black;">{{ $loop->index + 1 }}</td>
         <td colspan="2" style="border: 1px solid black;">{{ $item['application_path']['position'] }} - {{ $item['application_path']['responsible']['name'] }}</td>

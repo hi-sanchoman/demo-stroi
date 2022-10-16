@@ -1,5 +1,5 @@
 <?php
 
 return [
-    'site_title' => 'Строительство',
+    'site_title' => 'OKS Oasis',
 ];

@@ -11,6 +11,15 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
     Route::apiResource('constructions', 'ConstructionApiController');
 
     // Application
+    Route::post('get-signers/{id}', 'ApplicationApiController@getSigners');
+    Route::get('parent-statuses/{id}', 'ApplicationApiController@getParentStatuses');
+    Route::get('/filter-applications', 'ApplicationApiController@filter');    
+    Route::post('sign-application-first-time/{id}', 'ApplicationApiController@signFirstTime');
+    Route::post('make-application-editable/{id}', 'ApplicationApiController@makeEditable');
+
+    Route::post('/check-offers', 'ApplicationApiController@checkOffers');
+    Route::get('/subapplications/{id}', 'ApplicationApiController@getSubApplications');
+
     Route::apiResource('applications', 'ApplicationApiController');
 
     // Application Products
@@ -28,6 +37,9 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
     // Application Offer
     Route::apiResource('application-offers', 'ApplicationOfferApiController');
+    
+    // Contract Status
+    Route::apiResource('contract-statuses', 'ContractStatusApiController');
 
 
     Route::put('/application-equipments/{id}/prepare', 'ApplicationEquipmentsApiController@prepare');
@@ -62,6 +74,8 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1\Admin', '
 
     // Inventory applications
     Route::apiResource('inventory-applications', 'InventoryApplicationApiController');
+
+    
 });
 
 
@@ -86,8 +100,8 @@ Route::post('/v1/auth/logout', [App\Http\Controllers\Api\V1\AuthController::clas
 
 // non admin
 Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middleware' => ['auth:sanctum']], function () {
-
     Route::get('users', 'UserController@index');
+
 
     Route::apiResource('products', 'ProductApiController');
     Route::apiResource('categories', 'CategoryApiController');
@@ -102,6 +116,12 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::get('companies/{id}/offers', 'CompanyApiController@offers');
 
     Route::apiResource('companies', 'CompanyApiController');
+
+    // contracts
+    Route::get('/contract-owners', 'ContractApiController@getOwners');    
+    Route::get('/filter-contracts', 'ContractApiController@filter');    
+    Route::apiResource('contracts', 'ContractApiController');
+    Route::put('contracts-first-sign/{id}', 'ContractApiController@signFirst');
 
     
     Route::post('tasks/{id}/start', 'TaskApiController@start');
@@ -122,7 +142,9 @@ Route::group(['prefix' => 'v1', 'as' => 'api.', 'namespace' => 'Api\V1', 'middle
     Route::put('/temp-inventory-accept/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'acceptIncoming']);
     Route::put('/temp-inventory-decline/{id}', [App\Http\Controllers\Api\V1\Admin\InventoryApiController::class, 'declineIncoming']);
 
-
+    
+    Route::post('comments/', 'ApplicationCommentApiController@store');
+    Route::post('contract-comments/', 'ContractCommentApiController@store');
 
 
 

@@ -52,6 +52,10 @@ class Application extends Model
         'updated_at',
         'deleted_at',
         'owner_id',
+        'num',
+        'parent_id',
+        'is_accepted',
+        'is_signed',
     ];
 
     public function applicationEquipments()
@@ -72,6 +76,11 @@ class Application extends Model
     public function applicationApplicationStatuses()
     {
         return $this->hasMany(ApplicationStatus::class, 'application_id', 'id');
+    }
+
+    public function comments()
+    {
+        return $this->hasMany(ApplicationComment::class, 'application_id', 'id')->orderBy('created_at', 'desc');
     }
 
     public function construction()
@@ -108,5 +117,10 @@ class Application extends Model
     public function owner()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function parent()
+    {
+        return $this->belongsTo(Application::class, 'parent_id');
     }
 }

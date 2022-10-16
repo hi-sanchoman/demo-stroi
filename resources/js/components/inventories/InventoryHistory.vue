@@ -5,7 +5,7 @@
 
         <v-row no-gutters>
             <v-col cols="12">
-                <h1 v-if="inventory != null" class="w-full text-left">Склад: {{  inventory.construction.name  }}</h1>
+                <h1 v-if="inventory != null" class="w-full text-left">Склад: {{ inventory.construction.name }}</h1>
             </v-col>
         </v-row>
 
@@ -23,7 +23,7 @@
                 </ag-grid-vue>
 
 
-                <v-table transition="slide-x-transition" style="overflow-x:auto;">
+                <!-- <v-table transition="slide-x-transition" style="overflow-x:auto;">
                     <thead>
                         <tr>
                             <th class="text-left">
@@ -54,11 +54,10 @@
                             <td>{{  item.user.email  }}</td>
                             <td>{{  item.created_at  }}</td>
                             <td>
-                                <!-- Management -->
-                            </td>
-                        </tr>
-                    </tbody>
-                </v-table>
+                </td>
+                </tr>
+                </tbody>
+                </v-table> -->
             </v-col>
         </v-row>
 

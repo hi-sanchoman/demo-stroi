@@ -74,4 +74,8 @@ class ConstructionController extends Controller
 
         return response(null, Response::HTTP_NO_CONTENT);
     }
+
+    public function exportPayments(Request $request) {
+        return 1;
+    }
 }

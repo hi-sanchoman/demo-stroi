@@ -5,7 +5,7 @@
 
       <v-toolbar-title class="flex-grow-1">
         <router-link to="/" class="text-decoration-none text-white">
-          Строительство
+          OKS Oasis
         </router-link>
       </v-toolbar-title>
 
@@ -22,7 +22,7 @@
         </router-link>
 
         <router-link
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Warehouse Manager' || currentUser.roles[0].title == 'Section Manager' || currentUser.roles[0].title == 'Foreman')"
+          v-if="currentUser != null && (currentUser.roles[0].title == 'PTD Engineer' || currentUser.roles[0].title == 'Warehouse Manager' || currentUser.roles[0].title == 'Section Manager' || currentUser.roles[0].title == 'Foreman')"
           to="/inventories" class="text-decoration-none">
           <v-btn flat class="text-white">Склады</v-btn>
         </router-link>
@@ -33,13 +33,14 @@
         </router-link>
 
         <router-link
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor' || currentUser.roles[0].title == 'Economist' || currentUser.roles[0].title == 'Supplier')"
+          v-if="currentUser != null && (currentUser.roles[0].title == 'CEO' || currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Material Accountant' || currentUser.roles[0].title == 'Chief Financial Officer' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor' || currentUser.roles[0].title == 'Economist' || currentUser.roles[0].title == 'Supplier')"
           to="/payments" class="text-decoration-none">
           <v-btn flat class="text-white">Реестр платежей</v-btn>
         </router-link>
 
-        <router-link v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'" to="/supplies"
-          class="text-decoration-none">
+        <router-link
+          v-if="currentUser != null && (currentUser.roles[0].title == 'CEO' || currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Material Accountant' || currentUser.roles[0].title == 'Chief Financial Officer')"
+          to="/supplies" class="text-decoration-none">
           <v-btn flat class="text-white">Накопители</v-btn>
         </router-link>
 
@@ -48,7 +49,18 @@
         </router-link>
 
         <router-link
-          v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman' || currentUser.roles[0].title != 'Warehouse Manager')"
+          v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman' && currentUser.roles[0].title != 'Warehouse Manager')"
+          to="/contracts?status=all" class="text-decoration-none">
+          <v-btn flat class="text-white">
+            Договоры
+            <span v-if="store.badgeContracts > 0">
+              <v-badge color="error" :content="store.badgeContracts" inline></v-badge>
+            </span>
+          </v-btn>          
+        </router-link>
+
+        <router-link
+          v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman' && currentUser.roles[0].title != 'Warehouse Manager')"
           to="/companies" class="text-decoration-none">
           <v-btn flat class="text-white">Клиенты</v-btn>
         </router-link>
@@ -119,7 +131,7 @@
         </v-list-item>
 
         <v-list-item
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Warehouse Manager' || currentUser.roles[0].title == 'Section Manager' || currentUser.roles[0].title == 'Foreman')">
+          v-if="currentUser != null && (currentUser.roles[0].title == 'PTD Engineer' || currentUser.roles[0].title == 'Warehouse Manager' || currentUser.roles[0].title == 'Section Manager' || currentUser.roles[0].title == 'Foreman')">
           <router-link to="/inventories" class="text-decoration-none">
             <v-btn flat class="">Склады</v-btn>
           </router-link>
@@ -132,13 +144,14 @@
         </v-list-item>
 
         <v-list-item
-          v-if="currentUser != null && (currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor' || currentUser.roles[0].title == 'Economist' || currentUser.roles[0].title == 'Supplier')">
+          v-if="currentUser != null && (currentUser.roles[0].title == 'CEO' || currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Material Accountant' || currentUser.roles[0].title == 'Chief Financial Officer' || currentUser.roles[0].title == 'Accountant' || currentUser.roles[0].title == 'Supervisor' || currentUser.roles[0].title == 'Economist' || currentUser.roles[0].title == 'Supplier')">
           <router-link to="/payments" class="text-decoration-none">
             <v-btn flat class="">Реестр платежей</v-btn>
           </router-link>
         </v-list-item>
 
-        <v-list-item v-if="currentUser != null && currentUser.roles[0].title == 'Vice President'">
+        <v-list-item
+          v-if="currentUser != null && (currentUser.roles[0].title == 'CEO' || currentUser.roles[0].title == 'Vice President' || currentUser.roles[0].title == 'Chief Financial Officer')">
           <router-link to="/supplies" class="text-decoration-none">
             <v-btn flat class="">Накопители</v-btn>
           </router-link>
@@ -151,7 +164,18 @@
         </v-list-item>
 
         <v-list-item
-          v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman' || currentUser.roles[0].title != 'Warehouse Manager')">
+          v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman' && currentUser.roles[0].title != 'Warehouse Manager')">
+          <router-link to="/contracts?status=all" class="text-decoration-none">
+            <v-btn flat class="">
+              Договоры
+              
+              <v-badge v-if="store.badgeContracts > 0" color="error" :content="store.badgeContracts" inline></v-badge>
+            </v-btn>
+          </router-link>
+        </v-list-item>
+
+        <v-list-item
+          v-if="currentUser != null && (currentUser.roles[0].title != 'Foreman' && currentUser.roles[0].title != 'Warehouse Manager')">
           <router-link to="/companies" class="text-decoration-none">
             <v-btn flat class="">Клиенты</v-btn>
           </router-link>
@@ -326,8 +350,16 @@ export default {
 
     getCountNewApplications() {
       axios.get('/api/v1/badges-unread?type=applications').then((response) => {
-        this.store.badgeNew = response.data;
+        this.store.badgeNew = response.data.total;
+        this.store.badges = response.data.badges;
+        console.log(this.store.badges);
       });
+
+      axios.get('/api/v1/badges-unread?type=contracts').then((response) => {
+        this.store.badgeContracts = response.data.total;
+        console.log('contract badges', this.store.badgeContracts);
+      });
+
     }
   },
 

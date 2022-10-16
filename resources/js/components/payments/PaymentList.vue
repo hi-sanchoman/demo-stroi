@@ -18,6 +18,20 @@
             <v-col cols="12" class="mb-5">
                 <v-btn @click="chosenObject = null" size="small">Выбрать другой объект</v-btn>
                 <h2>Реестр платежей</h2>
+
+                <div class="d-flex space-x-4">
+                    <a v-if="isEconomist()" size="small" color="primary"
+                        class="mt-3 v-btn v-btn--elevated v-theme--light v-btn--density-default v-btn--size-small v-btn--variant-contained"
+                        :href="`/export/payments/${chosenObject.id}`">Скачать реестр</a>
+
+                    <a v-if="isEconomist()" size="small" color="primary"
+                        class="mt-3 ml-3 v-btn v-btn--elevated v-theme--light v-btn--density-default v-btn--size-small v-btn--variant-contained"
+                        :href="`/export/payments/${chosenObject.id}?to_be_paid=1`">Скачать на оплате</a>
+
+                    <a v-if="isEconomist()" size="small" color="primary"
+                        class="mt-3 ml-3 v-btn v-btn--elevated v-theme--light v-btn--density-default v-btn--size-small v-btn--variant-contained"
+                        :href="`/export/payments/${chosenObject.id}?positions=1`">Скачать по позициям</a>
+                </div>
             </v-col>
 
             <v-col cols="12" class="">
@@ -38,6 +52,9 @@
                                 </th> -->
                             <th class="text-left">
                                 Компания
+                            </th>
+                            <th class="text-left">
+                                Счета на оплату
                             </th>
                             <th>
                                 Сумма
@@ -64,11 +81,15 @@
                         <template v-for="payment in payments" :key="payment.id">
                             <tr>
                                 <td>{{ payment.application.construction.name }}</td>
-                                <td @click="goToApplication(payment.application.id)" style="cursor:pointer">
-                                    <span class="">{{ payment.application.id
-                                    }}</span>
+                                <td style="cursor:pointer">
+                                    <span @click="goToApplication(payment.application.parent_id ? payment.application.parent_id : payment.application.id)" class="">
+                                        {{ payment.application.num ? payment.application.num : payment.application.id }}
+                                    </span>
                                     <br />
                                     {{ getKind(payment.application.kind) }}
+                                    <br />
+                                    <a class="mb-1" :href="`/export/application/${payment.application.parent_id ? payment.application.parent_id : payment.application.id}`">скачать
+                                        заявку</a>
                                 </td>
                                 <!-- <td width="30%">{{ payment.application_product.product.name }}</td> -->
                                 <!-- <td>{{ payment.quantity }} {{ payment.application_product.product.unit }}</td> -->
@@ -81,16 +102,24 @@
                                         Показать позиции
                                     </v-btn>
                                 </td>
-                                <td>{{ payment.amount }} ₸</td>
-                                <td>{{ payment.paid }} ₸</td>
-                                <td>{{ (payment.amount - payment.paid) }} ₸</td>
+                                <td>
+                                    <a v-for="(file, index) in payment.files" :key="index"
+                                        class="block px-2 py-1 mb-1 text-sm border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                        target="_blank" :href="'/uploads/' + file"
+                                        style="display: block; min-width: 120px">
+                                        Счет на оплату - {{ index + 1 }}
+                                    </a>
+                                </td>
+                                <td>{{ payment.amount.toLocaleString('ru') }} ₸</td>
+                                <td>{{ payment.paid.toLocaleString('ru') }} ₸</td>
+                                <td>{{ (payment.amount - payment.paid).toLocaleString('ru') }} ₸</td>
                                 <td class="pt-6">
                                     <v-text-field v-model="payment.order_paid" type="number" density="compact"
                                         class="w-24" variant="underlined" style="width: 150px">
                                     </v-text-field>
                                 </td>
                                 <td>
-                                    {{ payment.to_be_paid ? `${payment.to_be_paid} ₸` : '' }}
+                                    {{ payment.to_be_paid ? `${payment.to_be_paid.toLocaleString('ru')} ₸` : '' }}
                                 </td>
                             </tr>
 
@@ -121,10 +150,10 @@
                                 }}
                             </td>
                             <td>
-                                {{ offer.price }} ₸
+                                {{ offer.price.toLocaleString('ru') }} ₸
                             </td>
                             <td>
-                                {{ offer.price * offer.quantity }} ₸
+                                {{ (offer.price * offer.quantity).toLocaleString('ru') }} ₸
                             </td>
                         </tr>
                         <tr v-for="offer in payment.equipment_offers" :key="offer.id">
@@ -138,10 +167,10 @@
                                 {{ offer.quantity }} {{ offer.application_equipment.unit.name }}
                             </td>
                             <td>
-                                {{ offer.price }} ₸
+                                {{ offer.price.toLocaleString('ru') }} ₸
                             </td>
                             <td>
-                                {{ offer.price * offer.quantity }} ₸
+                                {{ (offer.price * offer.quantity).toLocaleString('ru') }} ₸
                             </td>
                         </tr>
                         <tr v-for="offer in payment.service_offers" :key="offer.id">
@@ -155,10 +184,10 @@
                                 {{ offer.quantity }} {{ offer.application_service.unit }}
                             </td>
                             <td>
-                                {{ offer.price }} ₸
+                                {{ offer.price.toLocaleString('ru') }} ₸
                             </td>
                             <td>
-                                {{ offer.price * offer.quantity }} ₸
+                                {{ (offer.price * offer.quantity).toLocaleString('ru') }} ₸
                             </td>
                         </tr>
 
@@ -171,10 +200,10 @@
 
 
 <tr v-if="payments.length > 0">
-    <td colspan="3" class="text-right">ИТОГ</td>
-    <td>{{ payments.reduce((acc, i) => acc + i.amount, 0) }} ₸</td>
-    <td>{{ payments.reduce((acc, i) => acc + i.paid, 0) }} ₸</td>
-    <td>{{ payments.reduce((acc, i) => acc + i.amount - i.paid, 0) }} ₸</td>
+    <td colspan="4" class="text-right">ИТОГ</td>
+    <td>{{ payments.reduce((acc, i) => acc + i.amount, 0).toLocaleString('ru') }} ₸</td>
+    <td>{{ payments.reduce((acc, i) => acc + i.paid, 0).toLocaleString('ru') }} ₸</td>
+    <td>{{ payments.reduce((acc, i) => acc + i.amount - i.paid, 0).toLocaleString('ru') }} ₸</td>
     <td colspan="2"></td>
 </tr>
 </tbody>
@@ -237,6 +266,10 @@ export default {
     },
 
     methods: {
+        isEconomist() {
+            return this.currentUser.roles[0].title === 'Economist';
+        },
+
         getCurrentUser() {
             axios.get('/api/v1/me').then((response) => {
                 this.currentUser = response.data
@@ -307,8 +340,8 @@ export default {
 
         selectConstruction(c) {
             this.chosenObject = c;
-            this.rowData.value = [];
-            this.getSupplies(c);
+            // this.rowData.value = [];
+            this.getPayments(c);
         }
 
     },

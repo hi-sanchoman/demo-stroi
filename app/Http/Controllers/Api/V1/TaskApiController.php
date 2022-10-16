@@ -64,18 +64,20 @@ class TaskApiController extends Controller
         
         if($responsibles) {
           foreach ($responsibles as $user) {
+            // dd($user);
             PivotTaskUser::create(['task_id' => $task->id, 'user_id' => $user['id']]);
+            $userDb = User::find($user['id']);
 
-            // notify via email
-            Mail::to($user['email'])->send(new TaskAssigned($task));
+            // // notify via email
+            // Mail::to($userDb->email)->send(new TaskAssigned($task));
 
-            // notify via push
-            if ($user['device_token'] != null) {
-              $messaging = app('firebase.messaging');
-              $message = CloudMessage::withTarget('token', $user['device_token'])
-                  ->withNotification(Notification::create('Новая задача', 'Вам назначили новую задачу'));
-              $messaging->send($message);
-            }
+            // // notify via push
+            // if ($userDb->device_token != null) {
+            //   $messaging = app('firebase.messaging');
+            //   $message = CloudMessage::withTarget('token', $userDb->device_token)
+            //       ->withNotification(Notification::create('Новая задача', 'Вам назначили новую задачу'));
+            //   $messaging->send($message);
+            // }
           }
         }
 

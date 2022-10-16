@@ -1,81 +1,185 @@
 <template>
-    <div style="padding: 20px;">
+    <div style="padding: 20px">
         <!-- <v-container> -->
         <!-- <v-row no-gutters>
                 <v-col cols="12">
                     <h1 class="w-full text-left">Заявки</h1>
                 </v-col>
             </v-row> -->
+        <v-row no-gutters="">
+            <v-btn
+                v-if="currentUser != null && application != null"
+                class="mb-5"
+                @click="backToList()"
+            >
+                Назад к списку заявок
+            </v-btn>
+        </v-row>
 
-        <v-row no-gutters class="mt-10">
-            <v-col cols="12" md="3" class="border px-5 py-5">
-                <ApplicationSidebar v-if="currentUser != null" :currentUser="currentUser" />
+        <v-row no-gutters class="mt-3 mt-sm-10 d-flex flex-column-reverse flex-sm-row">
+            <v-col cols="12" md="3" class="">            
+                <ApplicationSidebar
+                    v-if="currentUser != null && application != null"
+                    :currentUser="currentUser"
+                />
+
+                <div v-if="currentUser != null && application != null">
+                    <h4 class="mt-4">Комментарии к заявке:</h4>
+
+                    <div class="d-flex flex-column">
+                        <div class="d-flex flex">
+                            <v-text-field
+                                v-model="comment"
+                                variant="underlined"
+                            />
+                            <v-btn @click="sendComment" size="small">Отправить</v-btn>
+                        </div>
+
+                        <div
+                            class="d-flex flex-column"
+                            style="height: 500px; overflow-y: auto"
+                        >
+                            <div
+                                v-for="comment in application.comments"
+                                :key="comment.id"
+                                class="d-flex flex-column mb-4"
+                            >
+                                <div>
+                                    <strong>{{ comment.user.name }}</strong>
+                                </div>
+                                <div class="text-body-2" style="color: #ccc">
+                                    {{ comment.created_at }}
+                                </div>
+                                <div>
+                                    {{ comment.comment }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </v-col>
 
-            <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
+            <v-col
+                v-if="currentUser != null && application != null"
+                cols="12"
+                md="9"
+                class="pl-0 pl-md-5 mt-6 mt-md-0"
+            >
                 <div v-if="errors">
-                    <div v-for="(v, k) in errors" :key="k"
-                        class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0">
+                    <div
+                        v-for="(v, k) in errors"
+                        :key="k"
+                        class="bg-red-500 text-white rounded font-bold mb-4 shadow-lg py-2 px-4 pr-0"
+                    >
                         <p v-for="error in v" :key="error" class="text-sm">
-                            {{  error  }}
+                            {{ error }}
                         </p>
                     </div>
                 </div>
 
                 <v-form class="space-y-6">
-                    <v-row v-if="
-                        application != null &&
-                        application.status != 'draft'
-                    " class="mb-5">
+                    <v-row
+                        v-if="
+                            application != null && application.status != 'draft'
+                        "
+                        class="mb-5"
+                    >
                         <v-col cols="12">
-                            <strong>Заявка №{{  application.id  }}</strong><br />
-                            Дата заявки: {{  application.issued_at  }}
-                            <a class="mb-1"
-                                v-if="application != null && application.status == 'in_progress' && isPTDEngineer()"
-                                :href="`/export/application/${application.id}`">скачать
-                                заявку</a>
+                            <strong
+                                >Заявка №{{
+                                    application.parent?.num ?? application.num ?? `(${application.id})`
+                                }}</strong
+                            ><br />
+                            Дата заявки: {{ application.parent?.created_at ?? application?.created_at }}
+                            <a
+                                class="mb-1"
+                                v-if="
+                                    application != null &&
+                                    application.is_accepted &&
+                                    isPTDEngineer()
+                                "
+                                :href="`/export/application/${application.id}`"
+                                >скачать заявку</a
+                            >
                         </v-col>
                     </v-row>
 
-                    <multiselect v-model="form.construction" :options="constructions"
-                        placeholder="Укажите строительный объект" :disabled="
-                            application != null &&
-                            application.status != 'draft'
-                        " label="name" track-by="name">
+                    <multiselect
+                        v-model="form.construction"
+                        :options="constructions"
+                        placeholder="Укажите строительный объект"
+                        :disabled="
+                            application != null && application.status != 'draft'
+                        "
+                        label="name"
+                        track-by="name"
+                    >
                     </multiselect>
 
-                    <v-row v-if="
-                        application != null &&
-                        application.status == 'draft'
-                    " class="mt-5">
-                        <v-col v-if="application.kind == 'product'" cols="12">Добавить товар к заявке:</v-col>
-                        <v-col v-else-if="application.kind == 'equipment'" cols="12">Добавить спец. технику к
-                            заявке:
+                    <v-row
+                        v-if="
+                            application != null && application.status == 'draft'
+                        "
+                        class="mt-5"
+                    >
+                        <v-col v-if="application.kind == 'product'" cols="12"
+                            >Добавить товар к заявке:</v-col
+                        >
+                        <v-col
+                            v-else-if="application.kind == 'equipment'"
+                            cols="12"
+                            >Добавить спец. технику к заявке:
                         </v-col>
-                        <v-col v-else-if="application.kind == 'service'" cols="12">Добавить услугу к заявке:</v-col>
+                        <v-col
+                            v-else-if="application.kind == 'service'"
+                            cols="12"
+                            >Добавить услугу к заявке:</v-col
+                        >
                     </v-row>
 
-                    <v-row v-if="
-                        application != null &&
-                        application.status == 'draft'
-                    ">
+                    <v-row
+                        v-if="
+                            application != null && application.status == 'draft'
+                        "
+                    >
                         <template v-if="application.kind == 'product'">
                             <v-col cols="12" md="3">
-                                <multiselect v-model="current.category" :options="categories"
-                                    placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                                <multiselect
+                                    v-model="current.category"
+                                    :options="categories"
+                                    placeholder="Укажите категорию"
+                                    label="name"
+                                    track-by="name"
+                                ></multiselect>
                             </v-col>
 
                             <v-col cols="12" md="3">
-                                <multiselect v-model="current.product" placeholder="Укажите товар" label="name"
-                                    track-by="name" :options="options" :multiple="false" :searchable="true"
-                                    :loading="isLoading" @search-change="asyncFind" :selectLabel="''"
-                                    :deselectLabel="''">
+                                <multiselect
+                                    v-model="current.product"
+                                    placeholder="Укажите товар"
+                                    label="name"
+                                    track-by="name"
+                                    :options="options"
+                                    :multiple="false"
+                                    :searchable="true"
+                                    :loading="isLoading"
+                                    @search-change="asyncFind"
+                                    :selectLabel="''"
+                                    :deselectLabel="''"
+                                >
                                 </multiselect>
                             </v-col>
 
                             <v-col cols="12" md="2">
-                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
-                                    track-by="name" :selectLabel="''" :deselectLabel="''">
+                                <multiselect
+                                    v-model="current.unit"
+                                    :options="units"
+                                    placeholder="Ед. изм."
+                                    label="name"
+                                    track-by="name"
+                                    :selectLabel="''"
+                                    :deselectLabel="''"
+                                >
                                 </multiselect>
                             </v-col>
                         </template>
@@ -83,8 +187,13 @@
                         <!-- Equipment -->
                         <template v-else-if="application.kind == 'equipment'">
                             <v-col cols="12" md="4">
-                                <multiselect v-model="current.equipment" :options="equipmentOptions"
-                                    placeholder="Укажите спец. технику" label="name" track-by="name"></multiselect>
+                                <multiselect
+                                    v-model="current.equipment"
+                                    :options="equipmentOptions"
+                                    placeholder="Укажите спец. технику"
+                                    label="name"
+                                    track-by="name"
+                                ></multiselect>
                             </v-col>
 
                             <!-- <v-col cols="12" md="2">
@@ -93,11 +202,17 @@
                                 </v-col> -->
 
                             <v-col cols="12" md="2">
-                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
-                                    track-by="name" :selectLabel="''" :deselectLabel="''">
+                                <multiselect
+                                    v-model="current.unit"
+                                    :options="units"
+                                    placeholder="Ед. изм."
+                                    label="name"
+                                    track-by="name"
+                                    :selectLabel="''"
+                                    :deselectLabel="''"
+                                >
                                 </multiselect>
                             </v-col>
-
                         </template>
 
                         <!-- Service -->
@@ -107,13 +222,24 @@
                                         variant="underlined" required density="comfortable" type="text"></v-text-field>
                                 </v-col> -->
                             <v-col cols="12" md="2">
-                                <multiselect v-model="current.category" :options="categories"
-                                    placeholder="Укажите категорию" label="name" track-by="name"></multiselect>
+                                <multiselect
+                                    v-model="current.category"
+                                    :options="categories"
+                                    placeholder="Укажите категорию"
+                                    label="name"
+                                    track-by="name"
+                                ></multiselect>
                             </v-col>
 
                             <v-col cols="12" md="3">
-                                <v-text-field v-model="current.service" label="Напишите название" variant="underlined"
-                                    required density="comfortable" type="text"></v-text-field>
+                                <v-text-field
+                                    v-model="current.service"
+                                    label="Напишите название"
+                                    variant="underlined"
+                                    required
+                                    density="comfortable"
+                                    type="text"
+                                ></v-text-field>
                             </v-col>
 
                             <!-- <v-col cols="12" md="2">
@@ -121,42 +247,81 @@
                                         density="comfortable" type="text"></v-text-field>
                                 </v-col> -->
                             <v-col cols="12" md="2">
-                                <multiselect v-model="current.unit" :options="units" placeholder="Ед. изм." label="name"
-                                    track-by="name" :selectLabel="''" :deselectLabel="''">
+                                <multiselect
+                                    v-model="current.unit"
+                                    :options="units"
+                                    placeholder="Ед. изм."
+                                    label="name"
+                                    track-by="name"
+                                    :selectLabel="''"
+                                    :deselectLabel="''"
+                                >
                                 </multiselect>
                             </v-col>
 
                             <v-col cols="12" md="1">
-                                <v-text-field v-model="current.price" label="Цена за ед." variant="underlined" required
-                                    density="comfortable" type="number"></v-text-field>
+                                <v-text-field
+                                    v-model="current.price"
+                                    label="Цена за ед."
+                                    variant="underlined"
+                                    required
+                                    density="comfortable"
+                                    type="number"
+                                ></v-text-field>
                             </v-col>
                         </template>
 
                         <!-- Common -->
                         <v-col cols="12" md="1">
-                            <v-text-field v-model="current.quantity" label="Количество" @keyup.enter="addProduct()"
-                                variant="underlined" required density="comfortable" type="number"></v-text-field>
+                            <v-text-field
+                                v-model="current.quantity"
+                                label="Количество"
+                                @keyup.enter="addProduct()"
+                                variant="underlined"
+                                required
+                                density="comfortable"
+                                type="number"
+                            ></v-text-field>
                         </v-col>
 
                         <v-col cols="12" md="2">
-                            <v-textarea v-if="current.isAddNotes" outlined v-model="current.notes" label="Примечание"
-                                variant="underlined" density="comfortable" @keyup.enter="addProduct()"></v-textarea>
-                            <v-btn v-if="!current.isAddNotes" color="" size="small" @click="showNotes()">
+                            <v-textarea
+                                v-if="current.isAddNotes"
+                                outlined
+                                v-model="current.notes"
+                                label="Примечание"
+                                variant="underlined"
+                                density="comfortable"
+                                @keyup.enter="addProduct()"
+                            ></v-textarea>
+                            <v-btn
+                                v-if="!current.isAddNotes"
+                                color=""
+                                size="small"
+                                @click="showNotes()"
+                            >
                                 + примечание
                             </v-btn>
                         </v-col>
 
                         <v-col cols="12" md="1">
-                            <v-btn size="small" color="primary" @click="addProduct()">
+                            <v-btn
+                                size="small"
+                                color="primary"
+                                @click="addProduct()"
+                            >
                                 <v-icon>mdi-plus</v-icon>
                             </v-btn>
                         </v-col>
                     </v-row>
 
-                    <v-table style="" v-if="
-                        application != null &&
-                        application.kind == 'product'
-                    ">
+                    <!-- PRODUCTS table -->
+                    <v-table
+                        style=""
+                        v-if="
+                            application != null && application.kind == 'product'
+                        "
+                    >
                         <thead>
                             <tr>
                                 <th>№</th>
@@ -164,7 +329,9 @@
                                 <th>Наименование ресурсов</th>
                                 <th>Ед. изм.</th>
 
-                                <th v-if="application.status === 'draft'">Кол-во</th>
+                                <th v-if="application.status === 'draft'">
+                                    Кол-во
+                                </th>
                                 <template v-else>
                                     <th>заказано</th>
                                     <th>фактически</th>
@@ -177,100 +344,122 @@
                         </thead>
 
                         <tbody>
-                            <template v-for="(item, index) in products" :key="item.id">
+                            <template
+                                v-for="(item, index) in products"
+                                :key="item.id"
+                            >
                                 <tr>
-                                    <td>{{  index + 1  }}</td>
                                     <td>
-                                        {{  item.category?.name  }}
+                                        <v-checkbox v-if="isSupplier()" v-model="positions"
+                                            color="primary" :value="item.id" hide-details>
+                                        </v-checkbox>
+                                        <span v-if="!isSupplier()">{{ index + 1 }}</span>
                                     </td>
-                                    <td>{{  item.product?.name  }}</td>
-                                    <td>{{  item.unit?.name  }}</td>
+                                    <td style="width: 20%">
+                                        {{ item.category?.name }}
+                                    </td>
+                                    <td>{{ item.product?.name }}</td>
+                                    <td>{{ item.unit?.name }}</td>
 
-                                    <td v-if="application.status === 'draft'" :class="
-                                        application.status === 'draft'
-                                            ? 'd-flex mt-3'
-                                            : ''
-                                    ">
-                                        <v-text-field v-model="
-                                            products[index].quantity
-                                        " type="number" variant="plain" density="compact" v-if="
-    application.status ==
-    'draft'
-">
+                                    <td
+                                        v-if="application.status === 'draft'"
+                                        :class="
+                                            application.status === 'draft'
+                                                ? 'd-flex mt-3'
+                                                : ''
+                                        "
+                                    >
+                                        <v-text-field
+                                            v-model="products[index].quantity"
+                                            type="number"
+                                            variant="plain"
+                                            density="compact"
+                                            v-if="application.status == 'draft'"
+                                        >
                                         </v-text-field>
 
                                         <!-- <span v-if="!isPTDEngineer()">
                                                 {{ products[index].prepared }} /
                                             </span> -->
 
-                                        <span v-if="
-                                            application.status !=
-                                            'draft'
-                                        ">
-                                            {{  products[index].quantity  }}
+                                        <span
+                                            v-if="application.status != 'draft'"
+                                        >
+                                            {{ products[index].quantity?.toLocaleString('ru') }}
                                         </span>
                                     </td>
 
                                     <template v-else>
                                         <td>
-                                            {{  products[index].quantity  }}
+                                            {{ products[index].quantity?.toLocaleString('ru') }}
                                         </td>
                                         <td>
-                                            {{  products[index].prepared  }}
+                                            {{ products[index].prepared?.toLocaleString('ru') }}
                                         </td>
                                         <td>
                                             {{
-                                             products[index].quantity -
-                                             products[index].prepared
-
-
-
-
-
-
+                                                (products[index].quantity -
+                                                products[index].prepared)?.toLocaleString('ru')
                                             }}
                                         </td>
                                     </template>
 
-                                    <td>{{  item.notes  }}</td>
+                                    <td>{{ item.notes }}</td>
 
                                     <td>
-                                        <v-btn v-if="
-                                            application.status ==
-                                            'draft'
-                                        " size="small" color="error" @click="deleteProduct(item)">
+                                        <v-btn
+                                            v-if="application.status == 'draft'"
+                                            size="small"
+                                            color="error"
+                                            @click="deleteProduct(item)"
+                                        >
                                             <v-icon>mdi-close</v-icon>
                                         </v-btn>
 
-                                        <v-btn v-if="
-                                            application.status ==
-                                            'in_progress' &&
-                                            isSupplier()
-                                        " @click="addOffer(item.id)" color="info" size="small">
+                                        <v-btn
+                                            v-if="
+                                                application.status ==
+                                                    'in_progress' &&
+                                                isSupplier()
+                                            "
+                                            @click="addOffer(item.id)"
+                                            color="info"
+                                            size="small"
+                                        >
                                             + компания
                                         </v-btn>
 
-                                        <v-btn v-if="
-                                            isWarehouseManager() &&
-                                            products[index].quantity !=
-                                            products[index].prepared
-                                        " @click="showAcceptProduct(item)" color="info" size="small">
+                                        <v-btn
+                                            v-if="
+                                                isWarehouseManager() &&
+                                                products[index].quantity !=
+                                                    products[index].prepared
+                                            "
+                                            @click="showAcceptProduct(item)"
+                                            color="info"
+                                            size="small"
+                                        >
                                             принять товар
                                         </v-btn>
                                     </td>
                                 </tr>
 
-                                <tr v-if="
-                                    !isWarehouseManager() &&
-                                    item.offers != null &&
-                                    item.offers.length > 0 &&
-                                    (application.status ==
-                                        'in_progress' ||
-                                        application.status ==
-                                        'in_review')
-                                " class="bg-slate-100">
+                                <tr
+                                    v-if="
+                                        isSecondCrew() &&
+                                        !isWarehouseManager() &&
+                                        item.offers != null &&
+                                        item.offers.length > 0 &&
+                                        (application.status == 'in_progress' ||
+                                            application.status == 'in_review')
+                                    "
+                                    class="bg-slate-100"
+                                >
                                     <td colspan="9" class="border-none">
-                                        <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
+                                        <v-table
+                                            class="mt-4 mb-8 mx-0 border"
+                                            style="overflow: visible"
+                                        >
                                             <thead>
                                                 <tr>
                                                     <th style="width: 25%">
@@ -287,1162 +476,2152 @@
                                                     <th></th>
                                                 </tr>
                                             </thead>
-                        <tbody>
-                            <tr v-for="offer in item.offers" :key="offer.id">
-                                <td class="">
-                                    <!-- <v-text-field
+                                            <tbody>
+                                                <tr
+                                                    v-for="offer in item.offers"
+                                                    :key="offer.id"
+                                                >
+                                                    <td class="">
+                                                        <!-- <v-text-field
                                                                 v-if="offer.status == 'draft' && isEditable()"
                                                                 v-model="offer.name"
                                                                 type="text"
                                                                 variant="underlined"
                                                                 required
                                                             ></v-text-field> -->
-                                    <div class="flex">
-                                        <multiselect v-if="
-                                            offer.status ==
-                                            'draft' &&
-                                            isEditable()
-                                        " v-model="
-    offer.company
-" :options="
-    companies
-" placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
-                                        </multiselect>
+                                                        <div class="flex">
+                                                            <multiselect
+                                                                v-if="
+                                                                    offer.status ==
+                                                                        'draft' &&
+                                                                    isEditable()
+                                                                "
+                                                                v-model="
+                                                                    offer.company
+                                                                "
+                                                                :options="
+                                                                    companies
+                                                                "
+                                                                placeholder="Укажите компанию"
+                                                                label="name"
+                                                                track-by="id"
+                                                                :selectLabel="''"
+                                                                :deselectLabel="''"
+                                                            >
+                                                            </multiselect>
 
-                                        <router-link v-if="
-                                            offer.status ==
-                                            'draft' &&
-                                            isEditable()
-                                        " class="mt-1 text-underline-none" to="/companies/create" target="_blank">
-                                            <v-btn color="primary" size="x-small" plain>
-                                                Добавить компанию
-                                            </v-btn>
-                                        </router-link>
-                                    </div>
+                                                            <router-link
+                                                                v-if="
+                                                                    offer.status ==
+                                                                        'draft' &&
+                                                                    isEditable()
+                                                                "
+                                                                class="mt-1 text-underline-none"
+                                                                to="/companies/create"
+                                                                target="_blank"
+                                                            >
+                                                                <v-btn
+                                                                    color="primary"
+                                                                    size="x-small"
+                                                                    plain
+                                                                >
+                                                                    Добавить
+                                                                    компанию
+                                                                </v-btn>
+                                                            </router-link>
+                                                        </div>
 
-                                    <span v-if="
-                                        !isEditable() &&
-                                        offer !=
-                                        null &&
-                                        offer.company !=
-                                        null
-                                    ">{{
-                                         offer
-                                         .company
-                                         .name
+                                                        <span
+                                                            v-if="
+                                                                !isEditable() &&
+                                                                offer != null &&
+                                                                offer.company !=
+                                                                    null
+                                                            "
+                                                            >{{
+                                                                offer.company
+                                                                    .name
+                                                            }}</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <v-text-field
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            @change="
+                                                                offerHasChanged(
+                                                                    $event,
+                                                                    offer
+                                                                )
+                                                            "
+                                                            v-model="
+                                                                offer.quantity
+                                                            "
+                                                            label=""
+                                                            type="number"
+                                                            variant="underlined"
+                                                            required
+                                                        >
+                                                        </v-text-field>
+                                                        <span
+                                                            v-if="!isEditable()"
+                                                            >{{
+                                                                offer.quantity?.toLocaleString('ru')
+                                                            }}</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <v-text-field
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            v-model="
+                                                                offer.price
+                                                            "
+                                                            label=""
+                                                            type="number"
+                                                            variant="underlined"
+                                                            required
+                                                        >
+                                                        </v-text-field>
+                                                        <span
+                                                            v-if="!isEditable()"
+                                                            >{{
+                                                                offer.price?.toLocaleString('ru')
+                                                            }}
+                                                             тг</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        {{
+                                                            (offer.price *
+                                                            offer.quantity)?.toLocaleString('ru')
+                                                        }}
+                                                        тг
+                                                    </td>
 
+                                                    <td>
+                                                        <span
+                                                            v-if="
+                                                                offer.file !=
+                                                                null
+                                                            "
+                                                        >
+                                                            <a
+                                                                class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                                                target="_blank"
+                                                                :href="
+                                                                    '/uploads/' +
+                                                                    offer.file
+                                                                "
+                                                                >Просмотр</a
+                                                            >
+                                                        </span>
 
+                                                        <input
+                                                            v-if="isEditable()"
+                                                            type="file"
+                                                            id="file"
+                                                            v-on:change="
+                                                                handleFileUpload(
+                                                                    offer,
+                                                                    $event
+                                                                )
+                                                            "
+                                                        />
+                                                    </td>
 
+                                                    <td>
+                                                        <v-btn
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            :id="
+                                                                'offer_' +
+                                                                offer.id
+                                                            "
+                                                            @click="
+                                                                updateOffer(
+                                                                    offer
+                                                                )
+                                                            "
+                                                            color="success"
+                                                            size="small"
+                                                            class="mr-2"
+                                                        >
+                                                            Сохранить
+                                                        </v-btn>
 
-
-
-                                        }}</span>
-                                </td>
-                                <td>
-                                    <v-text-field v-if="
-                                        offer.status ==
-                                        'draft' &&
-                                        isEditable()
-                                    " @change="
-    offerHasChanged(
-        $event,
-        offer
-    )
-" v-model="
-    offer.quantity
-" label="" type="number" variant="underlined" required>
-                                    </v-text-field>
-                                    <span v-if="
-                                        !isEditable()
-                                    ">{{
-                                         offer.quantity 
-                                        }}</span>
-                                </td>
-                                <td>
-                                    <v-text-field v-if="
-                                        offer.status ==
-                                        'draft' &&
-                                        isEditable()
-                                    " v-model="
-    offer.price
-" label="" type="number" variant="underlined" required>
-                                    </v-text-field>
-                                    <span v-if="
-                                        !isEditable()
-                                    ">{{
-                                         offer.price 
-                                        }}
-                                        тг</span>
-                                </td>
-                                <td>
-                                    {{
-                                     offer.price *
-                                     offer.quantity
-
-
-
-
-
-
-                                    }}
-                                    тг
-                                </td>
-
-                                <td>
-                                    <span v-if="
-                                        offer.file !=
-                                        null
-                                    ">
-                                        <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
-                                            target="_blank" :href="
-                                                '/uploads/' +
-                                                offer.file
-                                            ">Просмотр</a>
-                                    </span>
-
-                                    <input v-if="
-                                        isEditable()
-                                    " type="file" id="file" v-on:change="
-    handleFileUpload(
-        offer,
-        $event
-    )
-" />
-                                </td>
-
-                                <td>
-                                    <v-btn v-if="
-                                        offer.status ==
-                                        'draft' &&
-                                        isEditable()
-                                    " :id="
-    'offer_' +
-    offer.id
-" @click="
-    updateOffer(
-        offer
-    )
-" color="success" size="small" class="mr-2">
-                                        Сохранить
-                                    </v-btn>
-
-                                    <v-btn @click="
-                                        deleteOffer(
-                                            offer.id,
-                                            item.id
-                                        )
-                                    " color="error" size="small" v-if="
-    offer.status ==
-    'draft' &&
-    isEditable()
-">
-                                        Удалить
-                                    </v-btn>
-                                </td>
-                            </tr>
+                                                        <v-btn
+                                                            @click="
+                                                                deleteOffer(
+                                                                    offer.id,
+                                                                    item.id
+                                                                )
+                                                            "
+                                                            color="error"
+                                                            size="small"
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                        >
+                                                            Удалить
+                                                        </v-btn>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </v-table>
+                                    </td>
+                                </tr>
+                            </template>
                         </tbody>
                     </v-table>
-                    </td>
-                    </tr>
-</template>
-</tbody>
-</v-table>
 
-<v-table style="" v-else-if="application != null && application.kind == 'service'">
-    <thead>
-        <tr>
-            <th>№</th>
-            <th>Статья расходов</th>
-            <th>Наименование ресурсов</th>
-            <th>Ед. изм.</th>
+                    <!-- SERVICES table -->
+                    <v-table
+                        style=""
+                        v-else-if="
+                            application != null && application.kind == 'service'
+                        "
+                    >
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Статья расходов</th>
+                                <th>Наименование ресурсов</th>
+                                <th>Ед. изм.</th>
 
-            <th v-if="application.status === 'draft'">Кол-во</th>
-            <template v-else>
-                <th>заказано</th>
-                <th>фактически</th>
-                <th>остаток</th>
-            </template>
+                                <th v-if="application.status === 'draft'">
+                                    Кол-во
+                                </th>
+                                <template v-else>
+                                    <th>заказано</th>
+                                    <th>фактически</th>
+                                    <th>остаток</th>
+                                </template>
 
-            <th>Цена за ед.</th>
-            <th>Сумма</th>
-            <th>Примечание</th>
-            <th></th>
-        </tr>
-    </thead>
+                                <th>Цена за ед.</th>
+                                <th>Сумма</th>
+                                <th>Примечание</th>
+                                <th></th>
+                            </tr>
+                        </thead>
 
-    <tbody>
-        <template v-for="(item, index) in services" :key="item.id">
-            <tr>
-                <td>{{  index + 1  }}</td>
-                <td>
-                    {{  item.category  }}
-                    <!-- <multiselect v-model="services[index].category" :options="categories"
+                        <tbody>
+                            <template
+                                v-for="(item, index) in services"
+                                :key="item.id"
+                            >
+                                <tr>
+                                    <td>
+                                        <v-checkbox v-if="isSupplier()" v-model="positions"
+                                            color="primary" :value="item.id" hide-details>
+                                        </v-checkbox>
+                                        <span v-if="!isSupplier()">{{ index + 1 }}</span>
+                                    </td>
+                                    <td>
+                                        {{ item.category }}
+                                        <!-- <multiselect v-model="services[index].category" :options="categories"
                         placeholder="Укажите категорию" label="name" track-by="name"></multiselect> -->
-                </td>
-                <td>
-                    <!-- <v-text-field v-model="services[index].service" label="Напишите название" variant="underlined"
+                                    </td>
+                                    <td>
+                                        <!-- <v-text-field v-model="services[index].service" label="Напишите название" variant="underlined"
                         required density="comfortable" type="text"></v-text-field> -->
-                    {{  item.service  }}
-                </td>
-                <td>{{  item.unit  }}</td>
+                                        {{ item.service }}
+                                    </td>
+                                    <td>{{ item.unit }}</td>
 
-                <td v-if="application.status === 'draft'" :class="
-                    application.status == 'draft'
-                        ? ''
-                        : ''
-                ">
-                    <v-text-field v-model="
-                        services[index].quantity
-                    " type="number" variant="plain" density="compact" v-if="
-    application.status ==
-    'draft'
-">
-                    </v-text-field>
+                                    <td
+                                        v-if="application.status === 'draft'"
+                                        :class="
+                                            application.status == 'draft'
+                                                ? ''
+                                                : ''
+                                        "
+                                    >
+                                        <v-text-field
+                                            v-model="services[index].quantity"
+                                            type="number"
+                                            variant="plain"
+                                            density="compact"
+                                            v-if="application.status == 'draft'"
+                                        >
+                                        </v-text-field>
 
-                    <!-- <span v-if="!isPTDEngineer()">
+                                        <!-- <span v-if="!isPTDEngineer()">
                         {{ services[index].prepared }} /
                     </span> -->
-                    <span v-if="
-                        application.status !=
-                        'draft'
-                    ">
-                        {{  services[index].quantity  }}
-                    </span>
-                </td>
-
-                <template v-else>
-                    <td>
-                        {{  services[index].quantity  }}
-                    </td>
-                    <td>
-                        {{  services[index].prepared  }}
-                    </td>
-                    <td>
-                        {{
-                         services[index].quantity -
-                         services[index].prepared
-
-
-
-
-
-
-                        }}
-                    </td>
-                </template>
-
-                <td>
-                    <v-text-field v-if="application.status == 'draft'" v-model="services[index].price" type="number"
-                        variant="plain" density="compact"></v-text-field>
-
-                    <tempalte v-else-if="application.status == 'in_progress' && isSupplier()">
-                        <v-text-field :id="item.id" v-model="services[index].price" type="number" variant="plain"
-                            density="compact" @change="onServicePriceChanged">
-                        </v-text-field>
-                    </tempalte>
-
-                    <span v-else>{{  item.price  }}</span>
-                </td>
-                <td>
-                    <template v-if="item.price">
-                        {{  item.price * item.quantity  }}₸
-                    </template>
-                </td>
-
-                <td>{{  item.notes  }}</td>
-
-                <td>
-                    <v-btn v-if="
-                        application.status ==
-                        'draft'
-                    " size="small" color="error" @click="deleteProduct(item)">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-
-                    <v-btn v-if="
-                        application.status ==
-                        'in_progress' &&
-                        isSupplier()
-                    " @click="addOffer(item.id)" color="info" size="small">
-                        + компания
-                    </v-btn>
-
-                    <v-btn v-if="
-                        isWarehouseManager() &&
-                        services[index].quantity !=
-                        services[index].prepared
-                    " @click="showAcceptProduct(item)" color="info" size="small">
-                        принять товар
-                    </v-btn>
-                </td>
-            </tr>
-
-            <tr v-if="
-                !isWarehouseManager() &&
-                item.offers != null &&
-                item.offers.length > 0 &&
-                (application.status ==
-                    'in_progress' ||
-                    application.status ==
-                    'in_review')
-            " class="bg-slate-100">
-                <td colspan="9" class="border-none">
-                    <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
-                        <thead>
-                            <tr>
-                                <th style="width: 25%">
-                                    Название компании
-                                </th>
-                                <th style="width: 10%">
-                                    Кол-во
-                                </th>
-                                <th style="width: 10%">
-                                    Цена за ед.
-                                </th>
-                                <th>Общая сумма</th>
-                                <th>Счет на оплату</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-    <tbody>
-        <tr v-for="offer in item.offers" :key="offer.id">
-            <td class="">
-                <!-- <v-text-field
-                                                                v-if="offer.status == 'draft' && isEditable()"
-                                                                v-model="offer.name"
-                                                                type="text"
-                                                                variant="underlined"
-                                                                required
-                                                            ></v-text-field> -->
-                <div class="flex">
-                    <multiselect v-if="
-                        offer.status ==
-                        'draft' &&
-                        isEditable()
-                    " v-model="
-    offer.company
-" :options="
-    companies
-" placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
-                    </multiselect>
-
-                    <router-link v-if="
-                        offer.status ==
-                        'draft' &&
-                        isEditable()
-                    " class="mt-1 text-underline-none" to="/companies/create" target="_blank">
-                        <v-btn color="primary" size="x-small" plain>
-                            Добавить компанию
-                        </v-btn>
-                    </router-link>
-                </div>
-
-                <span v-if="
-                    !isEditable() &&
-                    offer !=
-                    null &&
-                    offer.company !=
-                    null
-                ">{{
-                     offer
-                     .company
-                     .name
-
-
-
-
-
-
-                    }}</span>
-            </td>
-            <td>
-                <v-text-field v-if="
-                    offer.status ==
-                    'draft' &&
-                    isEditable()
-                " @change="
-    offerHasChanged(
-        $event,
-        offer
-    )
-" v-model="
-    offer.quantity
-" label="" type="number" variant="underlined" required>
-                </v-text-field>
-                <span v-if="
-                    !isEditable()
-                ">{{
-                     offer.quantity 
-                    }}</span>
-            </td>
-            <td>
-                <v-text-field v-if="
-                    offer.status ==
-                    'draft' &&
-                    isEditable()
-                " v-model="
-    offer.price
-" label="" type="number" variant="underlined" required>
-                </v-text-field>
-                <span v-if="
-                    !isEditable()
-                ">{{
-                     offer.price 
-                    }}
-                    тг</span>
-            </td>
-            <td>
-                {{
-                 offer.price *
-                 offer.quantity
-
-
-
-
-
-
-                }}
-                тг
-            </td>
-
-            <td>
-                <span v-if="
-                    offer.file !=
-                    null
-                ">
-                    <a class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
-                        target="_blank" :href="
-                            '/uploads/' +
-                            offer.file
-                        ">Просмотр</a>
-                </span>
-
-                <input v-if="
-                    isEditable()
-                " type="file" id="file" v-on:change="
-    handleFileUpload(
-        offer,
-        $event
-    )
-" />
-            </td>
-
-            <td>
-                <v-btn v-if="
-                    offer.status ==
-                    'draft' &&
-                    isEditable()
-                " :id="
-    'offer_' +
-    offer.id
-" @click="
-    updateOffer(
-        offer
-    )
-" color="success" size="small" class="mr-2">
-                    Сохранить
-                </v-btn>
-
-                <v-btn @click="
-                    deleteOffer(
-                        offer.id,
-                        item.id
-                    )
-                " color="error" size="small" v-if="
-    offer.status ==
-    'draft' &&
-    isEditable()
-">
-                    Удалить
-                </v-btn>
-            </td>
-        </tr>
-    </tbody>
-</v-table>
-</td>
-</tr>
-</template>
-</tbody>
-</v-table>
-
-<v-table style="" v-else-if="
-    application != null &&
-    application.kind == 'equipment'
-">
-    <thead>
-        <tr>
-            <th>№</th>
-            <th>Наименование спец. техники</th>
-            <th>Ед. изм.</th>
-
-            <th v-if="application.status === 'draft'">Кол-во</th>
-            <template v-else>
-                <th>заказано</th>
-                <th>фактически</th>
-                <th>остаток</th>
-            </template>
-
-            <th>Примечание</th>
-            <th></th>
-        </tr>
-    </thead>
-
-    <tbody>
-        <template v-for="(item, index) in equipments" :key="item.id">
-            <tr>
-                <td>{{  item.id  }}</td>
-                <td>{{  item.equipment?.name  }}</td>
-                <td>{{  item.unit?.name  }}</td>
-                <td v-if="application.status === 'draft'" :class="
-                    application.status == 'draft'
-                        ? 'd-flex mt-3'
-                        : ''
-                ">
-                    <v-text-field v-model="
-                        equipments[index].quantity
-                    " type="number" variant="plain" density="compact" v-if="
-    application.status ==
-    'draft'
-">
-                    </v-text-field>
-
-                    <!-- <span v-if="!isPTDEngineer()">
-                        {{ equipments[index].prepared }} /
-                    </span> -->
-                    <span v-if="
-                        application.status !=
-                        'draft'
-                    ">
-                        {{  equipments[index].quantity  }}
-                    </span>
-                </td>
-
-                <template v-else>
-                    <td>
-                        {{  equipments[index].quantity  }}
-                    </td>
-                    <td>
-                        {{  equipments[index].prepared  }}
-                    </td>
-                    <td>
-                        {{
-                         equipments[index].quantity -
-                         equipments[index].prepared
-
-
-
-
-
-
-                        }}
-                    </td>
-                </template>
-
-                <td>{{  item.notes  }}</td>
-
-                <td>
-                    <v-btn v-if="
-                        application.status ==
-                        'in_progress' &&
-                        item.status == 'completed' &&
-                        isSupplier()
-                    " @click="addOffer(item.id)" color="info" size="small">
-                        + компания
-                    </v-btn>
-
-                    <v-btn v-if="
-                        application.status ==
-                        'in_progress' &&
-                        item.status == 'completed' &&
-                        isSupplier()
-                    " @click="showEquipmentNotes(item)" class="ml-2" color="warning" size="small">
-                        дневник
-                    </v-btn>
-
-                    <v-btn v-if="
-                        isWarehouseManager() &&
-                        application.status == 'in_progress' &&
-                        equipments[index].quantity !=
-                        equipments[index].prepared
-                    " @click="showAcceptProduct(item)" color="info" size="small">
-                        принять технику
-                    </v-btn>
-
-                    <v-btn v-if="application != null && application.status == 'draft' && isPTDEngineer()" size="small"
-                        color="error" @click="deleteProduct(item)">
-                        <v-icon>mdi-close</v-icon>
-                    </v-btn>
-                </td>
-            </tr>
-            <tr v-if="
-                !isWarehouseManager() &&
-                item.offers != null &&
-                item.offers.length > 0 &&
-            
-                (application.status ==
-                    'in_progress' ||
-                    application.status ==
-                    'in_review')
-            " class="bg-slate-100">
-                <td colspan="9" class="border-none">
-                    <v-table class="mt-4 mb-8 mx-0 border" style="overflow: visible">
-                        <thead>
-                            <tr>
-                                <th style="width: 25%">
-                                    Название компании
-                                </th>
-                                <th style="width: 10%">
-                                    Кол-во
-                                </th>
-                                <th style="width: 10%">
-                                    Цена за ед.
-                                </th>
-                                <th>Общая сумма</th>
-                                <th>Счет на оплату</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-    <tbody>
-        <tr v-for="offer in item.offers" :key="offer.id">
-            <td class="">
-                <!-- <v-text-field
-                                                                v-if="offer.status == 'draft' && isEditable()"
-                                                                v-model="offer.name"
-                                                                type="text"
-                                                                variant="underlined"
-                                                                required
-                                                            ></v-text-field> -->
-                <div class="flex">
-                    <multiselect v-if="
-                        offer.status ==
-                        'draft' &&
-                        isEditable()
-                    " v-model="
-    offer.company
-" :options="
-    companies
-" placeholder="Укажите компанию" label="name" track-by="id" :selectLabel="''" :deselectLabel="''">
-                    </multiselect>
-
-                    <router-link v-if="
-                        offer.status ==
-                        'draft' &&
-                        isEditable()
-                    " class="mt-1 text-underline-none" to="/companies/create" target="_blank">
-                        <v-btn color="primary" size="x-small" plain>
-                            Добавить компанию
-                        </v-btn>
-                    </router-link>
-                </div>
-
-                <span v-if="
-                    !isEditable() &&
-                    offer !=
-                    null &&
-                    offer.company !=
-                    null
-                ">{{
-                     offer
-                     .company
-                     .name
-
-
-
-
-
-
-                    }}</span>
-            </td>
-            <td>
-                <v-text-field v-if="
-                    offer.status ==
-                    'draft' &&
-                    isEditable()
-                " @change="
-    offerHasChanged(
-        $event,
-        offer
-    )
-" v-model="
-    offer.quantity
-" label="" type="number" variant="underlined" required>
-                </v-text-field>
-                <span v-if="
-                    !isEditable()
-                ">{{
-                     offer.quantity 
-                    }}</span>
-            </td>
-            <td>
-                <v-text-field v-if="
-                    offer.status ==
-                    'draft' &&
-                    isEditable()
-                " v-model="
-    offer.price
-" label="" type="number" variant="underlined" required>
-                </v-text-field>
-                <span v-if="
-                    !isEditable()
-                ">{{
-                     offer.price 
-                    }}
-                    тг</span>
-            </td>
-            <td>
-                {{
-                 offer.price *
-                 offer.quantity
-
-
-
-
-
-
-                }}
-                тг
-            </td>
-
-            <td>
-                <span v-if="
-                    offer.file !=
-                    null
-                ">
-                    <a class="px-2 py-2 mr-2 border text-sm text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
-                        target="_blank" :href="
-                            '/uploads/' +
-                            offer.file
-                        ">Просмотр</a>
-                </span>
-
-                <input v-if="
-                    isEditable()
-                " type="file" id="file" v-on:change="
-    handleFileUpload(
-        offer,
-        $event
-    )
-" />
-            </td>
-
-            <td>
-                <v-btn v-if="
-                    offer.status ==
-                    'draft' &&
-                    isEditable()
-                " :id="
-    'offer_' +
-    offer.id
-" @click="
-    updateOffer(
-        offer
-    )
-" color="success" size="small" class="mr-2">
-                    Сохранить
-                </v-btn>
-
-                <v-btn @click="
-                    deleteOffer(
-                        offer.id,
-                        item.id
-                    )
-                " color="error" size="small" v-if="
-    offer.status ==
-    'draft' &&
-    isEditable()
-">
-                    Удалить
-                </v-btn>
-            </td>
-        </tr>
-    </tbody>
-</v-table>
-</td>
-</tr>
-</template>
-
-</tbody>
-</v-table>
-
-<v-btn v-if="
-    form.construction != null &&
-    (products.length > 0 ||
-        equipments.length > 0 ||
-        services.length > 0) &&
-    isPTDEngineer() &&
-    application.status == 'draft'
-" class="mt-5" @click="updateApplication" color="primary">
-    Сохранить
-</v-btn>
-</v-form>
-
-<v-container class="mt-5 px-0 md:px-2" v-if="application != null">
-    <v-row v-if="
-        currentUser != null &&
-        application.status == 'declined' &&
-        application.owner_id == currentUser.id
-    " class="mb-5" no-gutters>
-        <v-col cols="12">
-            <v-btn color="primary" @click="makeApplicationEditable()" class="">
-                Внести корректировки в заявку
-            </v-btn>
-        </v-col>
-    </v-row>
-
-    <!-- For supplier -->
-    <v-row v-if="
-        currentUser != null &&
-        application.status != 'in_progress' &&
-        isSupplier()
-    " class="mb-5" no-gutters>
-        <v-col cols="12">
-            <v-btn color="primary" @click="makeApplicationEditableBySupplier()" class="">
-                Дополнить заявку
-            </v-btn>
-        </v-col>
-    </v-row>
-
-    <v-row no-gutters>
-        <v-col no-gutters cols="12">
-            <v-expansion-panels no-gutters v-model="showPanels">
-                <v-expansion-panel value="sign">
-                    <v-expansion-panel-title>
-                        Подписание заявки
-                    </v-expansion-panel-title>
-
-                    <v-expansion-panel-text no-gutters style="" class="px-0">
-                        <v-list-item no-gutters v-for="(
-                                                    item, index
-                                                ) in application.application_application_statuses" :key="item.id">
-                            <v-list-item-header>
-                                <v-list-item-title>
-                                    <v-col cols="12" class="px-0">
-                                        <strong>{{
-                                             index + 1 
-                                            }}.
+                                        <span
+                                            v-if="application.status != 'draft'"
+                                        >
+                                            {{ services[index].quantity?.toLocaleString('ru') }}
+                                        </span>
+                                    </td>
+
+                                    <template v-else>
+                                        <td>
+                                            {{ services[index].quantity?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{ services[index].prepared?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
                                             {{
-                                             item
-                                             .application_path
-                                             .position
+                                                (services[index].quantity -
+                                                services[index].prepared)?.toLocaleString('ru')
+                                            }}
+                                        </td>
+                                    </template>
 
+                                    <td>
+                                        <v-text-field
+                                            v-if="application.status == 'draft'"
+                                            v-model="services[index].price"
+                                            type="number"
+                                            variant="plain"
+                                            density="compact"
+                                        ></v-text-field>
 
+                                        <tempalte
+                                            v-else-if="
+                                                application.status ==
+                                                    'in_progress' &&
+                                                isSupplier()
+                                            "
+                                        >
+                                            <v-text-field
+                                                :id="item.id"
+                                                v-model="services[index].price"
+                                                type="number"
+                                                variant="plain"
+                                                density="compact"
+                                                @change="onServicePriceChanged"
+                                            >
+                                            </v-text-field>
+                                        </tempalte>
 
+                                        <span v-else>{{ item.price?.toLocaleString('ru') }}</span>
+                                    </td>
+                                    <td>
+                                        <template v-if="item.price">
+                                            {{ (item.price * item.quantity)?.toLocaleString('ru') }}₸
+                                        </template>
+                                    </td>
 
+                                    <td>{{ item.notes }}</td>
 
-
-                                            }}</strong>
-                                        -
-                                        {{
-                                         item
-                                         .application_path
-                                         .responsible
-                                         .name
-
-
-
-
-
-
-                                        }}
-                                    </v-col>
-
-                                    <!-- declined -->
-                                    <span v-if="
-                                        item.status ==
-                                        'declined'
-                                    ">
-                                        <v-chip class="mr-2" color="red" text-color="white">
-                                            Отклонено
-                                        </v-chip>
-
-                                        <span>{{
-                                             item.declined_reason 
-                                            }}</span>
-                                        -
-                                        <span>{{
-                                             item.updated_at 
-                                            }}</span>
-                                    </span>
-                                    <!-- accepted -->
-                                    <span v-else-if="
-                                        item.status ==
-                                        'accepted'
-                                    ">
-                                        <v-chip class="mr-2" color="green" text-color="white">
-                                            Одобрено
-                                        </v-chip>
-
-                                        <span>{{
-                                             item.updated_at 
-                                            }}</span>
-                                    </span>
-
-                                    <!-- incoming -->
-                                    <span v-else-if="
-                                        currentUser !=
-                                        null &&
-                                        item.status ==
-                                        'incoming' &&
-                                        item
-                                            .application_path
-                                            .responsible
-                                            .id ==
-                                        currentUser.id
-                                    ">
-                                        <v-btn size="small" color="success" @click="
-                                            signApplication(
-                                                item
-                                            )
-                                        " class="mr-5">
-                                            Подписать
+                                    <td>
+                                        <v-btn
+                                            v-if="application.status == 'draft'"
+                                            size="small"
+                                            color="error"
+                                            @click="deleteProduct(item)"
+                                        >
+                                            <v-icon>mdi-close</v-icon>
                                         </v-btn>
 
-                                        <v-btn v-if="
-                                            item
-                                                .application_path
-                                                .responsible
-                                                .id !=
-                                            application.owner_id
-                                        " size="small" color="error" @click="
-    showDecline(
-        item
-    )
-" class="">
-                                            Отклонить
+                                        <v-btn
+                                            v-if="
+                                                application.status ==
+                                                    'in_progress' &&
+                                                isSupplier()
+                                            "
+                                            @click="addOffer(item.id)"
+                                            color="info"
+                                            size="small"
+                                        >
+                                            + компания
                                         </v-btn>
-                                    </span>
-                                    <span v-else>...</span>
-                                </v-list-item-title>
-                            </v-list-item-header>
-                        </v-list-item>
-                    </v-expansion-panel-text>
-                </v-expansion-panel>
-            </v-expansion-panels>
-        </v-col>
-    </v-row>
-</v-container>
-</v-col>
-</v-row>
-<!-- </v-container> -->
 
-<!-- Snackbar -->
-<v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
-    {{  snackbar.text  }}
+                                        <v-btn
+                                            v-if="
+                                                isWarehouseManager() &&
+                                                services[index].quantity !=
+                                                    services[index].prepared
+                                            "
+                                            @click="showAcceptProduct(item)"
+                                            color="info"
+                                            size="small"
+                                        >
+                                            принять товар
+                                        </v-btn>
+                                    </td>
+                                </tr>
 
-    <template v-slot:actions>
-        <v-btn color="blue" variant="text" @click="snackbar.status = false">
-            Закрыть
-        </v-btn>
-    </template>
-</v-snackbar>
+                                <tr
+                                    v-if="
+                                        isSecondCrew() &&
+                                        !isWarehouseManager() &&
+                                        item.offers != null &&
+                                        item.offers.length > 0 &&
+                                        (application.status == 'in_progress' ||
+                                            application.status == 'in_review')
+                                    "
+                                    class="bg-slate-100"
+                                >
+                                    <td colspan="9" class="border-none">
+                                        <v-table
+                                            class="mt-4 mb-8 mx-0 border"
+                                            style="overflow: visible"
+                                        >
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 25%">
+                                                        Название компании
+                                                    </th>
+                                                    <th style="width: 10%">
+                                                        Кол-во
+                                                    </th>
+                                                    <th style="width: 10%">
+                                                        Цена за ед.
+                                                    </th>
+                                                    <th>Общая сумма</th>
+                                                    <th>Счет на оплату</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    v-for="offer in item.offers"
+                                                    :key="offer.id"
+                                                >
+                                                    <td class="">
+                                                        <!-- <v-text-field
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                v-model="offer.name"
+                                                                type="text"
+                                                                variant="underlined"
+                                                                required
+                                                            ></v-text-field> -->
+                                                        <div class="flex">
+                                                            <multiselect
+                                                                v-if="
+                                                                    offer.status ==
+                                                                        'draft' &&
+                                                                    isEditable()
+                                                                "
+                                                                v-model="
+                                                                    offer.company
+                                                                "
+                                                                :options="
+                                                                    companies
+                                                                "
+                                                                placeholder="Укажите компанию"
+                                                                label="name"
+                                                                track-by="id"
+                                                                :selectLabel="''"
+                                                                :deselectLabel="''"
+                                                            >
+                                                            </multiselect>
 
-<!-- Decline dialog -->
-<v-dialog v-model="declineDialog" persistent>
-    <v-card>
-        <v-card-title>
-            <span class="text-h5">Отклонить заявку?</span>
-        </v-card-title>
+                                                            <router-link
+                                                                v-if="
+                                                                    offer.status ==
+                                                                        'draft' &&
+                                                                    isEditable()
+                                                                "
+                                                                class="mt-1 text-underline-none"
+                                                                to="/companies/create"
+                                                                target="_blank"
+                                                            >
+                                                                <v-btn
+                                                                    color="primary"
+                                                                    size="x-small"
+                                                                    plain
+                                                                >
+                                                                    Добавить
+                                                                    компанию
+                                                                </v-btn>
+                                                            </router-link>
+                                                        </div>
 
-        <v-card-text>
-            <v-container>
-                <v-row>
-                    <v-col cols="12">
-                        <v-textarea v-model="declinedReason" label="Причина отклонения*" required></v-textarea>
-                    </v-col>
-                </v-row>
-            </v-container>
-            <small>* обязательные поля</small>
-        </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
+                                                        <span
+                                                            v-if="
+                                                                !isEditable() &&
+                                                                offer != null &&
+                                                                offer.company !=
+                                                                    null
+                                                            "
+                                                            >{{
+                                                                offer.company
+                                                                    .name
+                                                            }}</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <v-text-field
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            @change="
+                                                                offerHasChanged(
+                                                                    $event,
+                                                                    offer
+                                                                )
+                                                            "
+                                                            v-model="
+                                                                offer.quantity
+                                                            "
+                                                            label=""
+                                                            type="number"
+                                                            variant="underlined"
+                                                            required
+                                                        >
+                                                        </v-text-field>
+                                                        <span
+                                                            v-if="!isEditable()"
+                                                            >{{
+                                                                offer.quantity?.toLocaleString('ru')
+                                                            }}</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <v-text-field
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            v-model="
+                                                                offer.price
+                                                            "
+                                                            label=""
+                                                            type="number"
+                                                            variant="underlined"
+                                                            required
+                                                        >
+                                                        </v-text-field>
+                                                        <span
+                                                            v-if="!isEditable()"
+                                                            >{{
+                                                                offer.price?.toLocaleString('ru')
+                                                            }}
+                                                             тг</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        {{
+                                                            (offer.price *
+                                                            offer.quantity)?.toLocaleString('ru')
+                                                        }}
+                                                        тг
+                                                    </td>
 
-            <v-btn color="blue-darken-1" text @click="declineDialog = false">
-                Отмена
-            </v-btn>
+                                                    <td>
+                                                        <span
+                                                            v-if="
+                                                                offer.file !=
+                                                                null
+                                                            "
+                                                        >
+                                                            <a
+                                                                class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                                                target="_blank"
+                                                                :href="
+                                                                    '/uploads/' +
+                                                                    offer.file
+                                                                "
+                                                                >Просмотр</a
+                                                            >
+                                                        </span>
 
-            <v-btn color="red-darken-1" text @click="declineApplication()">
-                Отклонить
-            </v-btn>
-        </v-card-actions>
-    </v-card>
-</v-dialog>
+                                                        <input
+                                                            v-if="isEditable()"
+                                                            type="file"
+                                                            id="file"
+                                                            v-on:change="
+                                                                handleFileUpload(
+                                                                    offer,
+                                                                    $event
+                                                                )
+                                                            "
+                                                        />
+                                                    </td>
 
-<!-- Decline Product dialog -->
-<v-dialog v-model="declineProductDialog" persistent>
-    <v-card>
-        <v-card-title>
-            <span class="text-h5">Отклонить приход?</span>
-        </v-card-title>
+                                                    <td>
+                                                        <v-btn
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            :id="
+                                                                'offer_' +
+                                                                offer.id
+                                                            "
+                                                            @click="
+                                                                updateOffer(
+                                                                    offer
+                                                                )
+                                                            "
+                                                            color="success"
+                                                            size="small"
+                                                            class="mr-2"
+                                                        >
+                                                            Сохранить
+                                                        </v-btn>
 
-        <v-card-text>
-            <v-container>
-                <v-row>
-                    <v-col cols="12">
-                        <v-textarea v-model="declinedProductReason" label="Причина отклонения*" required></v-textarea>
-                    </v-col>
-                </v-row>
-            </v-container>
-            <small>* обязательные поля</small>
-        </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
+                                                        <v-btn
+                                                            @click="
+                                                                deleteOffer(
+                                                                    offer.id,
+                                                                    item.id
+                                                                )
+                                                            "
+                                                            color="error"
+                                                            size="small"
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                        >
+                                                            Удалить
+                                                        </v-btn>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </v-table>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </v-table>
 
-            <v-btn color="blue-darken-1" text @click="declineProductDialog = false">
-                Отмена
-            </v-btn>
+                    <!-- EQUIPMENT table -->
+                    <v-table
+                        style=""
+                        v-else-if="
+                            application != null &&
+                            application.kind == 'equipment'
+                        "
+                    >
+                        <thead>
+                            <tr>
+                                <th>№</th>
+                                <th>Наименование спец. техники</th>
+                                <th>Ед. изм.</th>
 
-            <v-btn color="red-darken-1" text @click="declineProduct()">
-                Отклонить
-            </v-btn>
-        </v-card-actions>
-    </v-card>
-</v-dialog>
+                                <th v-if="application.status === 'draft'">
+                                    Кол-во
+                                </th>
+                                <template v-else>
+                                    <th>заказано</th>
+                                    <th>фактически</th>
+                                    <th>остаток</th>
+                                </template>
 
-<v-dialog v-model="receiveDialog" persistent>
-    <v-card>
-        <v-card-title>
-            <span class="text-h5">Получение материально-товарных ценностей</span>
-        </v-card-title>
+                                <th>Примечание</th>
+                                <th></th>
+                            </tr>
+                        </thead>
 
-        <v-card-text>
-            <v-container>
-                <v-row>
-                    <v-col cols="12">
-                        <v-text-field v-model="current.delivered" label="Количество" variant="outlined" type="number"
-                            required></v-text-field>
-                    </v-col>
-                </v-row>
-            </v-container>
-            <small>* обязательные поля</small>
-        </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
+                        <tbody>
+                            <template
+                                v-for="(item, index) in equipments"
+                                :key="item.id"
+                            >
+                                <tr>
+                                    <td>
+                                        <v-checkbox v-if="isSupplier()" v-model="positions"
+                                            color="primary" :value="item.id" hide-details>
+                                        </v-checkbox>
+                                        <span v-if="!isSupplier()">{{ index + 1 }}</span>
+                                    </td>
+                                    <td>{{ item.equipment?.name }}</td>
+                                    <td>{{ item.unit?.name }}</td>
+                                    <td
+                                        v-if="application.status === 'draft'"
+                                        :class="
+                                            application.status == 'draft'
+                                                ? 'd-flex mt-3'
+                                                : ''
+                                        "
+                                    >
+                                        <v-text-field
+                                            v-model="equipments[index].quantity"
+                                            type="number"
+                                            variant="plain"
+                                            density="compact"
+                                            v-if="application.status == 'draft'"
+                                        >
+                                        </v-text-field>
 
-            <v-btn color="" text @click="receiveDialog = false">
-                Отмена
-            </v-btn>
+                                        <!-- <span v-if="!isPTDEngineer()">
+                                            {{ equipments[index].prepared }} /
+                                        </span> -->
+                                        <span
+                                            v-if="application.status != 'draft'"
+                                        >
+                                            {{ equipments[index].quantity?.toLocaleString('ru') }}
+                                        </span>
+                                    </td>
 
-            <v-btn color="blue-darken-1" text @click="acceptDelivery()">
-                Принять
-            </v-btn>
-        </v-card-actions>
-    </v-card>
-</v-dialog>
+                                    <template v-else>
+                                        <td>
+                                            {{ equipments[index].quantity?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{ equipments[index].prepared?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                (equipments[index].quantity -
+                                                equipments[index].prepared)?.toLocaleString('ru')
+                                            }}
+                                        </td>
+                                    </template>
 
-<!-- Add Company Dialog -->
-<v-dialog v-model="addCompanyDialog" persistent>
-    <v-card>
-        <v-card-title>
-            <span class="text-h5">Добавить компанию</span>
-        </v-card-title>
+                                    <td>{{ item.notes }}</td>
 
-        <v-card-text>
-            <v-container>
-                <v-row>
-                    <v-col cols="12">
-                        <v-text-field v-model="newCompany" label="Название компании *" required></v-text-field>
-                    </v-col>
-                </v-row>
-            </v-container>
-            <small>* обязательные поля</small>
-        </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
+                                    <td>
+                                        <v-btn
+                                            v-if="
+                                                application.status ==
+                                                    'in_progress' &&
+                                                item.status == 'completed' &&
+                                                isSupplier()
+                                            "
+                                            @click="addOffer(item.id)"
+                                            color="info"
+                                            size="small"
+                                        >
+                                            + компания
+                                        </v-btn>
 
-            <v-btn color="default" text @click="addCompanyDialog = false">
-                Отмена
-            </v-btn>
+                                        <v-btn
+                                            v-if="
+                                                application.status ==
+                                                    'in_progress' &&
+                                                item.status == 'completed' &&
+                                                isSupplier()
+                                            "
+                                            @click="showEquipmentNotes(item)"
+                                            class="ml-2"
+                                            color="warning"
+                                            size="small"
+                                        >
+                                            дневник
+                                        </v-btn>
 
-            <v-btn color="success" text @click="addCompany()">
-                Добавить
-            </v-btn>
-        </v-card-actions>
-    </v-card>
-</v-dialog>
+                                        <v-btn
+                                            v-if="
+                                                isWarehouseManager() &&
+                                                application.status ==
+                                                    'in_progress' &&
+                                                equipments[index].quantity !=
+                                                    equipments[index].prepared
+                                            "
+                                            @click="showAcceptProduct(item)"
+                                            color="info"
+                                            size="small"
+                                        >
+                                            принять технику
+                                        </v-btn>
 
-<!-- Accept Product Dialog -->
-<v-dialog v-model="acceptProductDialog" persistent>
-    <v-card class="oks-dialog min-w-5xl w-7xl" style="">
-        <v-card-title>
-            <span class="text-h5">Приемка товара/техники/услуги</span>
-        </v-card-title>
+                                        <v-btn
+                                            v-if="
+                                                application != null &&
+                                                application.status == 'draft' &&
+                                                isPTDEngineer()
+                                            "
+                                            size="small"
+                                            color="error"
+                                            @click="deleteProduct(item)"
+                                        >
+                                            <v-icon>mdi-close</v-icon>
+                                        </v-btn>
+                                    </td>
+                                </tr>
+                                <tr
+                                    v-if="
+                                        isSecondCrew() &&
+                                        !isWarehouseManager() &&
+                                        item.offers != null &&
+                                        item.offers.length > 0 &&
+                                        (application.status == 'in_progress' ||
+                                            application.status == 'in_review')
+                                    "
+                                    class="bg-slate-100"
+                                >
+                                    <td colspan="9" class="border-none">
+                                        <v-table
+                                            class="mt-4 mb-8 mx-0 border"
+                                            style="overflow: visible"
+                                        >
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 25%">
+                                                        Название компании
+                                                    </th>
+                                                    <th style="width: 10%">
+                                                        Кол-во
+                                                    </th>
+                                                    <th style="width: 10%">
+                                                        Цена за ед.
+                                                    </th>
+                                                    <th>Общая сумма</th>
+                                                    <th>Счет на оплату</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr
+                                                    v-for="offer in item.offers"
+                                                    :key="offer.id"
+                                                >
+                                                    <td class="">
+                                                        <!-- <v-text-field
+                                                                v-if="offer.status == 'draft' && isEditable()"
+                                                                v-model="offer.name"
+                                                                type="text"
+                                                                variant="underlined"
+                                                                required
+                                                            ></v-text-field> -->
+                                                        <div class="flex">
+                                                            <multiselect
+                                                                v-if="
+                                                                    offer.status ==
+                                                                        'draft' &&
+                                                                    isEditable()
+                                                                "
+                                                                v-model="
+                                                                    offer.company
+                                                                "
+                                                                :options="
+                                                                    companies
+                                                                "
+                                                                placeholder="Укажите компанию"
+                                                                label="name"
+                                                                track-by="id"
+                                                                :selectLabel="''"
+                                                                :deselectLabel="''"
+                                                            >
+                                                            </multiselect>
 
-        <v-card-text>
-            <v-container>
-                <v-row>
-                    <v-col cols="12">{{  priemka.name  }}</v-col>
-                </v-row>
-                <v-row>
-                    <v-col cols="12">
-                        <v-text-field class="mt-2" v-model="priemka.quantity" label="Количество" variant="underlined"
-                            required density="comfortable" type="number" @keyup.enter="acceptProduct()"></v-text-field>
+                                                            <router-link
+                                                                v-if="
+                                                                    offer.status ==
+                                                                        'draft' &&
+                                                                    isEditable()
+                                                                "
+                                                                class="mt-1 text-underline-none"
+                                                                to="/companies/create"
+                                                                target="_blank"
+                                                            >
+                                                                <v-btn
+                                                                    color="primary"
+                                                                    size="x-small"
+                                                                    plain
+                                                                >
+                                                                    Добавить
+                                                                    компанию
+                                                                </v-btn>
+                                                            </router-link>
+                                                        </div>
 
-                        <v-textarea class="mt-2" v-model="priemka.notes" label="Примечание" variant="underlined"
-                            required density="comfortable"></v-textarea>
+                                                        <span
+                                                            v-if="
+                                                                !isEditable() &&
+                                                                offer != null &&
+                                                                offer.company !=
+                                                                    null
+                                                            "
+                                                            >{{
+                                                                offer.company
+                                                                    .name
+                                                            }}</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <v-text-field
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            @change="
+                                                                offerHasChanged(
+                                                                    $event,
+                                                                    offer
+                                                                )
+                                                            "
+                                                            v-model="
+                                                                offer.quantity
+                                                            "
+                                                            label=""
+                                                            type="number"
+                                                            variant="underlined"
+                                                            required
+                                                        >
+                                                        </v-text-field>
+                                                        <span
+                                                            v-if="!isEditable()"
+                                                            >{{
+                                                                offer.quantity?.toLocaleString('ru')
+                                                            }}</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        <v-text-field
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            v-model="
+                                                                offer.price
+                                                            "
+                                                            label=""
+                                                            type="number"
+                                                            variant="underlined"
+                                                            required
+                                                        >
+                                                        </v-text-field>
+                                                        <span
+                                                            v-if="!isEditable()"
+                                                            >{{
+                                                                offer.price?.toLocaleString('ru')
+                                                            }}
+                                                             тг</span
+                                                        >
+                                                    </td>
+                                                    <td>
+                                                        {{
+                                                            (offer.price *
+                                                            offer.quantity)?.toLocaleString('ru')
+                                                        }}
+                                                        тг
+                                                    </td>
 
-                        <span class="mt-2">Ед. изм.: {{  priemka.unit  }}</span>
-                    </v-col>
-                </v-row>
-            </v-container>
-            <!-- <small>* обязательные поля</small> -->
-        </v-card-text>
-        <v-card-actions>
-            <v-spacer></v-spacer>
+                                                    <td>
+                                                        <span
+                                                            v-if="
+                                                                offer.file !=
+                                                                null
+                                                            "
+                                                        >
+                                                            <a
+                                                                class="px-2 py-2 mr-2 border text-sm text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                                                target="_blank"
+                                                                :href="
+                                                                    '/uploads/' +
+                                                                    offer.file
+                                                                "
+                                                                >Просмотр</a
+                                                            >
+                                                        </span>
 
-            <v-btn color="default" text @click="acceptProductDialog = false">
-                Отмена
-            </v-btn>
+                                                        <input
+                                                            v-if="isEditable()"
+                                                            type="file"
+                                                            id="file"
+                                                            v-on:change="
+                                                                handleFileUpload(
+                                                                    offer,
+                                                                    $event
+                                                                )
+                                                            "
+                                                        />
+                                                    </td>
 
-            <v-btn color="success" text @click="acceptProduct()">
-                Принять
-            </v-btn>
-        </v-card-actions>
-    </v-card>
-</v-dialog>
+                                                    <td>
+                                                        <v-btn
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                            :id="
+                                                                'offer_' +
+                                                                offer.id
+                                                            "
+                                                            @click="
+                                                                updateOffer(
+                                                                    offer
+                                                                )
+                                                            "
+                                                            color="success"
+                                                            size="small"
+                                                            class="mr-2"
+                                                        >
+                                                            Сохранить
+                                                        </v-btn>
+
+                                                        <v-btn
+                                                            @click="
+                                                                deleteOffer(
+                                                                    offer.id,
+                                                                    item.id
+                                                                )
+                                                            "
+                                                            color="error"
+                                                            size="small"
+                                                            v-if="
+                                                                offer.status ==
+                                                                    'draft' &&
+                                                                isEditable()
+                                                            "
+                                                        >
+                                                            Удалить
+                                                        </v-btn>
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </v-table>
+                                    </td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </v-table>
 
 
+                    <!-- sign by PTD -->
+                    <div class="d-flex justify-space-between space-x-4">
+                        <div class="d-flex">
+                            <v-btn v-if="
+                                form.construction != null &&
+                                (products.length > 0 ||
+                                    equipments.length > 0 ||
+                                    services.length > 0) &&
+                                isPTDEngineer() &&
+                                application.status == 'draft'
+                            " class="mt-5" @click="updateApplication" color="primary">
+                                Сохранить
+                            </v-btn>
 
-<!-- equipment notes dialog -->
-<v-dialog v-model="equipmentHistoryDialog">
-    <v-card>
-        <v-card-title>
-            <span class="text-h5">История спец. техники</span>
-        </v-card-title>
+                            <v-btn v-if="
+                                form.construction != null &&
+                                (products.length > 0 ||
+                                    equipments.length > 0 ||
+                                    services.length > 0) &&
+                                isPTDEngineer() &&
+                                application.status == 'draft'
+                            " class="mt-5" @click="signApplicationFirstTime" color="green">
+                                Сохранить и подписать
+                            </v-btn>
+                        </div>
 
-        <v-card-text>
-            <v-container>
-                <v-row no-gutters class="">
-                    Полных рабочих дней: {{  getWorkingDays()  }}
-                    <v-col cols="12" class="">
-                        <v-table>
+                        <v-btn v-if="application != null && application.status == 'draft' && isPTDEngineer() && isOwner()" color="red"
+                            @click="deleteApplication(application.id)" class="ml-4 mt-5">
+                            Удалить заявку
+                        </v-btn>
+                    </div>
+
+
+                    <!-- sign btn by supplier -->
+                    <div
+                        v-if="
+                            isSupplier() &&
+                            application.is_accepted == 1 &&
+                            !noLeftPositions() && !signedBySupplier()
+                        "
+                        class="d-flex flex-row justify-space-between"
+                    >                    
+                        <v-btn
+                            color="green"
+                            @click="signBySupplier()"
+                            class="mt-5 font-white"
+                            style="color: white !important"
+                        >
+                            Отправить на подпись
+                        </v-btn>
+
+                        <div
+                            v-if="!emptyPositions() && application != null && application.kind != 'equipment'"
+                            class="mt-5 d-flex space-x-4 justify-center"
+                        >
+                            Загрузить общий счет на оплату: 
+                            <input 
+                                type="file"
+                                id="commonFile"
+                                class="ml-2"
+                                v-on:change="
+                                    handleOneFileUpload(
+                                        $event
+                                    )
+                                "
+                            />
+                        </div>
+                    </div>
+
+                    <div class="mt-6"></div>
+                    <!-- SUBS:  -->
+                    <template v-for="subapp in subs">
+                        <!-- PRODUCT -->
+                        <v-table                            
+                            :key="subapp.id"
+                            style=""
+                            class="mt-12"
+                            v-if="subapp != null && subapp.kind == 'product'"
+                        >
                             <thead>
                                 <tr>
-                                    <th>#</th>
-                                    <th>Дата</th>
-                                    <th>Часов отработано</th>
+                                    <th>№</th>
+                                    <th>Статья расходов</th>
+                                    <th>Наименование ресурсов</th>
+                                    <th>Ед. изм.</th>
+
+                                    <th>заказано</th>
+                                    <th>фактически</th>
+                                    <th>остаток</th>
+
                                     <th>Примечание</th>
                                     <th></th>
                                 </tr>
                             </thead>
+
                             <tbody>
-                                <tr v-for="(note, n) in equipmentNotes" :key="note.id">
-                                    <td>{{  n + 1  }}</td>
-                                    <td>{{  note.created_at  }}</td>
-                                    <td>{{  note.hours  }}</td>
-                                    <td>{{  note.notes  }}</td>
-                                    <td>
-                                        <!-- <v-btn color="error" size="small">удалить</v-btn> -->
-                                    </td>
-                                </tr>
+                                <template
+                                    v-for="(item, index) in subapp.application_application_products"
+                                    :key="item.id"
+                                >
+                                    <tr>
+                                        <td><span>{{ index + 1 }}</span></td>
+                                        <td style="width: 20%">
+                                            {{ item.category?.name }}
+                                        </td>
+                                        <td>{{ item.product?.name }}</td>
+                                        <td>{{ item.unit?.name }}</td>
+
+                                        <td>
+                                            {{ subapp.application_application_products[index].quantity?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{ subapp.application_application_products[index].prepared?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                (subapp.application_application_products[index].quantity -
+                                                subapp.application_application_products[index].prepared)?.toLocaleString('ru')
+                                            }}
+                                        </td>
+
+                                        <td>{{ item.notes }}</td>
+
+                                        <td>
+                                            &nbsp;
+                                        </td>
+                                    </tr>
+
+                                    <tr
+                                        v-if="
+                                            isSecondCrew() &&
+                                            !isWarehouseManager() &&
+                                            item.offers != null &&
+                                            item.offers.length > 0 &&
+                                            (subapp.status == 'in_progress' ||
+                                            subapp.status == 'in_review')
+                                        "
+                                        class="bg-slate-100"
+                                    >
+                                        <td colspan="9" class="border-none">
+                                            <v-table
+                                                class="mt-4 mb-4 mx-0 border"
+                                                style="overflow: visible"
+                                            >
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 25%">
+                                                            Название компании
+                                                        </th>
+                                                        <th style="width: 10%">
+                                                            Кол-во
+                                                        </th>
+                                                        <th style="width: 10%">
+                                                            Цена за ед.
+                                                        </th>
+                                                        <th>Общая сумма</th>
+                                                        <th>Счет на оплату</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        v-for="offer in item.offers"
+                                                        :key="offer.id"
+                                                    >
+                                                        <td class="">
+                                                            <span>{{offer.company.name}}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span>{{offer.quantity?.toLocaleString('ru')}}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span>{{ offer.price?.toLocaleString('ru')}} тг</span>
+                                                        </td>
+                                                        <td>
+                                                            {{ (offer.price * offer.quantity)?.toLocaleString('ru') }} тг
+                                                        </td>
+
+                                                        <td>
+                                                            <span
+                                                                v-if="
+                                                                    offer.file !=
+                                                                    null
+                                                                "
+                                                            >
+                                                                <a
+                                                                    class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                                                    target="_blank"
+                                                                    :href="
+                                                                        '/uploads/' +
+                                                                        offer.file
+                                                                    "
+                                                                    >Просмотр</a
+                                                                >
+                                                            </span>
+                                                        </td>
+
+                                                        <td>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </v-table>
+                                        </td>
+                                    </tr>
+                                </template>
                             </tbody>
                         </v-table>
-                    </v-col>
-                </v-row>
-            </v-container>
-        </v-card-text>
-    </v-card>
-</v-dialog>
-</div>
+
+                        <!-- SERVICES -->
+                        <v-table          
+                            :key="subapp.id"
+                            style=""
+                            v-if="
+                                subapp != null && subapp.kind == 'service'
+                            "
+                        >
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Статья расходов</th>
+                                    <th>Наименование ресурсов</th>
+                                    <th>Ед. изм.</th>
+
+                                    <th>заказано</th>
+                                    <th>фактически</th>
+                                    <th>остаток</th>
+
+                                    <th>Цена за ед.</th>
+                                    <th>Сумма</th>
+                                    <th>Примечание</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <template
+                                    v-for="(item, index) in subapp.application_services"
+                                    :key="item.id"
+                                >
+                                    <tr>
+                                        <td>{{ index + 1 }}</td>
+                                        <td>
+                                            {{ item.category }}
+                                            <!-- <multiselect v-model="services[index].category" :options="categories"
+                            placeholder="Укажите категорию" label="name" track-by="name"></multiselect> -->
+                                        </td>
+                                        <td>
+                                            <!-- <v-text-field v-model="services[index].service" label="Напишите название" variant="underlined"
+                            required density="comfortable" type="text"></v-text-field> -->
+                                            {{ item.service }}
+                                        </td>
+                                        <td>{{ item.unit }}</td>
+
+                                        <td>
+                                            {{ subapp.application_services[index].quantity?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{ subapp.application_services[index].prepared?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                (subapp.application_services[index].quantity -
+                                                subapp.application_services[index].prepared)?.toLocaleString('ru')
+                                            }}
+                                        </td>
+
+                                        <td>
+                                            <span>{{ item.price?.toLocaleString('ru') }}</span>
+                                        </td>
+                                        <td>
+                                            <template v-if="item.price">
+                                                {{ (item.price * item.quantity)?.toLocaleString('ru') }}₸
+                                            </template>
+                                        </td>
+
+                                        <td>{{ item.notes }}</td>
+
+                                        <td>
+                                            
+                                        </td>
+                                    </tr>
+
+                                    <tr
+                                        v-if="
+                                            isSecondCrew() &&
+                                            !isWarehouseManager() &&
+                                            item.offers != null &&
+                                            item.offers.length > 0 &&
+                                            (subapp.status == 'in_progress' ||
+                                            subapp.status == 'in_review')
+                                        "
+                                        class="bg-slate-100"
+                                    >
+                                        <td colspan="9" class="border-none">
+                                            <v-table
+                                                class="mt-4 mb-8 mx-0 border"
+                                                style="overflow: visible"
+                                            >
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 25%">
+                                                            Название компании
+                                                        </th>
+                                                        <th style="width: 10%">
+                                                            Кол-во
+                                                        </th>
+                                                        <th style="width: 10%">
+                                                            Цена за ед.
+                                                        </th>
+                                                        <th>Общая сумма</th>
+                                                        <th>Счет на оплату</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        v-for="offer in item.offers"
+                                                        :key="offer.id"
+                                                    >
+                                                        <td class="">
+                                                            <span>{{ offer.company.name}}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span>{{ offer.quantity?.toLocaleString('ru') }}</span>
+                                                        </td>
+                                                        <td>
+                                                            <span>{{offer.price?.toLocaleString('ru')}} тг</span>
+                                                        </td>
+                                                        <td>
+                                                            {{
+                                                                (offer.price *
+                                                                offer.quantity)?.toLocaleString('ru')
+                                                            }}
+                                                             тг
+                                                        </td>
+
+                                                        <td>
+                                                            <span
+                                                                v-if="
+                                                                    offer.file !=
+                                                                    null
+                                                                "
+                                                            >
+                                                                <a
+                                                                    class="px-2 py-2 mr-2 border text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                                                    target="_blank"
+                                                                    :href="
+                                                                        '/uploads/' +
+                                                                        offer.file
+                                                                    "
+                                                                    >Просмотр</a
+                                                                >
+                                                            </span>
+                                                        </td>
+
+                                                        <td>
+                                                            
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </v-table>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </v-table>
+
+                        <!-- EQUIPMENT table -->
+                        <v-table
+                            :key="subapp.id"
+                            style=""
+                            v-if="
+                                subapp != null &&
+                                subapp.kind == 'equipment'
+                            "
+                        >
+                            <thead>
+                                <tr>
+                                    <th>№</th>
+                                    <th>Наименование спец. техники</th>
+                                    <th>Ед. изм.</th>
+
+                                    <th>заказано</th>
+                                    <th>фактически</th>
+                                    <th>остаток</th>
+
+                                    <th>Примечание</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <template
+                                    v-for="(item, index) in subapp.application_equipments"
+                                    :key="item.id"
+                                >
+                                    <tr>
+                                        <td>{{ item.id }}</td>
+                                        <td>{{ item.equipment?.name }}</td>
+                                        <td>{{ item.unit?.name }}</td>
+                                        <td>
+                                            {{ subapp.application_equipments[index].quantity?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{ subapp.application_equipments[index].prepared?.toLocaleString('ru') }}
+                                        </td>
+                                        <td>
+                                            {{
+                                                (subapp.application_equipments[index].quantity -
+                                                subapp.application_equipments[index].prepared)?.toLocaleString('ru')
+                                            }}
+                                        </td>
+
+                                        <td>{{ item.notes }}</td>
+
+                                        <td>
+                                            
+                                        </td>
+                                    </tr>
+                                    <tr
+                                        v-if="
+                                            isSecondCrew() &&
+                                            !isWarehouseManager() &&
+                                            item.offers != null &&
+                                            item.offers.length > 0 &&
+                                            (subapp.status == 'in_progress' ||
+                                            subapp.status == 'in_review')
+                                        "
+                                        class="bg-slate-100"
+                                    >
+                                        <td colspan="9" class="border-none">
+                                            <v-table
+                                                class="mt-4 mb-8 mx-0 border"
+                                                style="overflow: visible"
+                                            >
+                                                <thead>
+                                                    <tr>
+                                                        <th style="width: 25%">
+                                                            Название компании
+                                                        </th>
+                                                        <th style="width: 10%">
+                                                            Кол-во
+                                                        </th>
+                                                        <th style="width: 10%">
+                                                            Цена за ед.
+                                                        </th>
+                                                        <th>Общая сумма</th>
+                                                        <th>Счет на оплату</th>
+                                                        <th></th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    <tr
+                                                        v-for="offer in item.offers"
+                                                        :key="offer.id"
+                                                    >
+                                                        <td class="">
+                                                            <span
+                                                                >{{
+                                                                    offer.company
+                                                                        .name
+                                                                }}</span
+                                                            >
+                                                        </td>
+                                                        <td>                                                            
+                                                            <span
+                                                                >{{
+                                                                    offer.quantity?.toLocaleString('ru')
+                                                                }}</span
+                                                            >
+                                                        </td>
+                                                        <td>
+                                                            <span
+                                                                >{{
+                                                                    offer.price?.toLocaleString('ru')
+                                                                }}
+                                                                 тг</span
+                                                            >
+                                                        </td>
+                                                        <td>
+                                                            {{
+                                                                (offer.price *
+                                                                offer.quantity)?.toLocaleString('ru')
+                                                            }}
+                                                            тг
+                                                        </td>
+
+                                                        <td>
+                                                            <span
+                                                                v-if="
+                                                                    offer.file !=
+                                                                    null
+                                                                "
+                                                            >
+                                                                <a
+                                                                    class="px-2 py-2 mr-2 border text-sm text-black text-decoration-none hover:bg-slate-100 cursor-pointer"
+                                                                    target="_blank"
+                                                                    :href="
+                                                                        '/uploads/' +
+                                                                        offer.file
+                                                                    "
+                                                                    >Просмотр</a
+                                                                >
+                                                            </span>
+
+                                                        </td>
+
+                                                        <td>
+                                                            
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
+                                            </v-table>
+                                        </td>
+                                    </tr>
+                                </template>
+                            </tbody>
+                        </v-table>
+
+                        <!-- signing -->
+                        <v-container
+                            :key="subapp.id"
+                            class="px-0 md:px-2"
+                            v-if="subapp != null"
+                        >
+                            <!-- For Supplier -->
+                            <!-- <v-row
+                                v-if="
+                                    currentUser != null &&
+                                    subapp.status != 'in_progress' &&
+                                    isSupplier()
+                                "
+                                class="mb-2"
+                                no-gutters
+                            >
+                                <v-col cols="12">
+                                    <v-btn
+                                        color="primary"
+                                        @click="makeApplicationEditableBySupplier(subapp.id)"
+                                        class=""
+                                    >
+                                        Дополнить заявку
+                                    </v-btn>
+                                </v-col>
+                            </v-row> -->
+
+                            <v-row v-if="subapp != null && subapp.status != 'draft'" no-gutters>
+                                <v-col no-gutters cols="12">
+                                    <v-expansion-panels no-gutters v-model="showPanels">
+                                        <v-expansion-panel value="sign">
+                                            <v-expansion-panel-title>
+                                                Подписание заявки
+                                            </v-expansion-panel-title>
+
+                                            <v-expansion-panel-text
+                                                no-gutters
+                                                style=""
+                                                class="px-0"
+                                            >
+                                                <v-list-item
+                                                    no-gutters
+                                                    v-for="(
+                                                        item, index
+                                                    ) in subapp?.signers"
+                                                    :key="item.id"
+                                                >
+                                                    <v-list-item-header>
+                                                        <v-list-item-title>
+                                                            <v-col
+                                                                cols="12"
+                                                                class="px-0"
+                                                            >
+                                                                <strong>{{ index + 1 }}.
+                                                                    {{ item.application_path.position }}</strong
+                                                                >
+                                                                -
+                                                                {{ item.application_path?.responsible.name }}
+                                                            </v-col>
+
+                                                            <!-- declined -->
+                                                            <span
+                                                                v-if="
+                                                                    item.status ==
+                                                                    'declined'
+                                                                "
+                                                            >
+                                                                <v-chip
+                                                                    class="mr-2"
+                                                                    color="red"
+                                                                    text-color="white"
+                                                                >
+                                                                    Отклонено
+                                                                </v-chip>
+
+                                                                <span>{{
+                                                                    item.declined_reason
+                                                                }}</span>
+                                                                -
+                                                                <span>{{
+                                                                    item.updated_at
+                                                                }}</span>
+                                                            </span>
+                                                            <!-- accepted -->
+                                                            <span
+                                                                v-else-if="
+                                                                    item.status ==
+                                                                    'accepted'
+                                                                "
+                                                            >
+                                                                <v-chip
+                                                                    class="mr-2"
+                                                                    color="green"
+                                                                    text-color="white"
+                                                                >
+                                                                    Одобрено
+                                                                </v-chip>
+
+                                                                <span>{{
+                                                                    item.updated_at
+                                                                }}</span>
+                                                            </span>
+
+                                                            <!-- incoming -->
+                                                            <span
+                                                                v-else-if="
+                                                                    currentUser !=
+                                                                        null &&
+                                                                    item.status ==
+                                                                        'incoming' &&
+                                                                    item
+                                                                        .application_path
+                                                                        ?.responsible
+                                                                        .id ==
+                                                                        currentUser.id
+                                                                "
+                                                            >
+                                                                <v-btn
+                                                                    size="small"
+                                                                    color="success"
+                                                                    @click="
+                                                                        signApplication(
+                                                                            item
+                                                                        )
+                                                                    "
+                                                                    class="mr-5"
+                                                                >
+                                                                    Подписать
+                                                                </v-btn>
+
+                                                                <v-btn
+                                                                    v-if="
+                                                                        item
+                                                                            .application_path
+                                                                            ?.responsible
+                                                                            .id !=
+                                                                        application.owner_id
+                                                                    "
+                                                                    size="small"
+                                                                    color="error"
+                                                                    @click="
+                                                                        showDecline(
+                                                                            item
+                                                                        )
+                                                                    "
+                                                                    class=""
+                                                                >
+                                                                    Отклонить
+                                                                </v-btn>
+                                                            </span>
+                                                            <span v-else>...</span>
+                                                        </v-list-item-title>
+                                                    </v-list-item-header>
+                                                </v-list-item>
+                                            </v-expansion-panel-text>
+                                        </v-expansion-panel>
+                                    </v-expansion-panels>
+                                </v-col>
+                            </v-row>
+                        </v-container>
+                    </template>
+
+                    
+                </v-form>
+
+                <!-- Edit buttons -->
+                <v-container
+                    class="mt-5 px-0 md:px-2"
+                    v-if="application != null"
+                >
+                    <!-- For PTD -->
+                    <v-row
+                        v-if="
+                            currentUser != null &&
+                            application.status == 'declined' &&
+                            application.owner_id == currentUser.id
+                        "
+                        class="mb-5"
+                        no-gutters
+                    >
+                        <v-col cols="12">
+                            <v-btn
+                                color="primary"
+                                @click="makeApplicationEditable()"
+                                class=""
+                            >
+                                Внести корректировки в заявку
+                            </v-btn>
+                        </v-col>
+                    </v-row>
+
+                    <v-row v-if="(application != null && application.status != 'draft' && subs.length <= 0 && !isSupplier() || (signedBySupplier() && subs.length <= 0))" no-gutters>
+                        <v-col no-gutters cols="12">
+                            <v-expansion-panels no-gutters v-model="showPanels">
+                                <v-expansion-panel value="sign">
+                                    <v-expansion-panel-title>
+                                        Подписание заявки
+                                    </v-expansion-panel-title>
+
+                                    <v-expansion-panel-text
+                                        no-gutters
+                                        style=""
+                                        class="px-0"
+                                    >
+                                        <v-list-item
+                                            no-gutters
+                                            v-for="(
+                                                item, index
+                                            ) in application.application_application_statuses"
+                                            :key="item.id"
+                                        >
+                                            <v-list-item-header>
+                                                <v-list-item-title>
+                                                    <v-col
+                                                        cols="12"
+                                                        class="px-0"
+                                                    >
+                                                        <strong
+                                                            >{{ index + 1 }}.
+                                                            {{
+                                                                item
+                                                                    .application_path
+                                                                    .position
+                                                            }}</strong
+                                                        >
+                                                        -
+                                                        {{
+                                                            item
+                                                                .application_path
+                                                                ?.responsible
+                                                                .name
+                                                        }}
+                                                    </v-col>
+
+                                                    <!-- declined -->
+                                                    <span
+                                                        v-if="
+                                                            item.status ==
+                                                            'declined'
+                                                        "
+                                                    >
+                                                        <v-chip
+                                                            class="mr-2"
+                                                            color="red"
+                                                            text-color="white"
+                                                        >
+                                                            Отклонено
+                                                        </v-chip>
+
+                                                        <span>{{
+                                                            item.declined_reason
+                                                        }}</span>
+                                                        -
+                                                        <span>{{
+                                                            item.updated_at
+                                                        }}</span>
+                                                    </span>
+                                                    <!-- accepted -->
+                                                    <span
+                                                        v-else-if="
+                                                            item.status ==
+                                                            'accepted'
+                                                        "
+                                                    >
+                                                        <v-chip
+                                                            class="mr-2"
+                                                            color="green"
+                                                            text-color="white"
+                                                        >
+                                                            Одобрено
+                                                        </v-chip>
+
+                                                        <span>{{
+                                                            item.updated_at
+                                                        }}</span>
+                                                    </span>
+
+                                                    <!-- incoming -->
+                                                    <span
+                                                        v-else-if="
+                                                            currentUser !=
+                                                                null &&
+                                                            item.status ==
+                                                                'incoming' &&
+                                                            item
+                                                                .application_path
+                                                                ?.responsible
+                                                                .id ==
+                                                                currentUser.id
+                                                        "
+                                                    >
+                                                        <v-btn
+                                                            size="small"
+                                                            color="success"
+                                                            @click="
+                                                                signApplication(
+                                                                    item
+                                                                )
+                                                            "
+                                                            class="mr-5"
+                                                        >
+                                                            Подписать
+                                                        </v-btn>
+
+                                                        <v-btn
+                                                            v-if="
+                                                                item
+                                                                    .application_path
+                                                                    ?.responsible
+                                                                    .id !=
+                                                                application.owner_id
+                                                            "
+                                                            size="small"
+                                                            color="error"
+                                                            @click="
+                                                                showDecline(
+                                                                    item
+                                                                )
+                                                            "
+                                                            class=""
+                                                        >
+                                                            Отклонить
+                                                        </v-btn>
+                                                    </span>
+                                                    <span v-else>...</span>
+                                                </v-list-item-title>
+                                            </v-list-item-header>
+                                        </v-list-item>
+                                    </v-expansion-panel-text>
+                                </v-expansion-panel>
+                            </v-expansion-panels>
+                        </v-col>
+                    </v-row>
+                </v-container>
+            </v-col>
+        </v-row>
+        <!-- </v-container> -->
+
+        <!-- Snackbar -->
+        <v-snackbar v-model="snackbar.status" :timeout="snackbar.timeout">
+            {{ snackbar.text }}
+
+            <template v-slot:actions>
+                <v-btn
+                    color="blue"
+                    variant="text"
+                    @click="snackbar.status = false"
+                >
+                    Закрыть
+                </v-btn>
+            </template>
+        </v-snackbar>
+
+        <!-- Decline dialog -->
+        <v-dialog v-model="declineDialog" persistent>
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Отклонить заявку?</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-textarea
+                                    v-model="declinedReason"
+                                    label="Причина отклонения*"
+                                    required
+                                ></v-textarea>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>* обязательные поля</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn
+                        color="blue-darken-1"
+                        text
+                        @click="declineDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn
+                        color="red-darken-1"
+                        text
+                        @click="declineApplication()"
+                    >
+                        Отклонить
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- Decline Product dialog -->
+        <v-dialog v-model="declineProductDialog" persistent>
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Отклонить приход?</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-textarea
+                                    v-model="declinedProductReason"
+                                    label="Причина отклонения*"
+                                    required
+                                ></v-textarea>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>* обязательные поля</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn
+                        color="blue-darken-1"
+                        text
+                        @click="declineProductDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn color="red-darken-1" text @click="declineProduct()">
+                        Отклонить
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <v-dialog v-model="receiveDialog" persistent>
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5"
+                        >Получение материально-товарных ценностей</span
+                    >
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="current.delivered"
+                                    label="Количество"
+                                    variant="outlined"
+                                    type="number"
+                                    required
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>* обязательные поля</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn color="" text @click="receiveDialog = false">
+                        Отмена
+                    </v-btn>
+
+                    <v-btn color="blue-darken-1" text @click="acceptDelivery()">
+                        Принять
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- Add Company Dialog -->
+        <v-dialog v-model="addCompanyDialog" persistent>
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">Добавить компанию</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field
+                                    v-model="newCompany"
+                                    label="Название компании *"
+                                    required
+                                ></v-text-field>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <small>* обязательные поля</small>
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn
+                        color="default"
+                        text
+                        @click="addCompanyDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn color="success" text @click="addCompany()">
+                        Добавить
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- Accept Product Dialog -->
+        <v-dialog v-model="acceptProductDialog" persistent>
+            <v-card class="oks-dialog min-w-5xl w-7xl" style="">
+                <v-card-title>
+                    <span class="text-h5">Приемка товара/техники/услуги</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row>
+                            <v-col cols="12">{{ priemka.name }}</v-col>
+                        </v-row>
+                        <v-row>
+                            <v-col cols="12">
+                                <v-text-field
+                                    class="mt-2"
+                                    v-model="priemka.quantity"
+                                    label="Количество"
+                                    variant="underlined"
+                                    required
+                                    density="comfortable"
+                                    type="number"
+                                    @keyup.enter="acceptProduct()"
+                                ></v-text-field>
+
+                                <v-textarea
+                                    class="mt-2"
+                                    v-model="priemka.notes"
+                                    label="Примечание"
+                                    variant="underlined"
+                                    required
+                                    density="comfortable"
+                                ></v-textarea>
+
+                                <span class="mt-2"
+                                    >Ед. изм.: {{ priemka.unit }}</span
+                                >
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                    <!-- <small>* обязательные поля</small> -->
+                </v-card-text>
+                <v-card-actions>
+                    <v-spacer></v-spacer>
+
+                    <v-btn
+                        color="default"
+                        text
+                        @click="acceptProductDialog = false"
+                    >
+                        Отмена
+                    </v-btn>
+
+                    <v-btn color="success" text @click="acceptProduct()">
+                        Принять
+                    </v-btn>
+                </v-card-actions>
+            </v-card>
+        </v-dialog>
+
+        <!-- equipment notes dialog -->
+        <v-dialog v-model="equipmentHistoryDialog">
+            <v-card>
+                <v-card-title>
+                    <span class="text-h5">История спец. техники</span>
+                </v-card-title>
+
+                <v-card-text>
+                    <v-container>
+                        <v-row no-gutters class="">
+                            Полных рабочих дней: {{ getWorkingDays() }}
+                            <v-col cols="12" class="">
+                                <v-table>
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Дата</th>
+                                            <th>Часов отработано</th>
+                                            <th>Примечание</th>
+                                            <th></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr
+                                            v-for="(note, n) in equipmentNotes"
+                                            :key="note.id"
+                                        >
+                                            <td>{{ n + 1 }}</td>
+                                            <td>{{ note.created_at }}</td>
+                                            <td>{{ note.hours }}</td>
+                                            <td>{{ note.notes }}</td>
+                                            <td>
+                                                <!-- <v-btn color="error" size="small">удалить</v-btn> -->
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </v-table>
+                            </v-col>
+                        </v-row>
+                    </v-container>
+                </v-card-text>
+            </v-card>
+        </v-dialog>
+    </div>
 </template>
 
 <script>
@@ -1544,6 +2723,12 @@ export default {
             selectedEquipment: null,
             equipmentNotes: [],
             equipmentHistoryDialog: false,
+
+            comment: null,
+
+            positions: [],
+
+            subs: []
         };
     },
 
@@ -1590,27 +2775,181 @@ export default {
     },
 
     methods: {
-        onServicePriceChanged(e) {
-            console.log(e.target.value, e.target.id);
-            const data = { price: e.target.value };
+        signedBySupplier() {
+            let signed = false;
+            for (let i = 0; i < this.application.application_application_statuses.length; i++) {
+                const s = this.application.application_application_statuses[i];
+            
+                if (this.isSupplier() && s.application_path?.responsible.id == this.currentUser.id && s.status == 'accepted') {
+                    signed = true;
+                }
+            }
 
-            axios.put(`/api/v1/application-services/${e.target.id}/service-price`, data).then((response) => {
-                this.snackbar.text = "Цена успешно обновлена. Инженер ПТО уведомлен";
-                this.snackbar.status = true;
+            return signed; 
+        },
+
+        async parentStatuses(parentId) {
+            const statuses = await axios.get(`/api/v1/parent-statuses/${parentId}`);
+            console.log(statuses);
+
+            return statuses.data;
+        },
+
+        togglePosition(id) {
+            console.log('check/uncheck', id);
+        },
+
+        emptyPositions() {
+            // console.log(this.positions);
+            return (this.positions && this.positions.length <= 0);
+        },
+
+        getSubs() {
+            axios.get(`/api/v1/subapplications/${this.application.id}`).then(async (response) => {
+                // console.log(response);
+                this.subs = response.data;
+                console.log(this.subs.length, 'subs');
+
+                for (let i = 0; i < this.subs.length; i++) {
+                    this.subs[i].signers = await this.getSigners(this.subs[i]);
+                    console.log(this.subs[i].signers, 'signers');
+                }
+            });
+        },
+
+        signBySupplier() {
+            if (!confirm('Вы уверены, что хотите подписать?')) return;
+            // console.log('positions', this.positions);
+            
+            if (this.positions // 👈 null and undefined check
+                && this.positions.length <= 0) {
+                alert('Выберите хотя бы 1 позицию');
+                return;
+            }
+
+            const data = {
+                'id': this.application.id,
+                'positions': this.positions
+            };
+
+            axios.post('/api/v1/check-offers', data).then((response) => {
+                if (response.data === -1) {
+                    this.snackbar.text = 'Ошибка: заполните предложения от компаний для выбранных позиций';
+                    this.snackbar.status = true;
+                    return;
+                }
+
+                this.getApplication();
+                this.positions = [];
             })
         },
 
+        signApplicationFirstTime() {
+            if (!confirm('Вы уверены, что хотите подписать?')) return;
+
+            // update application
+            this.form.products = this.products;
+            this.form.equipments = this.equipments;
+            this.form.services = this.services;
+            this.form.construction_id = this.form.construction.id;
+
+            try {
+                axios
+                    .put(
+                        `/api/v1/applications/${this.application.id}`,
+                        this.form
+                    )
+                    .then((response) => {                   
+                        this.snackbar.text = "Заявка успешно сохранена.";
+                        this.snackbar.status = true;
+
+                        // sign application
+                        axios
+                            .post( "/api/v1/sign-application-first-time/" + this.application.id)
+                            .then((response) => {
+                                this.getApplication();
+
+                                this.snackbar.text = "Заявка успешно подписана.";
+                                this.snackbar.status = true;
+                            });
+                    });
+            } catch (e) {
+                console.log(e);
+
+                if (e.response.status === 422) {
+                    // errors.value = e.response.data.errors
+                }
+
+                this.snackbar.text = "Ошибка.";
+                this.snackbar.status = true;
+            }
+        }, 
+
+        backToList() {
+            window.location.href = `/applications?status=all&construction_id=${this.application.construction_id}`;
+        },
+
+        isOwner() {
+            return (
+                this.currentUser != null &&
+                this.application != null &&
+                this.application.owner_id == this.currentUser.id
+            );
+        },
+
+        deleteApplication(id) {
+            if (!window.confirm("Вы действительно хотите удалить?")) {
+                return;
+            }
+
+            axios.delete("/api/v1/applications/" + id).then((response) => {
+                window.location.href = "/applications";
+            });
+        },
+
+        isSecondCrew() {
+            return (
+                this.currentUser != null &&
+                [
+                    "Economist",
+                    "Chief Financial Officer",
+                    "CEO",
+                    "Supervisor",
+                    "Supplier",
+                    "Material Accountant",
+                    "Vice President",
+                    "Section Manager",
+                ].includes(this.currentUser.roles[0].title)
+            );
+        },
+
+        onServicePriceChanged(e) {
+            // console.log(e.target.value, e.target.id);
+            const data = { price: e.target.value };
+
+            axios
+                .put(
+                    `/api/v1/application-services/${e.target.id}/service-price`,
+                    data
+                )
+                .then((response) => {
+                    this.snackbar.text =
+                        "Цена успешно обновлена. Инженер ПТО уведомлен";
+                    this.snackbar.status = true;
+                });
+        },
+
         asyncFind(query) {
-            console.log(query);
+            // console.log(query);
 
             if (query.length < 2) return;
 
-            this.isLoading = true
+            this.isLoading = true;
 
-            axios.get('/api/v1/products?q=' + query).then(response => {
+            axios.get("/api/v1/products?q=" + query).then((response) => {
                 this.options = response.data;
-                this.isLoading = false
-            })
+                this.isLoading = false;
+            });
         },
 
         showNotes() {
@@ -1620,7 +2959,7 @@ export default {
         getCurrentUser() {
             axios.get("/api/v1/me").then((response) => {
                 this.currentUser = response.data;
-                console.log(this.currentUser);
+                // console.log(this.currentUser);
 
                 if (
                     this.currentUser.roles[0].title == "Supplier" ||
@@ -1641,21 +2980,25 @@ export default {
                     this.application = response.data.data;
                     // console.log(this.application);
 
-                    this.products =
-                        this.application.application_application_products;
-                    // console.log(this.products);
-
+                    this.products = this.application.application_application_products;
                     this.equipments = this.application.application_equipments;
-                    // console.log('loaded equipments', this.equipments);
-
                     this.services = this.application.application_services;
 
                     this.form.construction = this.application.construction;
                     this.form.kind = this.application.kind;
 
+                    // get subpositions if exist
+                    this.getSubs();
+
                     // count badges
                     this.getCountNewApplications();
                 });
+        },
+
+        fillPositions() {
+            for (let i = 0; i < this.products.length; i++) {
+                // this.positions[this.products[i].id] = 0;
+            }
         },
 
         addProduct() {
@@ -1695,7 +3038,6 @@ export default {
                     quantity: this.current.quantity,
                     notes: this.current.notes,
                 });
-
             }
 
             this.current = {
@@ -1722,9 +3064,7 @@ export default {
                     (el) => el.id != item.id
                 );
             } else if (this.form.kind == "service") {
-                this.services = this.services.filter(
-                    (el) => el.id != item.id
-                );
+                this.services = this.services.filter((el) => el.id != item.id);
             }
         },
 
@@ -1734,7 +3074,7 @@ export default {
             this.form.services = this.services;
             this.form.construction_id = this.form.construction.id;
 
-            // console.log(this.form);
+            console.log(this.form);
 
             try {
                 axios
@@ -1759,7 +3099,14 @@ export default {
         },
 
         signApplication(applicationStatus) {
+            if (!confirm('Вы уверены, что хотите подписать?')) return;
+
             var data = { method: "sign" };
+
+            // if (this.isSupplier()) {
+            //     // console.log(this.positions);
+            //     return;
+            // }
 
             axios
                 .put(
@@ -1767,6 +3114,14 @@ export default {
                     data
                 )
                 .then((response) => {
+                    if (response.data === -1) {
+                        this.snackbar.text =
+                            "Ошибка: прикрепите счета на оплату на все позиции.";
+                        this.snackbar.status = true;
+
+                        return;
+                    }
+
                     this.getApplication();
 
                     this.snackbar.text = "Заявка успешно подписана.";
@@ -1779,6 +3134,11 @@ export default {
             this.declinedApplicationStatus = applicationStatus;
         },
 
+        async getSigners(subapp) {
+            const signers = await axios.post(`/api/v1/get-signers/${subapp.id}`);
+            return signers.data;
+        },
+
         declineApplication() {
             var data = {
                 method: "decline",
@@ -1788,7 +3148,7 @@ export default {
             axios
                 .put(
                     "/api/v1/application-statuses/" +
-                    this.declinedApplicationStatus.id,
+                        this.declinedApplicationStatus.id,
                     data
                 )
                 .then((response) => {
@@ -1804,17 +3164,10 @@ export default {
         },
 
         makeApplicationEditable() {
-            var data = {
-                status: "draft",
-                products: this.products,
-                services: this.services,
-                equipments: this.euipments,
-                construction_id: this.application.construction_id,
-                kind: this.application.kind,
-            };
-
+            if (!confirm('Вы уверены, что хотите внести корректировки?')) return;
+            
             axios
-                .put("/api/v1/applications/" + this.application.id, data)
+                .post("/api/v1/make-application-editable/" + this.application.id)
                 .then((response) => {
                     this.getApplication();
 
@@ -1873,8 +3226,11 @@ export default {
         },
 
         isWarehouseManager() {
-            if (this.application.kind == 'equipment') {
-                return this.currentUser != null && this.currentUser.roles[0].title == 'Section Manager';
+            if (this.application.kind == "equipment") {
+                return (
+                    this.currentUser != null &&
+                    this.currentUser.roles[0].title == "Section Manager"
+                );
             }
 
             return (
@@ -1909,6 +3265,18 @@ export default {
                         "Ценностно-материальная позиция обновлена.";
                     this.snackbar.status = true;
                 });
+        },
+
+        noLeftPositions() {
+            let positions = 0;
+            for (let i = 0; i < this.subs.length; i++) {
+                positions += this.subs[i].application_application_products.length + this.subs[i].application_equipments.length + this.subs[i].application_services.length;
+            }
+
+            const appPositions = this.application.application_application_products.length + this.application.application_equipments.length + this.application.application_services.length;
+            // console.log(positions, appPositions, this.application, 'positions');
+
+            return appPositions <= 0;
         },
 
         showReceiveDialog(item) {
@@ -1951,27 +3319,31 @@ export default {
                 paidSum: 0,
             };
 
-            if (this.application.kind == 'product') {
-                axios.post("/api/v1/application-offers", data).then((response) => {
-                    // console.log(response);
+            if (this.application.kind == "product") {
+                axios
+                    .post("/api/v1/application-offers", data)
+                    .then((response) => {
+                        // console.log(response);
 
-                    for (var i = 0; i < this.products.length; i++) {
-                        if (this.products[i].id == id) {
-                            // console.log(this.products[i]);
+                        for (var i = 0; i < this.products.length; i++) {
+                            if (this.products[i].id == id) {
+                                // console.log(this.products[i]);
 
-                            this.products[i].offers.push(response.data.data.offer);
+                                this.products[i].offers.push(
+                                    response.data.data.offer
+                                );
 
-                            this.snackbar.text =
-                                "Предложение от новой компании успешно добавлено.";
-                            this.snackbar.status = true;
+                                this.snackbar.text =
+                                    "Предложение от новой компании успешно добавлено.";
+                                this.snackbar.status = true;
+                            }
                         }
-                    }
-                });
+                    });
 
                 return;
             }
 
-            if (this.application.kind == 'service') {
+            if (this.application.kind == "service") {
                 axios.post("/api/v1/service-offers", data).then((response) => {
                     // console.log(response);
 
@@ -1979,7 +3351,9 @@ export default {
                         if (this.services[i].id == id) {
                             // console.log(this.products[i]);
 
-                            this.services[i].offers.push(response.data.data.offer);
+                            this.services[i].offers.push(
+                                response.data.data.offer
+                            );
 
                             this.snackbar.text =
                                 "Предложение от новой компании успешно добавлено.";
@@ -1991,28 +3365,32 @@ export default {
                 return;
             }
 
-            if (this.application.kind == 'equipment') {
-                axios.post("/api/v1/equipment-offers", data).then((response) => {
-                    console.log(response);
+            if (this.application.kind == "equipment") {
+                axios
+                    .post("/api/v1/equipment-offers", data)
+                    .then((response) => {
+                        // console.log(response);
 
-                    for (var i = 0; i < this.equipments.length; i++) {
-                        if (this.equipments[i].id == id) {
-                            // console.log(this.products[i]);
+                        for (var i = 0; i < this.equipments.length; i++) {
+                            if (this.equipments[i].id == id) {
+                                // console.log(this.products[i]);
 
-                            this.equipments[i].offers.push(response.data.data.offer);
+                                this.equipments[i].offers.push(
+                                    response.data.data.offer
+                                );
 
-                            this.snackbar.text =
-                                "Предложение от новой компании успешно добавлено.";
-                            this.snackbar.status = true;
+                                this.snackbar.text =
+                                    "Предложение от новой компании успешно добавлено.";
+                                this.snackbar.status = true;
+                            }
                         }
-                    }
-                });
+                    });
             }
         },
 
         updateOffer(offer) {
             try {
-                if (this.application.kind == 'product') {
+                if (this.application.kind == "product") {
                     axios
                         .put(`/api/v1/application-offers/${offer.id}`, offer)
                         .then((response) => {
@@ -2035,7 +3413,7 @@ export default {
                     return;
                 }
 
-                if (this.application.kind == 'service') {
+                if (this.application.kind == "service") {
                     axios
                         .put(`/api/v1/service-offers/${offer.id}`, offer)
                         .then((response) => {
@@ -2058,7 +3436,7 @@ export default {
                     return;
                 }
 
-                if (this.application.kind == 'equipment') {
+                if (this.application.kind == "equipment") {
                     axios
                         .put(`/api/v1/equipment-offers/${offer.id}`, offer)
                         .then((response) => {
@@ -2097,7 +3475,7 @@ export default {
                 return;
             }
 
-            if (this.application.kind == 'product') {
+            if (this.application.kind == "product") {
                 axios
                     .delete("/api/v1/application-offers/" + offerId)
                     .then((response) => {
@@ -2114,7 +3492,7 @@ export default {
                 return;
             }
 
-            if (this.application.kind == 'service') {
+            if (this.application.kind == "service") {
                 axios
                     .delete("/api/v1/service-offers/" + offerId)
                     .then((response) => {
@@ -2131,7 +3509,7 @@ export default {
                 return;
             }
 
-            if (this.application.kind == 'equipment') {
+            if (this.application.kind == "equipment") {
                 axios
                     .delete("/api/v1/equipment-offers/" + offerId)
                     .then((response) => {
@@ -2150,6 +3528,29 @@ export default {
 
         countSum(product) {
             return product.quantity * product.price;
+        },
+
+        handleOneFileUpload(event) {
+            this.file = event.target.files[0];
+
+            let formData = new FormData();
+            formData.append("file", this.file);
+            formData.append("positions", this.positions);
+            formData.append("kind", this.application.kind);
+
+            axios
+                .post("/upload-one-file", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                })
+                .then((response) => {
+                    this.getApplication();
+
+                    this.snackbar.text = "Общий счет на оплату закреплен";
+                    this.snackbar.status = true;
+                })
+                .catch((error) => {
+                    console.error(error);
+                });
         },
 
         handleFileUpload(offer, event) {
@@ -2207,19 +3608,15 @@ export default {
         // },
 
         showAcceptProduct(item) {
-            if (this.application.kind == 'product') {
+            if (this.application.kind == "product") {
                 this.priemka.product = item;
                 this.priemka.name = item.product.name;
                 this.priemka.unit = item.unit.name;
-            }
-
-            else if (this.application.kind == 'service') {
+            } else if (this.application.kind == "service") {
                 this.priemka.service = item;
                 this.priemka.name = item.service;
                 this.priemka.unit = item.unit;
-            }
-
-            else if (this.application.kind == 'equipment') {
+            } else if (this.application.kind == "equipment") {
                 this.priemka.equipment = item;
                 this.priemka.name = item.equipment.name;
                 this.priemka.unit = item.unit.name;
@@ -2236,11 +3633,7 @@ export default {
             };
 
             axios
-                .put(
-                    "/api/v1/inventory-applications/" +
-                    inventoryId,
-                    data
-                )
+                .put("/api/v1/inventory-applications/" + inventoryId, data)
                 .then((response) => {
                     this.getApplication();
 
@@ -2262,7 +3655,7 @@ export default {
         },
 
         acceptProduct() {
-            if (this.application.kind == 'product') {
+            if (this.application.kind == "product") {
                 this.priemka.product.toBePrepared = this.priemka.quantity;
 
                 // create inventory application
@@ -2274,8 +3667,8 @@ export default {
                 axios
                     .put(
                         "/api/v1/application-products/" +
-                        this.priemka.product.id +
-                        "/prepare",
+                            this.priemka.product.id +
+                            "/prepare",
                         productData
                     )
                     .then((response) => {
@@ -2284,9 +3677,7 @@ export default {
 
                         this.acceptInventory(response.data.inventory.id);
                     });
-            }
-
-            else if (this.application.kind == 'service') {
+            } else if (this.application.kind == "service") {
                 this.priemka.service.toBePrepared = this.priemka.quantity;
 
                 // create inventory application
@@ -2298,8 +3689,8 @@ export default {
                 axios
                     .put(
                         "/api/v1/application-services/" +
-                        this.priemka.service.id +
-                        "/prepare",
+                            this.priemka.service.id +
+                            "/prepare",
                         data
                     )
                     .then((response) => {
@@ -2308,9 +3699,7 @@ export default {
 
                         this.acceptInventory(response.data.inventory.id);
                     });
-            }
-
-            else if (this.application.kind == 'equipment') {
+            } else if (this.application.kind == "equipment") {
                 this.priemka.equipment.toBePrepared = this.priemka.quantity;
 
                 // create inventory application
@@ -2322,12 +3711,13 @@ export default {
                 axios
                     .put(
                         "/api/v1/application-equipments/" +
-                        this.priemka.equipment.id +
-                        "/prepare",
+                            this.priemka.equipment.id +
+                            "/prepare",
                         data
                     )
                     .then((response) => {
-                        this.priemka.equipment.prepared = response.data.prepared;
+                        this.priemka.equipment.prepared =
+                            response.data.prepared;
                         this.priemka.equipment.toBePrepared = null;
 
                         this.acceptInventory(response.data.inventory.id);
@@ -2340,7 +3730,7 @@ export default {
             this.declineProductDialog = true;
             this.declineInventoryApplicationId = item.id;
 
-            console.log(this.declineInventoryApplicationId);
+            // console.log(this.declineInventoryApplicationId);
         },
 
         declineProduct() {
@@ -2352,7 +3742,7 @@ export default {
             axios
                 .put(
                     "/api/v1/inventory-applications/" +
-                    this.declineInventoryApplicationId,
+                        this.declineInventoryApplicationId,
                     data
                 )
                 .then((response) => {
@@ -2383,7 +3773,7 @@ export default {
             axios
                 .get("/api/v1/badges-unread?type=applications")
                 .then((response) => {
-                    console.log("count of badges: ", response.data);
+                    // console.log("count of badges: ", response.data);
 
                     this.store.badgeNew = response.data;
                 });
@@ -2393,7 +3783,7 @@ export default {
             let res = true;
 
             for (let i = 0; i < offers.length; i++) {
-                if (offers[i].status != 'completed') {
+                if (offers[i].status != "completed") {
                     res = false;
                     break;
                 }
@@ -2403,7 +3793,7 @@ export default {
         },
 
         showEquipmentNotes(item) {
-            console.log(item);
+            // console.log(item);
 
             this.equipmentNotes = item.history;
             this.equipmentHistoryDialog = true;
@@ -2414,7 +3804,23 @@ export default {
         },
 
         getWorkingDays() {
-            return parseInt(this.equipmentNotes.reduce((acc, n) => acc + n.hours, 0) / 8);
+            return parseInt(
+                this.equipmentNotes.reduce((acc, n) => acc + n.hours, 0) / 8
+            );
+        },
+
+        sendComment() {
+            if (!this.comment) return;
+
+            const data = {
+                comment: this.comment,
+                application_id: this.application.id,
+                user_id: this.currentUser.id,
+            };
+
+            axios.post("/api/v1/comments", data).then((response) => {
+                this.application.comments = response.data;
+            });
         },
     },
 
@@ -2423,7 +3829,7 @@ export default {
             handler(newValue) {
                 const { status } = newValue;
 
-                console.log({ status });
+                // console.log({ status });
             },
             immediate: true,
         },
@@ -2436,35 +3842,28 @@ export default {
     z-index: 1000;
 }
 
-
-
 .v-table__wrapper {
     overflow-x: auto;
     overflow-y: visible !important;
 }
-
 
 .v-table__wrapper table {
     overflow-x: auto;
     overflow-y: visible !important;
 }
 
-
 .v-expansion-panel-text__wrapper {
     padding-left: 0 !important;
 }
-
 
 .v-list-item-title {
     white-space: normal !important;
 }
 
-
 @media only screen and (min-width: 768px) {
     .oks-dialog {
         width: 500px;
     }
-
 
     .v-table__wrapper {
         overflow: visible !important;

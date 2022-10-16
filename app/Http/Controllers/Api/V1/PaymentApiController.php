@@ -34,6 +34,20 @@ class PaymentApiController extends Controller
             if ($payment->amount > 0 && $payment->company_id != null) {
                 if ($request->has('construction_id')) {
                     if ($payment->application->construction_id === intval($request->construction_id)) {
+                        $files = [];
+
+                        foreach ($payment->productOffers as $offer) {
+                            if ($offer->file) $files[] = $offer->file;
+                        }
+                        foreach ($payment->equipmentOffers as $offer) {
+                            if ($offer->file) $files[] = $offer->file;
+                        }
+                        foreach ($payment->serviceOffers as $offer) {
+                            if ($offer->file) $files[] = $offer->file;
+                        }
+
+                        $payment->files = $files;
+
                         $data[] = $payment;
                     }
                 } else {

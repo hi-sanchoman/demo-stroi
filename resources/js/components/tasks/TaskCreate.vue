@@ -92,8 +92,38 @@ export default {
 
     getUsers() {
       axios.get('/api/v1/users').then((response) => {
-        this.users = response.data;
+        const options = response.data.map(u => {
+          return {
+            id: u.id,
+            name: `${u.name} - ${this.getPosition(u.roles[0].title)}`
+          };
+        });
+        console.log('options', options);
+        this.users = options;
       })
+    },
+
+    getPosition(title) {
+      const titles = {
+        'PTD Engineer': 'Инженер ПТО',
+        'Economist': 'Экономист',
+        'CEO': 'Генеральный директор',
+        'Material Accountant': 'Материальный бухгалтер',
+        'Supplier': 'Снабженец',
+        'Warehouse Manager': 'Зав. складом',
+        'Section Manager': 'Начальник участка',
+        'Chief Engineer': 'Главный инженер',
+        'Foreman': 'Прораб',
+        'Lawyer': 'Юрист',
+        'Chief Financial Officer': 'Финансовый директор',
+        'Accountant': 'Бухгалтер',
+        'Supervisor': 'Начальник снабжения',
+        'Vice President': 'Заместитель директора',
+        'PTD Manager': 'Начальник ПТО',
+        'Admin': 'Администратор'
+      };
+
+      return titles[title] ?? '-';
     },
 
     save() {

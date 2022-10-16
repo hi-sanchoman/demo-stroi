@@ -26,6 +26,7 @@ class ApplicationPath extends Model
         'order',
         'construction_id',
         'responsible_id',
+        'is_main',
         'created_at',
         'updated_at',
         'deleted_at',

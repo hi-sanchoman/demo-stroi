@@ -1,5 +1,5 @@
 <template>
-    <div>
+    <div class="border">
         <v-list density="compact" transition="slide-x-transition">
             <v-list-subheader class="d-block">
                 Заявки
@@ -30,7 +30,7 @@
                     </v-list-item>
                 </router-link>
 
-                <router-link to="/applications?status=in_review" class="text-decoration-none text-black">
+                <!-- <router-link to="/applications?status=in_review" class="text-decoration-none text-black">
                     <v-list-item key="in_review" value="in_review" active-color="primary">
                         <v-list-item-title v-text="'На рассмотрении'"></v-list-item-title>
                     </v-list-item>
@@ -46,16 +46,10 @@
                     <v-list-item key="in_progress" value="in_progress" active-color="primary">
                         <v-list-item-title v-text="'Открытые'"></v-list-item-title>
                     </v-list-item>
-                </router-link>
-
-                <router-link to="/applications?status=completed" class="text-decoration-none text-black">
-                    <v-list-item key="completed" value="completed" active-color="primary">
-                        <v-list-item-title v-text="'Завершенные'"></v-list-item-title>
-                    </v-list-item>
-                </router-link>
+                </router-link> -->
             </template>
 
-            <template v-else-if="currentUser != null && currentUser.roles[0].title == 'Supplier'">
+            <!-- <template v-else-if="currentUser != null && currentUser.roles[0].title == 'Supplier'">
                 <router-link to="/applications?status=in_progress_supplier" class="text-decoration-none text-black">
                     <v-list-item key="in_progress_supplier" value="in_progress_supplier" active-color="primary">
                         <v-list-item-title v-text="`Открытые`"></v-list-item-title>
@@ -70,7 +64,7 @@
                         <v-list-item-title v-text="`Открытые`"></v-list-item-title>
                     </v-list-item>
                 </router-link>
-            </template>
+            </template> -->
 
             <!-- <template v-else-if="currentUser != null && currentUser.roles[0].title == 'Warehouse Manager'">
                 <router-link to="/applications?status=in_progress_warehouse" class="text-decoration-none text-black">
@@ -81,7 +75,8 @@
             </template> -->
 
 
-            <template v-if="currentUser != null && currentUser.roles[0].title != 'Warehouse Manager'">
+            <!-- <template
+                v-if="currentUser != null && (currentUser.roles[0].title != 'Warehouse Manager' && currentUser.roles[0].title != 'PTD Engineer')">
                 <router-link to="/applications?status=incoming" class="text-decoration-none text-black">
                     <v-list-item key="incoming" value="incoming" active-color="primary">
                         <v-list-item-title v-text="`Входящие`"></v-list-item-title>
@@ -93,13 +88,27 @@
                         <v-list-item-title v-text="`Отклоненные мною`"></v-list-item-title>
                     </v-list-item>
                 </router-link>
+            </template> -->
+
+            <!-- closed - completed -->
+            <template>
+                <router-link to="/applications?status=signed" class="text-decoration-none text-black">
+                    <v-list-item key="signed" value="signed" active-color="primary">
+                        <v-list-item-title v-text="'Мат. исполненные'"></v-list-item-title>
+                    </v-list-item>
+                </router-link>
+
+                <router-link to="/applications?status=completed" class="text-decoration-none text-black">
+                    <v-list-item key="completed" value="completed" active-color="primary">
+                        <v-list-item-title v-text="'Закрытые'"></v-list-item-title>
+                    </v-list-item>
+                </router-link>
             </template>
-
-
-
 
         </v-list>
     </div>
+
+
 
     <!-- Choose Application Type Dialog -->
     <v-dialog v-model="typeChooserDialog" persistent>
@@ -170,13 +179,12 @@ export default {
 
     methods: {
         openTypeChooser() {
-            console.log('show dialog');
             this.typeChooserDialog = true;
         },
 
         createApplication() {
             let kind = this.kinds[this.chosenType];
-            this.$router.push(`/applications/create?kind=${kind.id}`);
+            window.location.href = `/applications/create?kind=${kind.id}`;
         }
     }
 }

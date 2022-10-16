@@ -9,6 +9,7 @@ use Illuminate\Validation\ValidationException;
 use App\Http\Controllers\Controller;
 use App\Models\ApplicationOpenedStatus;
 use App\Models\Badge;
+use App\Models\ContractOpenedStatus;
 
 class UserController extends Controller
 {
@@ -19,7 +20,7 @@ class UserController extends Controller
 
     public function index()
     {
-        return User::orderBy('name')->get();
+        return User::with(['roles'])->orderBy('name')->get();
     }
 
     public function saveDeviceToken(Request $request)
@@ -41,11 +42,37 @@ class UserController extends Controller
         //     ->first();
         // return $badge != null ? $badge->quantity : 0;
 
-        $unread = ApplicationOpenedStatus::query()
-            ->where('user_id', $request->user()->id)
-            ->where('status', 'unread')
-            ->count();
-        return $unread;
+        if ($request->type == 'applications') {
+            $badgesDb = ApplicationOpenedStatus::query()
+                ->with(['application', 'application.construction'])
+                ->where('user_id', $request->user()->id)
+                ->where('status', 'unread')
+                ->get();
+
+            $badges = [];
+
+            foreach ($badgesDb as $badge) {
+                if (isset($badges[$badge->application->construction_id])) {
+                    $badges[$badge->application->construction_id] += 1;
+                    continue;
+                } 
+
+                $badges[$badge->application->construction_id] = 1;
+            }
+
+            return ['total' => $badgesDb->count(), 'badges' => $badges];
+        }
+
+        if ($request->type == 'contracts') {
+            $badgesDb = ContractOpenedStatus::query()
+                ->with(['contract'])
+                ->where('user_id', $request->user()->id)
+                ->where('status', 'unread')
+                ->get();
+
+            return ['total' => $badgesDb->count()];
+        }
+
     }
 
     public function readBadge(Request $request)

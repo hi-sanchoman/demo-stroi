@@ -5,6 +5,9 @@ Route::get('/', function () {
 });
 
 Route::get('/export/application/{id}', 'ApplicationController@exportApplication');
+Route::get('/export/payments/{id}', 'ApplicationController@exportPayments');
+Route::get('/export/contracts/{id}', 'ApplicationController@exportContracts');
+Route::get('/export/table', 'ApplicationController@exportTable');
 
 
 Route::get('/home', function () {
@@ -39,6 +42,11 @@ Route::delete('/companies/{id}/contacts/{contactId}', 'ApplicationController@ind
 Route::get('/companies/{id}/edit', 'ApplicationController@index');
 Route::get('/companies/{id}', 'ApplicationController@index');
 
+Route::get('/contracts', 'ApplicationController@index');
+Route::get('/contracts/create', 'ApplicationController@index');
+Route::get('/contracts/{id}/edit', 'ApplicationController@index');
+Route::get('/contracts/{id}', 'ApplicationController@index');
+
 Route::get('/tasks', 'ApplicationController@index');
 Route::get('/tasks/create', 'ApplicationController@index');
 Route::get('/tasks/{id}/edit', 'ApplicationController@index');
@@ -52,7 +60,9 @@ Route::get('/logout', 'ApplicationController@index');
 Auth::routes(['register' => false]);
 
 
+Route::post('/upload-one-file', 'ApplicationController@uploadOneFile');
 Route::post('/upload-file', 'ApplicationController@uploadFile');
+Route::post('/upload-contract', 'ApplicationController@uploadContract');
 
 Route::get('/parse', 'ApplicationController@parse');
 

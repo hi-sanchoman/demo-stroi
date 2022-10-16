@@ -143,7 +143,7 @@
         <v-row>
           <v-col cols="12">
             <label for="date">Укажите день</label><br />
-            <input type="date" id="date" v-model="note.date" />
+            <input type="date" id="date" v-model="note.date" :min="new Date()" />
 
             <v-text-field class="mt-2" v-model="note.hours" label="Количество часов / Отработано" variant="underlined"
               required density="comfortable" type="number" @keyup.enter="addNote()"></v-text-field>
@@ -264,6 +264,15 @@ export default {
       let data = {
         note: this.note
       };
+
+      const noteDate = new Date(this.note.date).setHours(0, 0, 0, 0);
+      const today = new Date().setHours(0, 0, 0, 0);
+
+      if (noteDate < today) {
+        this.snackbar.text = "Ошибка: нельзя ввести прошедшую дату";
+        this.snackbar.status = true;
+        return;
+      }
 
       axios.post('/api/v1/application-equipments/add-note', data).then((response) => {
         this.getEquipments();

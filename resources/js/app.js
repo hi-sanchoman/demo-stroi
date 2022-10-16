@@ -53,6 +53,7 @@ const routes = [
   { path: '/applications/:id/edit', name: 'applications.edit', component: ApplicationEdit },
   { path: '/applications/', name: 'applications.index', component: ApplicationList },
 
+  // contracts  
   { path: '/contracts/create', name: 'contracts.create', component: ContractCreate },
   { path: '/contracts/:id/edit', name: 'contracts.edit', component: ContractEdit },
   { path: '/contracts/', name: 'contracts.index', component: ContractList },
@@ -68,6 +69,7 @@ const routes = [
   // companies
   { path: '/companies', name: 'companies.index', component: CompanyList },
   { path: '/companies/create', name: 'companies.create', component: CompanyCreate },
+
   
   // company contacts
   { path: '/companies/:id/contacts/create', name: 'companies.contacts.create', component: CompanyContactCreate },

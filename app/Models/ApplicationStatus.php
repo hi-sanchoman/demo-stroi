@@ -25,6 +25,7 @@ class ApplicationStatus extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+        'deadline_at',
     ];
 
     protected $fillable = [
@@ -35,6 +36,7 @@ class ApplicationStatus extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+        'deadline_at',
     ];
 
     public function application()

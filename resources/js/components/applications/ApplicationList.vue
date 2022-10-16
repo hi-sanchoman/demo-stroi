@@ -6,7 +6,12 @@
 
                 <v-card v-for="construction in objects" :key="construction.id" class="border rounded px-4 py-4 w-fit"
                     @click="selectConstruction(construction)">
-                    <v-card-title>{{  construction.name  }}</v-card-title>
+                    <v-card-title class="d-flex justify-space-between">
+                        {{ construction.name }}
+
+                        <v-badge v-if="store.badges[construction.id]" color="error"
+                            :content="store.badges[construction.id]" inline></v-badge>
+                    </v-card-title>
                 </v-card>
             </v-col>
         </v-row>
@@ -22,6 +27,54 @@
             </v-col>
 
             <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
+                <div v-if="!isWarehouseManager()" class="d-flex flex-column flex-sm-row  mb-4">
+                    <div class="d-flex mb-2 flex-column">
+                        <!-- <label class="font-bold"><b>Строительный объект:</b></label>
+                        <select @change="filterTotal($event, 'constructions')" v-model="filter_construction_ids" multiple>
+                            <option value="*">Все</option>
+                            <option v-for="construction in objects" :key="construction.id" :value="construction.id">{{construction.name}}</option>
+                        </select> -->
+
+                        <multiselect :selectLabel="''" :deselectLabel="''" @select="addFilterConstruction" @remove="removeFilterConstruction" v-model="filter_construction_ids" :options="objects" placeholder="Строительный объект" label="name"
+                            track-by="name" multiple>
+                        </multiselect>
+                    </div>
+                    
+                    <div class="d-flex mb-2 flex-column ml-sm-4">
+                        <!-- <label class="font-bold"><b>Тип заявки:</b></label>
+                        <select @change="filterTotal($event, 'kinds')" v-model="filter_kind_ids" multiple>
+                            <option v-for="kind in kindOptions" :key="kind.value" :value="kind.value">{{kind.name}}</option>
+                        </select> -->
+                        <multiselect :selectLabel="''" :deselectLabel="''" @select="addFilterKind" @remove="removeFilterKind" v-model="filter_kind_ids" :options="kindOptions" placeholder="Тип заявки" label="name"
+                            track-by="name" multiple>
+                        </multiselect>
+                    </div>
+
+                    <div class="d-flex mb-2 flex-column ml-sm-4">
+                        <!-- <label class="font-bold"><b>Статус:</b></label>
+                        <select @change="filterTotal($event, 'statuses')" v-model="filter_status_ids" multiple>
+                            <option v-for="status in statusOptions" :key="status.value" :value="status.value">{{status.name}}</option>
+                        </select> -->
+
+                        <multiselect :selectLabel="''" :deselectLabel="''" @select="addFilterStatus" @remove="removeFilterStatus" v-model="filter_status_ids" :options="statusOptions" placeholder="Статус" label="name"
+                            track-by="value" multiple>
+                        </multiselect>
+                    </div>
+
+                    <div class="d-flex mb-2 flex-column ml-sm-4">
+                        <div class="d-flex">От: <input class="ml-1 text-grey" type="date" @change="filterTotal" v-model="filter_period_from" aria-label="from"/></div>
+                        <div class="d-flex">До: <input class="ml-1 text-grey" type="date" @change="filterTotal" v-model="filter_period_to" aria-label="from"/></div>
+                    </div>
+                    
+                    <div class="d-flex mt-4 mt-sm-0 mb-2 flex-column ml-sm-4">
+                        <button @click="clearFilterTotal()">Очистить фильтр</button>
+                    </div>
+
+                    <div class="d-flex flex-grow-1 justify-center justify-sm-end">
+                        <v-btn @click="downloadTable()" size="small" color="primary">Скачать таблицу</v-btn>
+                    </div>
+                </div>
+
                 <ag-grid-vue class="ag-theme-alpine" style="height: 800px" :rowClassRules="rowClassRules"
                     :columnDefs="columnDefs.value" :rowData="rowData.value" :defaultColDef="defaultColDef"
                     rowSelection="multiple" animateRows="true" @grid-ready="onGridReady" :localeText="localeText"
@@ -43,7 +96,9 @@ import "ag-grid-community/styles/ag-grid.css"; // Core grid CSS, always needed
 import "ag-grid-community/styles/ag-theme-alpine.css"; // Optional theme CSS
 import { reactive, ref } from "vue";
 import DeleteBtnRenderer from '../grid/DeleteBtnRenderer.js';
+import DownloadBtnRenderer from '../grid/DownloadBtnRenderer.js';
 import AgSelectFilter from '../AgSelectFilter.js';
+import Multiselect from 'vue-multiselect'
 
 let self = this;
 
@@ -52,7 +107,9 @@ export default {
         ApplicationSidebar,
         AgGridVue,
         deleteBtnRenderer: DeleteBtnRenderer,
-        AgSelectFilter
+        downloadBtnRenderer: DownloadBtnRenderer,
+        AgSelectFilter,
+        Multiselect,
     },
 
     data() {
@@ -67,9 +124,9 @@ export default {
             rowData: reactive({}),
             defaultColDef: {
                 sortable: true,
-                filter: true,
+                filter: false,
                 flex: 1,
-                floatingFilter: true,
+                floatingFilter: false,
                 resizable: true,
                 suppressMovable: true,
                 wrapText: true,
@@ -77,7 +134,14 @@ export default {
             },
             rowClassRules: {
                 'tr-unread': (params) => {
-                    return params.data.opened_statuses.length > 0;
+                    // console.log('tr-undread', params);
+
+                    for (let i = 0; i < params.data.opened_statuses.length; i++) {
+                        if (params.data.opened_statuses[i].user_id == this.currentUser.id) {
+                            return params.data.opened_statuses[i].status === 'unread';
+                        }
+                    }
+                    return false;
                 }
             },
             localeText: {
@@ -116,22 +180,122 @@ export default {
 
             constructionOptions: [],
             kindOptions: [
-                { value: '', name: 'Все' },
+                // { value: '*', name: 'Все' },
                 { value: 'product', name: 'заявка на товар' },
                 { value: 'equipment', name: 'заявка на спец. технику' },
                 { value: 'service', name: 'заявка на услуги' }
             ],
+            statusOptions: [
+                // { value: '*', name: 'Все' },
+                { value: 'incoming', name: 'На подпись'},
+                { value: 'in_progress', name: 'В процессе исполнения'},
+                { value: 'signed', name: 'Материально исполнена'},
+                { value: 'completed', name: 'Закрыта'},
+            ],
 
             chosenObject: null,
             objects: [],
+
+            filter_construction_ids: [],
+            filter_category_ids: [],
+            filter_kind_ids: [],
+            filter_status_ids: [],
+            filter_period_to: null,
+            filter_period_from: null,
+
+            construction_ids: [],
+            kind_ids: [],
+            status_ids: [],
+
+            higher: [],
         }
     },
 
     methods: {
+        downloadTable() {
+            location.href = '/export/table?data=' + JSON.stringify({data: this.rowData.value, user: this.currentUser});
+        },
+
+        clearFilterTotal() {
+            this.filter_construction_ids = [];
+            this.filter_category_ids = [];
+            this.filter_kind_ids = [];
+            this.filter_status_ids = [];
+            this.filter_period_to = null;
+            this.filter_period_from = null;
+
+            this.construction_ids = [],
+            this.kind_ids = [],
+            this.status_ids = [],
+
+            this.getApplications(this.chosenObject, 'all');
+        },
+
+        addFilterStatus(option, id) {
+            this.status_ids.push(option.value);
+            this.filterTotal();
+        },
+
+        removeFilterStatus(option, id) {
+            this.status_ids = this.status_ids.filter(f => f != option.value);
+            this.filterTotal();
+        },
+
+        addFilterKind(option, id) {
+            this.kind_ids.push(option.value);
+            this.filterTotal();
+        },
+
+        removeFilterKind(option, id) {
+            this.kind_ids = this.kind_ids.filter(f => f != option.value);
+            this.filterTotal();
+        },
+
+        addFilterConstruction(option, id) {
+            this.construction_ids.push(option.id);
+            this.filterTotal();
+        },
+
+        removeFilterConstruction(option, id) {
+            this.construction_ids = this.construction_ids.filter(f => f != option.id);
+            this.filterTotal();
+        },
+
+        filterTotal() {
+            console.log(this.status_ids);
+
+            const query = `q=${JSON.stringify({
+                constructions: this.construction_ids, 
+                kinds: this.kind_ids,
+                statuses: this.status_ids,
+                period_from: this.filter_period_from,
+                period_to: this.filter_period_to,
+            })}`;
+            console.log(query, 'query');
+
+            axios.get(`/api/v1/filter-applications?${query}`,).then((response) => {
+                this.applications = response.data.data;
+                this.rowData.value = response.data.data;
+
+                console.log(this.rowData.value);
+            })
+        },
+
         getObjects() {
+            // console.log(this.$route.params, 'params');
             axios.get('/api/v1/constructions').then((response) => {
                 // console.log(response.data);
                 this.objects = response.data.data;
+
+                if (this.$route.query.construction_id) {
+                    this.objects.forEach(o => {
+                        // console.log(o.id, this.$route.query.construction_id);
+
+                        if (o.id == this.$route.query.construction_id) {
+                            this.selectConstruction(o)
+                        }
+                    })
+                }
             });
         },
 
@@ -170,35 +334,32 @@ export default {
                 // columns
                 this.columnDefs.value = [
                     {
-                        field: "id", minWidth: 100, headerName: '№ заявки', filter: 'agNumberColumnFilter', cellRenderer: (params) => {
-                            // console.log(params);
-
-                            var link = document.createElement('a');
-                            link.href = '#';
-                            link.innerText = params.value;
-
-                            link.style = 'text-decoration: underline; color: black;';
-                            link.className = params.data.opened_statuses.length > 0 ? 'unread' : 'read';
-
-                            link.addEventListener('click', (e) => {
-                                e.preventDefault();
-                                const id = params.data.id;
-                                this.$router.push(`/applications/${id}/edit`);
-                            });
-                            return link;
+                        field: "num", minWidth: 100, headerName: '№ заявки', cellRenderer: (params) => {
+                            return params.value ? params.value : `(${params.data.id})`;
                         }
                     },
                     {
-                        field: "construction.name", minWidth: 200, headerName: 'Объект', filter: AgSelectFilter, filterParams: {
-                            column: 'construction_id',
-                            options: this.constructionOptions,
+                        field: "construction.name", minWidth: 200, headerName: 'Объект', 
+                    },
+                    {
+                        field: "category",
+                        minWidth: 200,
+                        headerName: 'Статья расходов',
+                        cellRenderer: (params) => {
+                            // console.log('cell', params.data);
+                            let categories = [];
+
+                            if (params.data.kind === 'product' && params.data.application_application_products && params.data.application_application_products.length > 0) {
+                                return params.data.application_application_products[0].category?.name;
+                            } else if (params.data.kind === 'equipment' && params.data.application_equipments && params.data.application_equipments.length > 0) {
+                                return 'Аренда спец. техники';
+                            } else if (params.data.kind === 'service' && params.data.application_services && params.data.application_services.length > 0) {
+                                return params.data.application_services[0].category;
+                            }
                         },
                     },
                     {
-                        field: "kind", minWidth: 200, headerName: 'Тип заявки', filter: AgSelectFilter, filterParams: {
-                            column: 'kind',
-                            options: this.kindOptions,
-                        }, cellRenderer: (params) => {
+                        field: "kind", minWidth: 200, headerName: 'Тип заявки', cellRenderer: (params) => {
                             var kinds = {
                                 'product': 'заявка на товар',
                                 'equipment': 'заявка на спец. технику',
@@ -211,7 +372,7 @@ export default {
                         }
                     },
                     {
-                        field: "issued_at", minWidth: 200, headerName: 'Дата', type: ['dateColumn'], filter: 'agDateColumnFilter', filterParams: {
+                        field: "created_at", minWidth: 125, headerName: 'Дата', type: ['dateColumn'], filterParams: {
                             debounceMs: 500,
                             suppressAndOrCondition: true,
                             comparator: function (filterLocalDateAtMidnight, cellValue) {
@@ -237,7 +398,7 @@ export default {
                         },
                     },
                     {
-                        field: "status", minWidth: 200, headerName: 'Статус', valueGetter: this.getStatus, cellStyle: params => {
+                        field: "status", minWidth: 300, headerName: 'Статус', valueGetter: this.getStatus, cellStyle: params => {
                             // console.log(params);
 
                             if (params.data.status === 'declined') {
@@ -245,23 +406,20 @@ export default {
                                 return { color: 'red' };
                             }
                             return null;
-                        }, filter: AgSelectFilter, filterParams: {
-                            column: 'status',
-                            options: [{ value: '', name: 'Все' }, { value: 'draft', name: 'черновик' }, { value: 'in_progress', name: 'в процессе' }, { value: 'completed', name: 'закрыта' }],
                         },
                     },
                     {
                         field: "action",
                         minWidth: 200,
-                        headerName: 'Действие',
+                        headerName: '',
                         cellRendererSelector: (params) => {
                             // console.log('cell', params);
 
                             return {
-                                component: 'deleteBtnRenderer',
+                                component: 'downloadBtnRenderer',
                                 params: {
-                                    can: params.data.status == 'draft' && this.isPTDEngineer(),
-                                    clicked: this.deleteApplication,
+                                    can: this.isMaterialAccountant(),
+                                    clicked: this.downloadApplication,
                                 }
                             }
                         },
@@ -274,17 +432,31 @@ export default {
             })
         },
 
+        isMaterialAccountant() {
+            return this.currentUser != null && this.currentUser.roles[0].title === 'Material Accountant';
+        },
+
+        downloadApplication(id) {
+            window.location = `/export/application/${id}`;
+        },  
+
+        getHigher() {
+
+        },
+
         showApplication(id) {
             this.$router.push(`/applications/${id}/edit`)
         },
 
         getApplications(construction, status) {
-            console.log(`get applications with ${status} status`);
+            console.log(`get applications with ${status} status for ${construction.id}`);
 
             // get applications 
             axios.get(`/api/v1/applications?status=${status}&construction_id=${construction.id}`).then((response) => {
                 this.applications = response.data.data;
                 this.rowData.value = response.data.data;
+
+                // this.filterTotal();
             })
         },
 
@@ -321,7 +493,7 @@ export default {
         // },
 
         getInners(params) {
-            console.log(params?.data);
+            // console.log(params?.data);
             let inners = '';
 
             if (params?.data?.application_application_products?.length > 0) {
@@ -338,15 +510,57 @@ export default {
         },
 
         getStatus(params) {
-            var statuses = {
-                'draft': 'черновик',
-                'in_progress': 'в процессе',
-                'in_review': 'на рассмотрении',
-                'declined': 'отклонена',
-                'completed': 'закрыта',
-            };
+            // var statuses = {
+            //     'draft': 'черновик',
+            //     'in_progress': 'в процессе',
+            //     'in_review': 'на подпись',
+            //     'declined': 'отклонена',
+            //     'completed': 'закрыта',
+            // };
 
-            return statuses[params.data.status];
+            // return statuses[params.data.status];
+            if (params.data.status == 'completed') {
+                return 'закрыта';
+            }
+
+            if (params.data.is_signed == 1) {
+                return 'материально исполнена';
+            }
+
+            if (params.data.status == 'draft') {
+                return 'черновик';
+            }
+
+            const toBeSignedByMe = params.data.application_application_statuses.find(s => {
+                if (this.currentUser != null && s.status == 'incoming' && s.application_path != null && s.application_path.responsible.id == this.currentUser.id) {
+                    return true;
+                }
+
+                return false;
+            })
+
+            if (toBeSignedByMe) {
+                return 'на подпись';
+            }
+
+            // TODO: who is next from highers
+            const signedByNext = params.data.application_application_statuses.find(s => {
+                if (s.status == 'incoming' && s.application_path != null) {
+                    return true;
+                }
+
+                return false;
+            })
+
+            if (signedByNext) {
+                return `В процессе исполнения: ${signedByNext?.application_path?.responsible?.name}`;
+            }
+
+            return '-';
+        },
+
+        isWarehouseManager() {
+            return this.currentUser != null && this.currentUser.roles[0].title === 'Warehouse Manager';
         },
 
         getActions(params) {
@@ -359,7 +573,7 @@ export default {
         },
 
         cellWasClicked: (event) => { // Example of consuming Grid Event
-            console.log("cell was clicked", event);
+            // console.log("cell was clicked", event);
         },
 
         deselectRows: () => {
@@ -368,7 +582,7 @@ export default {
 
         rowWasClicked: (r) => {
             const id = r.data.id;
-            console.log(this);
+            // console.log(this);
             // console.log(this.router);
 
             // self.$router.push(`/applications/${id}/edit`);
@@ -411,5 +625,10 @@ export default {
 
 .unread {
     font-weight: bold;
+}
+
+.ag-cell,
+.ag-full-width-row .ag-cell-wrapper.ag-row-group {
+    line-height: 20px;
 }
 </style>

@@ -34,6 +34,7 @@ class ApplicationEquipment extends Model
         'status',
         'days',
         'unit_id',
+        'parent_id',
     ];
 
     public function application()

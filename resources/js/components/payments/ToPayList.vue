@@ -59,13 +59,13 @@
                             <td>{{ payment.application.construction.name }}</td>
                             <td style="">
                                 <span class="cursor-pointer hover:underline"
-                                    @click="goToApplication(payment.application.id)">
-                                    {{ payment.application.id }}
+                                    @click="goToApplication(payment.application.parent_id ? payment.application.parent_id : payment.application.id)">
+                                    {{ payment.application.num ? payment.application.num : payment.application.id }}
                                 </span>
                                 <br />
                                 {{ getKind(payment.application.kind) }}
                                 <br />
-                                <a class="mb-1" :href="`/export/application/${payment.application.id}`">скачать
+                                <a class="mb-1" :href="`/export/application/${payment.application.parent_id ? payment.application.parent_id : payment.application.id}`">скачать
                                     заявку</a>
                             </td>
                             <td width="30%">{{ payment.company.name }}</td>
