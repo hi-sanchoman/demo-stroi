@@ -143,16 +143,16 @@ class ApplicationStatusApiController extends Controller
                     $openedStatus->status = 'unread';
                     $openedStatus->save();
 
-                    // notify next via email
-                    Mail::to($next->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
+                    // // notify next via email
+                    // Mail::to($next->responsible->email)->send(new ApplicationSigned($applicationStatus->application));
 
-                    // notify via push
-                    if ($next->responsible->device_token != null) {
-                        $message = CloudMessage::withTarget('token', $next->responsible->device_token)
-                            ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
-                            ->withData(['key' => 'value']);
-                        $messaging->send($message);
-                    }
+                    // // notify via push
+                    // if ($next->responsible->device_token != null) {
+                    //     $message = CloudMessage::withTarget('token', $next->responsible->device_token)
+                    //         ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на рассмотрение'))
+                    //         ->withData(['key' => 'value']);
+                    //     $messaging->send($message);
+                    // }
                 }
             }
 
@@ -230,16 +230,16 @@ class ApplicationStatusApiController extends Controller
                     $openedStatus->status = 'unread';
                     $openedStatus->save();
     
-                    // notify prev via email that request was declined
-                    Mail::to($prev->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
+                    // // notify prev via email that request was declined
+                    // Mail::to($prev->responsible->email)->send(new ApplicationDeclined($applicationStatus->application));
     
-                    // notify via push
-                    if ($prev->responsible->device_token != null) {
-                        $message = CloudMessage::withTarget('token', $prev->responsible->device_token)
-                            ->withNotification(Notification::create('Заявка отклонена', 'Ваша заявка отклонена'))
-                            ->withData(['key' => 'value']);
-                        $messaging->send($message);
-                    }
+                    // // notify via push
+                    // if ($prev->responsible->device_token != null) {
+                    //     $message = CloudMessage::withTarget('token', $prev->responsible->device_token)
+                    //         ->withNotification(Notification::create('Заявка отклонена', 'Ваша заявка отклонена'))
+                    //         ->withData(['key' => 'value']);
+                    //     $messaging->send($message);
+                    // }
                 }
             }
 

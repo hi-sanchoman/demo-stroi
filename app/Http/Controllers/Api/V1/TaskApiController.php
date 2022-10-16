@@ -90,16 +90,16 @@ class TaskApiController extends Controller
       $task->status = 'in_progress';
       $task->save();
       
-      // notify via email
-      Mail::to($task->owner->email)->send(new TaskStarted($task, $request->user()));
+      // // notify via email
+      // Mail::to($task->owner->email)->send(new TaskStarted($task, $request->user()));
 
-      // notify via push
-      if ($task->owner->device_token != null) {
-        $messaging = app('firebase.messaging');
-        $message = CloudMessage::withTarget('token', $task->owner->device_token)
-            ->withNotification(Notification::create('Старт задачи', 'Начали выполнение вашей задачи: "' . $task->name . '"'));
-        $messaging->send($message);
-      }
+      // // notify via push
+      // if ($task->owner->device_token != null) {
+      //   $messaging = app('firebase.messaging');
+      //   $message = CloudMessage::withTarget('token', $task->owner->device_token)
+      //       ->withNotification(Notification::create('Старт задачи', 'Начали выполнение вашей задачи: "' . $task->name . '"'));
+      //   $messaging->send($message);
+      // }
 
       return $task;
     }
@@ -110,16 +110,16 @@ class TaskApiController extends Controller
       $task->status = 'completed';
       $task->save();
       
-      // notify via email
-      Mail::to($task->owner->email)->send(new TaskCompleted($task, $request->user()));
+      // // notify via email
+      // Mail::to($task->owner->email)->send(new TaskCompleted($task, $request->user()));
 
-      // notify via push
-      if ($task->owner->device_token != null) {
-        $messaging = app('firebase.messaging');
-        $message = CloudMessage::withTarget('token', $task->owner->device_token)
-            ->withNotification(Notification::create('Задача завершена', 'Ваша задача "' . $task->name . '" закончена'));
-        $messaging->send($message);
-      }
+      // // notify via push
+      // if ($task->owner->device_token != null) {
+      //   $messaging = app('firebase.messaging');
+      //   $message = CloudMessage::withTarget('token', $task->owner->device_token)
+      //       ->withNotification(Notification::create('Задача завершена', 'Ваша задача "' . $task->name . '" закончена'));
+      //   $messaging->send($message);
+      // }
 
       return 1;
     }

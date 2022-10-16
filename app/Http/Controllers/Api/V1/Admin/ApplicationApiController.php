@@ -828,16 +828,16 @@ class ApplicationApiController extends Controller
         $openedStatus->save();
 
         // notify next signer
-        $messaging = app('firebase.messaging');
-        Mail::to($secondSigner->email)->send(new ApplicationSigned($application));
+        // $messaging = app('firebase.messaging');
+        // Mail::to($secondSigner->email)->send(new ApplicationSigned($application));
 
-        // notify via push
-        if ($secondSigner->device_token != null) {
-            $message = CloudMessage::withTarget('token', $secondSigner->device_token)
-                ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на подпись'))
-                ->withData(['key' => 'value']);
-            $messaging->send($message);
-        }
+        // // notify via push
+        // if ($secondSigner->device_token != null) {
+        //     $message = CloudMessage::withTarget('token', $secondSigner->device_token)
+        //         ->withNotification(Notification::create('Новая заявка', 'у вас новая заявка на подпись'))
+        //         ->withData(['key' => 'value']);
+        //     $messaging->send($message);
+        // }
         
         // save new status
         $application->status = 'in_review';
