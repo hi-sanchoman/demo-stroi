@@ -64,6 +64,7 @@
             { 'name': 'Финансовый директор', value: 'findir@mail.com' },
             { 'name': 'Бухгалтер', value: 'buh@mail.com' },
             { 'name': 'Бригадир', value: 'brigadir@mail.com' },
+            { 'name': 'Юрист', value: 'urist@mail.com' },
             { 'name': 'Материальный бухгалтер', value: 'mathub@mail.com' },
             { 'name': 'Генеральный директор', value: 'ceo@mail.com' },
         ],
