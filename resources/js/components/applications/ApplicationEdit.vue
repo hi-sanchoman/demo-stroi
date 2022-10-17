@@ -1611,7 +1611,18 @@
                                         <td>{{ item.notes }}</td>
 
                                         <td>
-                                            &nbsp;
+                                            <v-btn
+                                                v-if="
+                                                    isWarehouseManager() &&
+                                                    products[index].quantity !=
+                                                        products[index].prepared
+                                                "
+                                                @click="showAcceptProduct(item)"
+                                                color="info"
+                                                size="small"
+                                            >
+                                                принять товар
+                                            </v-btn>
                                         </td>
                                     </tr>
 
@@ -1765,7 +1776,20 @@
                                         <td>{{ item.notes }}</td>
 
                                         <td>
-                                            
+                                            <v-btn
+                                                v-if="
+                                                    isWarehouseManager() &&
+                                                    application.status ==
+                                                        'in_progress' &&
+                                                    equipments[index].quantity !=
+                                                        equipments[index].prepared
+                                                "
+                                                @click="showAcceptProduct(item)"
+                                                color="info"
+                                                size="small"
+                                            >
+                                                принять технику
+                                            </v-btn>
                                         </td>
                                     </tr>
 
