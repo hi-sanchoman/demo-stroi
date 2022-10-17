@@ -92,7 +92,7 @@ class ApplicationStatusApiController extends Controller
 
                 if ($application->kind == 'equipment') {
                     $equipmentIds = ApplicationEquipment::whereApplicationId($application->id)->pluck('id')->toArray();
-                    $unsigned = EquipmentOffer::whereIn('application_offer_id', $equipmentIds)->where('file', null)->count();
+                    $unsigned = EquipmentOffer::whereIn('application_equipment_id', $equipmentIds)->where('file', null)->count();
                 }
 
                 if ($application->kind == 'service') {
