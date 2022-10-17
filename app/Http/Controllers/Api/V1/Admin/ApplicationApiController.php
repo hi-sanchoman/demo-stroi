@@ -710,15 +710,17 @@ class ApplicationApiController extends Controller
                 ->get();
 
             return new ApplicationResource($collection);
-        } else if (in_array('Section Manager', $roles->toArray())) {
-            $collection = $collection
-                ->where('is_accepted', 1)
-                ->where('parent_id', null)
-                ->orderBy('updated_at', 'DESC')
-                ->get();
+        } 
+        // else if (in_array('Section Manager', $roles->toArray())) {
+        //     $collection = $collection
+        //         ->where('is_accepted', 1)
+        //         ->where('parent_id', null)
+        //         ->orderBy('updated_at', 'DESC')
+        //         ->get();
 
-            return new ApplicationResource($collection);
-        } else {
+        //     return new ApplicationResource($collection);
+        // } 
+        else {
             $collection = $collection
                 // ->with(['application'])
                 ->whereNot('status', 'draft')
