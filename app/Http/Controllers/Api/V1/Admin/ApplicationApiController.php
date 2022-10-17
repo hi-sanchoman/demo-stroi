@@ -705,6 +705,7 @@ class ApplicationApiController extends Controller
         } else if (in_array('Warehouse Manager', $roles->toArray())) {
             $collection = $collection
                 ->where('is_accepted', 1)
+                ->where('parent_id', null)
                 ->orderBy('updated_at', 'DESC')
                 ->get();
 
