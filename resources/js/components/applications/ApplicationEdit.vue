@@ -1928,8 +1928,6 @@
                                             <v-btn
                                                 v-if="
                                                     isWarehouseManager() &&
-                                                    subapp.status ==
-                                                        'in_progress' &&
                                                     subapp.application_equipments[index].quantity !=
                                                     subapp.application_equipments[index].prepared
                                                 "
