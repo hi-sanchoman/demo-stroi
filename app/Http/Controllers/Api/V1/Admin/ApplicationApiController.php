@@ -654,7 +654,15 @@ class ApplicationApiController extends Controller
                 'applicationApplicationProducts', 'applicationApplicationProducts.product', 'applicationApplicationProducts.category',
                 'applicationServices', 
                 'applicationEquipments', 'applicationEquipments.equipment',
-                'openedStatuses'
+                'openedStatuses',
+
+                'parent', 'parent.construction', 
+                'parent.applicationApplicationStatuses', 
+                'parent.applicationApplicationStatuses.application_path.responsible', 
+                'parent.applicationApplicationProducts', 'parent.applicationApplicationProducts.product', 'parent.applicationApplicationProducts.category',
+                'parent.applicationServices', 
+                'parent.applicationEquipments', 'parent.applicationEquipments.equipment',
+                'parent.openedStatuses',
             ]);                
         
         if (isset($input->constructions) && count($input->constructions) > 0) {
@@ -692,13 +700,13 @@ class ApplicationApiController extends Controller
         if (in_array('PTD Engineer', $roles->toArray())) {
             $collection = $collection
                 ->where('owner_id', $request->user()->id)
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->get();
         } else {
             $collection = $collection
                 // ->with(['application'])
                 ->whereNot('status', 'draft')
-                ->orderBy('created_at', 'DESC')
+                ->orderBy('updated_at', 'DESC')
                 ->get();
         }
 
@@ -708,14 +716,22 @@ class ApplicationApiController extends Controller
             $filtered = collect();
 
             if (in_array('incoming', $input->statuses)) {
-                $filtered = $collection->filter(function($item) use ($request) {
+                foreach ($collection as $item) {
                     foreach ($item->applicationApplicationStatuses as $status) {
-                        if ($status->status == 'incoming' && $status->application_path != null && $status->application_path->responsible->id == $request->user()->id) {
-                            return true;
+                        if (
+                            $status->status == 'incoming' && 
+                            // $item->parent_id == null &&
+                            $status->application_path != null && 
+                            $status->application_path->responsible->id == $request->user()->id
+                        ) {
+                            if ($item->parent_id != null) {
+                                $filtered->push($item->parent);
+                            } else {
+                                $filtered->push($item);
+                            }
                         }
                     }
-                });
-                // dd($collection);
+                }
             }
 
             $responseCollection = $responseCollection->merge($filtered);
@@ -723,20 +739,27 @@ class ApplicationApiController extends Controller
             $rank = -1;
 
             if (in_array('in_progress', $input->statuses)) {
-                $filtered = $collection->filter(function($item) use ($request) {
-                    $allowed = false;
+                $allowed = false;
 
+                foreach ($collection as $item) {
                     foreach ($item->applicationApplicationStatuses as $status) {
-                        if ($allowed && in_array($status->status, ['accepted', 'incoming', 'declined']) && $item->is_signed != 1 && $item->status != 'completed' && $item->parent_id == null) {
-                            // dd($status->toArray());
-                            return true;
+                        if ($allowed && in_array($status->status, ['accepted', 'incoming', 'declined']) && $item->is_signed != 1 && $item->status != 'completed') {
+                            if ($item->parent_id != null) {
+                                $filtered->push($item->parent);
+                            } else {
+                                $filtered->push($item);
+                            }
+                            break;
                         }
 
                         if ($status->application_path != null && $status->application_path->responsible->id == $request->user()->id && $status->status === 'accepted') {
                             $allowed = true;
                         }
                     }
-                });
+                }
+
+                $filtered = $filtered->unique('id');
+                
             }
 
             $responseCollection = $responseCollection->merge($filtered);
@@ -759,13 +782,27 @@ class ApplicationApiController extends Controller
 
             $responseCollection = $responseCollection->merge($filtered);
         } else {
-            $responseCollection = $collection->filter(function($item) use ($request) {
+            $responseCollection = [];
+
+            // by default
+            foreach ($collection as $item) {
                 foreach ($item->applicationApplicationStatuses as $status) {
-                    if ($status->status == 'incoming' && $status->application_path != null && $status->application_path->responsible->id == $request->user()->id) {
-                        return true;
+                    if (
+                        $status->status == 'incoming' && 
+                        // $item->parent_id == null &&
+                        $status->application_path != null && 
+                        $status->application_path->responsible->id == $request->user()->id
+                    ) {
+                        if ($item->parent_id != null) {
+                            $responseCollection[] = $item->parent;
+                        } else {
+                            $responseCollection[] = $item;
+                        }
                     }
                 }
-            });
+            }
+
+            // dd($responseCollection);
         }
 
         return new ApplicationResource($responseCollection);
@@ -893,7 +930,15 @@ class ApplicationApiController extends Controller
         }
 
         // TODO: check that each offer is valid (fully completed)
-        if (false) {
+        $valid = true;
+
+        foreach ($offers as $offer) {
+            if (!$offer->file) $valid = false;
+        }
+
+        // dd($offers->toArray());
+
+        if (!$valid || count($offers) <= 0) {
             return -1;
         }
 
@@ -1054,7 +1099,7 @@ class ApplicationApiController extends Controller
                 'application_path_id' => $step->id,
                 'status' => $status,
                 'declined_reason' => '',
-                // 'deadline_at' => Carbon\Carbon::now()->addDays($days),
+                'deadline_at' => $index == 1 ? Carbon\Carbon::now()->addDays(3) : null, // TODO: hard-coded 3 days!
             ]);
             $appStatuses[] = $appStatus->toArray();
 

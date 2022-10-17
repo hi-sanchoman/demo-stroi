@@ -274,6 +274,8 @@ export default {
             console.log(query, 'query');
 
             axios.get(`/api/v1/filter-applications?${query}`,).then((response) => {
+                console.log('from filter', response);
+                
                 this.applications = response.data.data;
                 this.rowData.value = response.data.data;
 
@@ -453,10 +455,10 @@ export default {
 
             // get applications 
             axios.get(`/api/v1/applications?status=${status}&construction_id=${construction.id}`).then((response) => {
-                this.applications = response.data.data;
-                this.rowData.value = response.data.data;
+                // this.applications = response.data.data;
+                // this.rowData.value = response.data.data;
 
-                // this.filterTotal();
+                this.filterTotal();
             })
         },
 
