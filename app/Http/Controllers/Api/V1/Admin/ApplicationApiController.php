@@ -708,7 +708,7 @@ class ApplicationApiController extends Controller
                 ->orderBy('updated_at', 'DESC')
                 ->get();
 
-            return ApplicationResource($collection);
+            return new ApplicationResource($collection);
         } else {
             $collection = $collection
                 // ->with(['application'])
