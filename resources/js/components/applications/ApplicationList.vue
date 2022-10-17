@@ -27,7 +27,7 @@
             </v-col>
 
             <v-col cols="12" md="9" class="pl-0 pl-md-5 mt-4 mt-md-0">
-                <div v-if="!isWarehouseManager()" class="d-flex flex-column flex-sm-row  mb-4">
+                <div v-if="!isWarehouseManager()" class="d-flex flex-column flex-md-row  mb-4">
                     <div class="d-flex mb-2 flex-column">
                         <!-- <label class="font-bold"><b>Строительный объект:</b></label>
                         <select @change="filterTotal($event, 'constructions')" v-model="filter_construction_ids" multiple>
@@ -40,7 +40,7 @@
                         </multiselect>
                     </div>
                     
-                    <div class="d-flex mb-2 flex-column ml-sm-4">
+                    <div class="d-flex mb-2 flex-column ml-md-4">
                         <!-- <label class="font-bold"><b>Тип заявки:</b></label>
                         <select @change="filterTotal($event, 'kinds')" v-model="filter_kind_ids" multiple>
                             <option v-for="kind in kindOptions" :key="kind.value" :value="kind.value">{{kind.name}}</option>
@@ -50,7 +50,7 @@
                         </multiselect>
                     </div>
 
-                    <div class="d-flex mb-2 flex-column ml-sm-4">
+                    <div class="d-flex mb-2 flex-column ml-md-4">
                         <!-- <label class="font-bold"><b>Статус:</b></label>
                         <select @change="filterTotal($event, 'statuses')" v-model="filter_status_ids" multiple>
                             <option v-for="status in statusOptions" :key="status.value" :value="status.value">{{status.name}}</option>
@@ -61,12 +61,12 @@
                         </multiselect>
                     </div>
 
-                    <div class="d-flex mb-2 flex-column ml-sm-4">
+                    <div class="d-flex mb-2 flex-column ml-md-4">
                         <div class="d-flex">От: <input class="ml-1 text-grey" type="date" @change="filterTotal" v-model="filter_period_from" aria-label="from"/></div>
                         <div class="d-flex">До: <input class="ml-1 text-grey" type="date" @change="filterTotal" v-model="filter_period_to" aria-label="from"/></div>
                     </div>
                     
-                    <div class="d-flex mt-4 mt-sm-0 mb-2 flex-column ml-sm-4">
+                    <div class="d-flex mt-4 mt-sm-0 mb-2 flex-column ml-md-4">
                         <button @click="clearFilterTotal()">Очистить фильтр</button>
                     </div>
 
@@ -275,7 +275,7 @@ export default {
 
             axios.get(`/api/v1/filter-applications?${query}`,).then((response) => {
                 console.log('from filter', response);
-                
+
                 this.applications = response.data.data;
                 this.rowData.value = response.data.data;
 
