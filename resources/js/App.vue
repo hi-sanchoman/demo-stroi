@@ -5,7 +5,7 @@
 
       <v-toolbar-title class="flex-grow-1">
         <router-link to="/" class="text-decoration-none text-white">
-          OKS Oasis
+          Oasis
         </router-link>
       </v-toolbar-title>
 

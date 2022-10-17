@@ -6,10 +6,10 @@
       <td style="font-weight: bold">{{ $application->created_at->format('d/m/Y') }}</td>
     </tr>
     <tr>
-      <td colspan="6" style="font-weight: bold">ТОО "Онтүстік-құрылыс-сервис"</td>
+      <td colspan="6" style="font-weight: bold">ТОО "Название компании"</td>
     </tr>
     <tr>
-      <td colspan="6" style="font-weight: bold">Құртаеву А.Ә.</td>
+      <td colspan="6" style="font-weight: bold">(ФИО)</td>
     </tr>
     
     {{-- line break --}}

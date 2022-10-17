@@ -31,7 +31,7 @@ if (isSupported) {
 //   console.log('[firebase-messaging-sw.js] Received background message ', payload);
 
 //   // Customize notification here
-//   const notificationTitle = 'OKS OASIS';
+//   const notificationTitle = 'OASIS';
 //   const notificationOptions = {
 //     body: 'У вас новое уведомление.',
 //     icon: '/images/launcher.png'
