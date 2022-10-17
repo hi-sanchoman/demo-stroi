@@ -946,7 +946,7 @@ class ApplicationApiController extends Controller
         $valid = true;
 
         foreach ($offers as $offer) {
-            if (!$offer->file) $valid = false;
+            // if (!$offer->file) $valid = false;
         }
 
         // dd($offers->toArray());
