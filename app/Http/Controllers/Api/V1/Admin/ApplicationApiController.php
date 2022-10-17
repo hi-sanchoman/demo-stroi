@@ -733,6 +733,8 @@ class ApplicationApiController extends Controller
                     }
                 }
             }
+            
+            $filtered = $filtered->unique('id');
 
             $responseCollection = $responseCollection->merge($filtered);
             $filtered = collect();
@@ -802,6 +804,9 @@ class ApplicationApiController extends Controller
                 }
             }
 
+            $filtered = collect($responseCollection);
+            $filtered = $filtered->unique('id');
+            $responseCollection = $filtered;
             // dd($responseCollection);
         }
 
