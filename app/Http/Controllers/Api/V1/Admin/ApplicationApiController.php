@@ -702,6 +702,13 @@ class ApplicationApiController extends Controller
                 ->where('owner_id', $request->user()->id)
                 ->orderBy('updated_at', 'DESC')
                 ->get();
+        } else if (in_array('Warehouse Manager', $roles->toArray())) {
+            $collection = $collection
+                ->where('is_accepted', 1)
+                ->orderBy('updated_at', 'DESC')
+                ->get();
+
+            return ApplicationResource($collection);
         } else {
             $collection = $collection
                 // ->with(['application'])
