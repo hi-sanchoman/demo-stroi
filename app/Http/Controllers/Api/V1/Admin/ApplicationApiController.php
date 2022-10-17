@@ -943,17 +943,19 @@ class ApplicationApiController extends Controller
         }
 
         // TODO: check that each offer is valid (fully completed)
-        $valid = true;
+        // $valid = true;
 
-        foreach ($offers as $offer) {
-            // if (!$offer->file) $valid = false;
-        }
+        // foreach ($offers as $offer) {
+        //     // TODO: fix for equipemnt 
+        //     // if (!$offer->file) $valid = false;
+        // }
+        // if (!$valid || count($offers) <= 0) {
+        //     return -1;
+        // }
 
         // dd($offers->toArray());
 
-        if (!$valid || count($offers) <= 0) {
-            return -1;
-        }
+        
 
         DB::beginTransaction();
 
